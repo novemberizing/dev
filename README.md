@@ -1,2 +1,6 @@
-# dev
 NOVEMBERIZING'S DEV
+===================
+
+## NOVEMBERIZING::X
+
+
