@@ -1,0 +1,12 @@
+{
+    "name": "novemberizing's bookmark",
+    "version": "0.0.1",
+    "permissions": [],
+    "description": "manage bookmark",
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+    "manifest_version": 2
+
+}
