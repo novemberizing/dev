@@ -2,6 +2,7 @@
     "name": "novemberizing's messaging sample",
     "version": "0.0.1",
     "description": "messaging sample",
+    "permissions": ["nativeMessaging"],
     "background": {
         "scripts": ["background.js"]
     },
