@@ -51,3 +51,4 @@ docker run --name textory-redis -p 6379:6379 -d redis
 ```
 docker run --name [name] -p 6379:6379 -d redis
 ```
+docker run --name textory-redis -p 6379:6379 -d redis
