@@ -15,6 +15,11 @@ https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server
 https://blog.naver.com/PostView.nhn?blogId=wnrjsxo&logNo=221338322734
 
 https://javascript.info/server-sent-events
+https://lovemewithoutall.github.io/it/json-dot-net/
+
+https://riptutorial.com/ko/json-net/example/6086/visual-studio-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EC%97%90-json-net%EC%9D%84-%EC%84%A4%EC%B9%98%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95
+
+
 
 'EventSource'
 
