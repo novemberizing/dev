@@ -153,7 +153,7 @@ const template = `<!DOCTYPE html>
                         console.log(k);
                         try {
                             // document.body.innerHTML += JSON.stringify({key: data.message[k]}) + "<br>";
-                            const result = await axios.get('/del/?auth='+auth+'&data='+JSON.stringify({key:k}));
+                            const result = await axios.get('/del/?auth='+auth+'&key='+k);
                             // document.body.innerHTML += JSON.stringify(result.data) + "<br>";
                         } catch(e) {
                             console.log(e.toString());
@@ -174,9 +174,9 @@ app.get('/', (req, res) => {
 app.get('/del/', async (req, res) => {
     try {
         const key = await pubsub.auth(req.query.auth);
-        const data = JSON.parse(req.query.data);
+        const field = req.query.key;
         if(key) {
-            const result = await pubsub.del(key, data.key);
+            const result = await pubsub.del(key, field);
             res.send(JSON.stringify(result));
         } else {
             // logging invalid access must close
