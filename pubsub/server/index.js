@@ -53,12 +53,11 @@ class Pubsub {
      */
     pub(pattern, channel, message) {
         const strings = channel.split(':');
-        console.log(channel);
-        console.log(message);
         if(strings.length >= 2 && strings[0] === 'message' && strings[1]) {
             const key = strings[1];
             const session = this.clients.get(key);
-            if(session) {
+            console.log(message);
+            if(session && message) {
                 session.res.write(`data: {"message":${message}}\n\n`);
             }
         }
@@ -74,6 +73,7 @@ class Pubsub {
                     reject(e);
                     return;
                 }
+                console.log(v);
                 resolve(v);
             });
         });
@@ -106,9 +106,6 @@ class Pubsub {
                 }
                 let data = {};
                 data[field] = value;
-                console.log('message:' + key);
-                console.log(data);
-                console.log('==================');
                 this.client.publish('message:' + key, JSON.stringify(data), (e, v) => {
                     if(e) {
                         reject(e);
@@ -125,7 +122,7 @@ class Pubsub {
         this.clients.set(key, o);
         console.log(`client connected: ${key}`);
         if(remove) {
-            console.log(`client ${key}'s old connection is exist`);
+            console.log(`client ${key}'s old connection is exist and old session remove`);
         }
         return remove;
     }
@@ -179,7 +176,7 @@ app.get('/del/', async (req, res) => {
         const key = await pubsub.auth(req.query.auth);
         const data = JSON.parse(req.query.data);
         if(key) {
-            const result = await pubsub.del(key, data);
+            const result = await pubsub.del(key, data.key);
             res.send(JSON.stringify(result));
         } else {
             // logging invalid access must close
@@ -197,7 +194,6 @@ app.get('/put/', async (req, res) => {
         const key = await pubsub.auth(req.query.auth);
         const data = JSON.parse(req.query.data);
         if(key) {
-            console.log(data);
             const result = await pubsub.put(key, data.key, data.value);
             res.send(JSON.stringify(result));
         } else {
@@ -228,9 +224,10 @@ app.get('/events/', async (req, res) => {
                 'Connection': 'keep-alive'
             });
             res.write('\n');
-            const data = pubsub.get(key);
+            const data = await pubsub.get(key);
             if(data) {
-                res.write(`data: ${JSON.stringify({message: data})}`);
+                console.log(data);
+                res.write(`data: ${JSON.stringify({message: data})}\n\n`);
             }
             return;
         } else {

@@ -39,13 +39,13 @@ docker run --name some-redis -d redis
 
 
 ```
-docker build -t novemberizing-pubsub .
+docker build -t novemberizing/pubsub .
 ```
 
-docker run -it --rm --name pubsub --link some-redis:redis novemberizing-pubsub
+docker run -it --rm --name pubsub -p 8080:8080 --link redis:redis novemberizing/pubsub
 
 
-docker run --name textory-redis -p 6379:6379 -d redis
+docker run --name novemberizing-redis -p 6379:6379 -d redis
 
 
 ```
