@@ -4,12 +4,18 @@
  * @since  0.0.1
  */
 
-console.log('hello novemberizing');
+import './custom.css';
+import 'bootstrap/dist/css/bootstrap.css';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-function hello() {
-    let element = document.createElement('div');
-    element.innerHTML = 'Hello Novemberizing';
-    return element;
-}
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fab } from '@fortawesome/free-brands-svg-icons';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 
-document.body.appendChild(hello());
+library.add(fab);
+library.add(fas);
+
+import Root from './root';
+
+ReactDOM.render(<Root />, document.getElementById('root'));
