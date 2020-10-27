@@ -21,6 +21,11 @@ module.exports = {
             template: 'static/index.html',
             inject: true
         }),
+        new HtmlWebpackPlugin({
+            filename: 'login.html',
+            template: 'static/login.html',
+            inject: true
+        }),
         new webpack.HotModuleReplacementPlugin()
     ],
     output: {
