@@ -4,6 +4,7 @@
  * @since  0.0.1
  */
 
+import './admin.css';
 import './custom.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import '@fortawesome/fontawesome-free/css/all.css';

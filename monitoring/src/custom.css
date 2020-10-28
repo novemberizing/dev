@@ -10133,16 +10133,16 @@
     height: 4.375rem;
   }
   
-  .topbar #sidebarToggleTop {
+  .topbar .sidebarToggleTop {
     height: 2.5rem;
     width: 2.5rem;
   }
   
-  .topbar #sidebarToggleTop:hover {
+  .topbar .sidebarToggleTop:hover {
     background-color: #eaecf4;
   }
   
-  .topbar #sidebarToggleTop:active {
+  .topbar .sidebarToggleTop:active {
     background-color: #dddfeb;
   }
   

@@ -1,9 +1,13 @@
 import React from 'react';
 import NavigationBar from './components/navigation-bar';
+import Page from './components/page';
+import Content from './components/content';
+import Toolbar from './components/toolbar';
+import ToolbarNav from './components/toolbar/navigation';
 
 export default class Root extends React.Component {
     render() {
-        return (<div>
+        return (<div id="wrapper">
             <NavigationBar>
                 <NavigationBar.Brand title="datamon" href="/" version="0.0.1" />
                 <NavigationBar.Divider className={['my-0']} />
@@ -39,6 +43,19 @@ export default class Root extends React.Component {
                 <NavigationBar.Divider className={["d-none","d-md-block"]} />
                 <NavigationBar.Toggle />
             </NavigationBar>
+            <Content>
+                <Toolbar>
+                    <Toolbar.Btn className="d-md-none" icon={["fa", "bars"]} />
+                    <Toolbar.Search />
+                    <Toolbar.Nav>
+                        <ToolbarNav.Dropdown.Search />
+                        <ToolbarNav.Dropdown.Alarm />
+                    </Toolbar.Nav>
+                </Toolbar>
+                <Page>
+                    Hello
+                </Page>
+            </Content>
         </div>);
     }
 }
