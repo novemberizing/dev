@@ -3,7 +3,6 @@ import Strings from "../../../../../util/string";
 
 export default class ToolbarNavDropdownMessageItem extends React.Component {
     render() {
-        console.log(this.props.img);
         return (
             <a className="dropdown-item d-flex align-items-center" href="#">
                 <div className="dropdown-list-image mr-3">
