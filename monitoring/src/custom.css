@@ -10371,8 +10371,8 @@
     color: #4e73df;
     font-weight: 700;
   }
-  
-  .sidebar #sidebarToggle {
+
+  .sidebar .sidebarToggleBtn {
     width: 2.5rem;
     height: 2.5rem;
     text-align: center;
@@ -10380,6 +10380,23 @@
     cursor: pointer;
   }
   
+  /* REMOVE THIS */
+  .sidebar #sidebarToggle {
+    width: 2.5rem;
+    height: 2.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+  }
+
+  .sidebar .sidebarToggleBtn::after {
+    font-weight: 900;
+    content: '\f104';
+    font-family: 'Font Awesome 5 Free';
+    margin-right: 0.1rem;
+  }
+  
+  /* REMOVE THIS */
   .sidebar #sidebarToggle::after {
     font-weight: 900;
     content: '\f104';
@@ -10387,10 +10404,20 @@
     margin-right: 0.1rem;
   }
   
+  .sidebar .sidebarToggleBtn:hover {
+    text-decoration: none;
+  }
+
+  /* REMOVE THIS */
   .sidebar #sidebarToggle:hover {
     text-decoration: none;
   }
+
+  .sidebar .sidebarToggleBtn:focus {
+    outline: none;
+  }
   
+  /* REMOVE THIS */
   .sidebar #sidebarToggle:focus {
     outline: none;
   }
@@ -10399,7 +10426,14 @@
     width: 0 !important;
     overflow: hidden;
   }
+
+  .sidebar.toggled .sidebarToggleBtn::after {
+    content: '\f105';
+    font-family: 'Font Awesome 5 Free';
+    margin-left: 0.25rem;
+  }
   
+  /* REMOVE THIS */
   .sidebar.toggled #sidebarToggle::after {
     content: '\f105';
     font-family: 'Font Awesome 5 Free';
@@ -10594,15 +10628,30 @@
   .sidebar-light .nav-item.active .nav-link i {
     color: #6e707e;
   }
-  
-  .sidebar-light #sidebarToggle {
+
+  .sidebar-light .sidebarToggleBtn {
     background-color: #eaecf4;
   }
   
+  /* REMOVE THIS */
+  .sidebar-light #sidebarToggle {
+    background-color: #eaecf4;
+  }
+
+  .sidebar-light .sidebarToggleBtn::after {
+    color: #b7b9cc;
+  }
+  
+  /* REMOVE THIS */
   .sidebar-light #sidebarToggle::after {
     color: #b7b9cc;
   }
   
+  .sidebar-light .sidebarToggleBtn:hover {
+    background-color: #dddfeb;
+  }
+
+  /* REMOVE THIS */
   .sidebar-light #sidebarToggle:hover {
     background-color: #dddfeb;
   }
@@ -10646,19 +10695,39 @@
   .sidebar-dark .nav-item.active .nav-link i {
     color: #fff;
   }
+
+  .sidebar-dark .sidebarToggleBtn {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
   
+  /* REMOVE THIS */
   .sidebar-dark #sidebarToggle {
     background-color: rgba(255, 255, 255, 0.2);
   }
   
-  .sidebar-dark #sidebarToggle::after {
+  .sidebar-dark .sidebarToggleBtn::after {
     color: rgba(255, 255, 255, 0.5);
   }
   
-  .sidebar-dark #sidebarToggle:hover {
+  /* REMOVE THIS */
+  .sidebar-dark #sidebarToggle::after {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .sidebar-dark .sidebarToggleBtn:hover {
     background-color: rgba(255, 255, 255, 0.25);
   }
   
+  /* REMOVE THIS */
+  .sidebar-dark #sidebarToggle:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .sidebar-dark.toggled .sidebarToggleBtn::after {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* REMOVE THIS */
   .sidebar-dark.toggled #sidebarToggle::after {
     color: rgba(255, 255, 255, 0.5);
   }
@@ -11208,5 +11277,9 @@
   
   body.sidebar-toggled footer.sticky-footer {
     width: 100%;
+  }
+
+  span.sidebar-link-title {
+    margin-left: 5px;
   }
   

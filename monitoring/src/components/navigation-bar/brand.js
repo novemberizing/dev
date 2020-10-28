@@ -4,11 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export default class NavigationBarBrand extends React.Component {
     render() {
         return (
-            <a href={this.props.href} className="sidebar-brand d-flex align-items-center justify-content-center">
-                <div className="sidebar-brand-icon">
-                    <FontAwesomeIcon icon={this.props.icon} />
+            <a className="sidebar-brand d-flex align-items-center justify-content-center" href={this.props.href}>
+                <div className="sidebar-brand-icon rotate-n-15">
+                    <FontAwesomeIcon icon={["fas", "laugh-wink"]} />
                 </div>
-                <div className="sidebar-brand-text mx-3">NOV ADMIN <sup>1</sup></div>
+                <div className="sidebar-brand-text mx-3">{this.props.title} <sup>{this.props.version}</sup></div>
             </a>
         );
     }
