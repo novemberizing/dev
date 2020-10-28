@@ -37,9 +37,10 @@ export default class NavigationBarCollapse extends React.Component {
     }
 
     render() {
+        const collapsed = this.state.visible ? "nav-link" : "nav-link collapsed";
         return (
             <li className="nav-item">
-                <a className="nav-link collapsed" href="#" onClick={this.toggle}>
+                <a className={collapsed} href="#" onClick={this.toggle} data-toggle="collapse">
                     { this.props.icon && <FontAwesomeIcon icon={this.props.icon} fixedWidth />}
                     <span className="sidebar-link-title">{this.props.name}</span>
                 </a>
