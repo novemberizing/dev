@@ -50,6 +50,7 @@ export default class Root extends React.Component {
                     <Toolbar.Nav>
                         <ToolbarNav.Dropdown.Search />
                         <ToolbarNav.Dropdown.Alarm />
+                        <ToolbarNav.Dropdown.Message />
                     </Toolbar.Nav>
                 </Toolbar>
                 <Page>

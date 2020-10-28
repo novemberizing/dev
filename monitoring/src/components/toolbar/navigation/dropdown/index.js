@@ -3,6 +3,7 @@ import React from 'react';
 import Strings from '../../../../util/string';
 import ToolbarNavDropdownAlarm from './alarm';
 import ToolbarNavDropdownSearch from './search';
+import ToolbarNavDropdownMessage from "./message";
 
 export default class ToolbarNavDropdown extends React.Component {
     static __dropdowns = [];
@@ -47,3 +48,4 @@ export default class ToolbarNavDropdown extends React.Component {
 
 ToolbarNavDropdown.Search = ToolbarNavDropdownSearch;
 ToolbarNavDropdown.Alarm = ToolbarNavDropdownAlarm;
+ToolbarNavDropdown.Message = ToolbarNavDropdownMessage;
