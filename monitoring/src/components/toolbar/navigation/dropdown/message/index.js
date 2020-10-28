@@ -55,7 +55,7 @@ export default class ToolbarNavDropdownMessage extends React.Component {
 
     render() {
         const messages = this.state.messages && (this.state.messages.map((o, index) => {
-            return (<ToolbarNavDropdownMessageItem image={o.source} alt={o.alt} status={o.status} bold={o.bold} message={o.message} from={o.from} when={o.when} key={index} />);
+            return (<ToolbarNavDropdownMessageItem image={o.image} alt={o.alt} status={o.status} bold={o.bold} message={o.message} from={o.from} when={o.when} key={index} />);
         }).concat());
 
         return (
