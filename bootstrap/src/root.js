@@ -1,6 +1,7 @@
 import React from 'react';
 import Alert from './component/alert';
 import Badge from './component/badge';
+import Button from './component/button';
 import Link from './component/basis/link';
 import Breadcrumb from './component/breadcrumb';
 
@@ -69,6 +70,70 @@ export default class Root extends React.Component {
                     <Breadcrumb.Item separator=":">Library</Breadcrumb.Item>
                     <Breadcrumb.Item separator=":" active={true}>Data</Breadcrumb.Item>
                 </Breadcrumb>
+
+                <Button type="secondary">SECONDARY</Button>
+                <Button type="success">SUCCESS</Button>
+                <Button type="danger">DANGER</Button>
+                <Button type="warning">WARNING</Button>
+                <Button type="info">INFO</Button>
+                <Button type="light">LIGHT</Button>
+                <Button type="dark">DARK</Button>
+
+                <Button type="secondary" className="text-nowrap">SECONDARY</Button>
+                <Button type="success" className="text-nowrap">SUCCESS</Button>
+                <Button type="danger" className="text-nowrap">DANGER</Button>
+                <Button type="warning" className="text-nowrap">WARNING</Button>
+                <Button type="info" className="text-nowrap">INFO</Button>
+                <Button type="light" className="text-nowrap">LIGHT</Button>
+                <Button type="dark" className="text-nowrap">DARK</Button>
+
+                <Button type="secondary" outline={true}>SECONDARY</Button>
+                <Button type="success" outline={true}>SUCCESS</Button>
+                <Button type="danger" outline={true}>DANGER</Button>
+                <Button type="warning" outline={true}>WARNING</Button>
+                <Button type="info" outline={true}>INFO</Button>
+                <Button type="light" outline={true}>LIGHT</Button>
+                <Button type="dark" outline={true}>DARK</Button>
+
+                <Button type="secondary" outline={true} size="sm">SECONDARY</Button>
+                <Button type="success" outline={true} size="sm">SUCCESS</Button>
+                <Button type="danger" outline={true} size="sm">DANGER</Button>
+                <Button type="warning" outline={true} size="sm">WARNING</Button>
+                <Button type="info" outline={true} size="sm">INFO</Button>
+                <Button type="light" outline={true} size="sm">LIGHT</Button>
+                <Button type="dark" outline={true} size="sm">DARK</Button>
+
+                <Button type="secondary" outline={true} size="lg">SECONDARY</Button>
+                <Button type="success" outline={true} size="lg">SUCCESS</Button>
+                <Button type="danger" outline={true} size="lg">DANGER</Button>
+                <Button type="warning" outline={true} size="lg">WARNING</Button>
+                <Button type="info" outline={true} size="lg">INFO</Button>
+                <Button type="light" outline={true} size="lg">LIGHT</Button>
+                <Button type="dark" outline={true} size="lg">DARK</Button>
+
+                <Button type="secondary" outline={true} size="lg" block={true}>SECONDARY</Button>
+                <Button type="success" outline={true} size="lg" block={true}>SUCCESS</Button>
+                <Button type="danger" outline={true} size="lg" block={true}>DANGER</Button>
+                <Button type="warning" outline={true} size="lg" block={true}>WARNING</Button>
+                <Button type="info" outline={true} size="lg" block={true}>INFO</Button>
+                <Button type="light" outline={true} size="lg" block={true}>LIGHT</Button>
+                <Button type="dark" outline={true} size="lg" block={true}>DARK</Button>
+
+                <Button type="secondary" outline={true} size="lg" block={true} active={true}>SECONDARY</Button>
+                <Button type="success" outline={true} size="lg" block={true} active={true}>SUCCESS</Button>
+                <Button type="danger" outline={true} size="lg" block={true} active={true}>DANGER</Button>
+                <Button type="warning" outline={true} size="lg" block={true} active={true}>WARNING</Button>
+                <Button type="info" outline={true} size="lg" block={true} active={true}>INFO</Button>
+                <Button type="light" outline={true} size="lg" block={true} active={true}>LIGHT</Button>
+                <Button type="dark" outline={true} size="lg" block={true} active={true}>DARK</Button>
+
+                <Button type="secondary" outline={true} size="lg" block={true} active={true} disabled={true}>SECONDARY</Button>
+                <Button type="success" outline={true} size="lg" block={true} active={true} disabled={true}>SUCCESS</Button>
+                <Button type="danger" outline={true} size="lg" block={true} active={true} disabled={true}>DANGER</Button>
+                <Button type="warning" outline={true} size="lg" block={true} active={true} disabled={true}>WARNING</Button>
+                <Button type="info" outline={true} size="lg" block={true} active={true} disabled={true}>INFO</Button>
+                <Button type="light" outline={true} size="lg" block={true} active={true} disabled={true}>LIGHT</Button>
+                <Button type="dark" outline={true} size="lg" block={true} active={true} disabled={true}>DARK</Button>
             </div>
         );
     }
