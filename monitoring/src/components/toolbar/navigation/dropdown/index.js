@@ -4,6 +4,7 @@ import Strings from '../../../../util/string';
 import ToolbarNavDropdownAlarm from './alarm';
 import ToolbarNavDropdownSearch from './search';
 import ToolbarNavDropdownMessage from "./message";
+import ToolbarNavDropdownProfile from "./profile";
 
 export default class ToolbarNavDropdown extends React.Component {
     static __dropdowns = [];
@@ -33,7 +34,7 @@ export default class ToolbarNavDropdown extends React.Component {
     }
 
     render() {
-        const styles = ["nav-item", "dropdown", "no-arrow", "mx-1"];
+        const styles = ["nav-item", "dropdown", "no-arrow"];
         return (
             <li className={Strings.concat([styles, this.props.className])}>
                 <a className="nav-link dropdown-toggle" href="#" onClick={this.toggle}>
@@ -49,3 +50,4 @@ export default class ToolbarNavDropdown extends React.Component {
 ToolbarNavDropdown.Search = ToolbarNavDropdownSearch;
 ToolbarNavDropdown.Alarm = ToolbarNavDropdownAlarm;
 ToolbarNavDropdown.Message = ToolbarNavDropdownMessage;
+ToolbarNavDropdown.Profile = ToolbarNavDropdownProfile;

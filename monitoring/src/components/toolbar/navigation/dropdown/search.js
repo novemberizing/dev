@@ -5,7 +5,7 @@ import ToolbarNavDropdown from '.';
 export default class ToolbarNavDropdownMenuSearch extends React.Component {
     render() {
         return (
-            <ToolbarNavDropdown icon={["fas", "search"]} count={0}>
+            <ToolbarNavDropdown icon={["fas", "search"]} count={0} className={this.props.className}>
                 <div className="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" style={{display:"block"}}>
                     <form className="form-inline mr-auto w-100 navbar-search">
                         <div className="input-group">

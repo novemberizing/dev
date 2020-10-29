@@ -59,3 +59,5 @@ https://www.digitalocean.com/community/tutorials/how-to-use-font-awesome-5-with-
 https://stackoverflow.com/questions/44337538/react-toggle-menu
 
 https://subicura.com/2020/01/07/2019-dev-summary.html
+
+https://stackoverflow.com/questions/35412137/how-to-get-access-to-webpack-dev-server-from-devices-in-local-network

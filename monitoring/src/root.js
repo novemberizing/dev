@@ -4,6 +4,7 @@ import Page from './components/page';
 import Content from './components/content';
 import Toolbar from './components/toolbar';
 import ToolbarNav from './components/toolbar/navigation';
+import source from './img/source.jpg';
 
 export default class Root extends React.Component {
     render() {
@@ -48,9 +49,11 @@ export default class Root extends React.Component {
                     <Toolbar.Btn className="d-md-none" icon={["fa", "bars"]} />
                     <Toolbar.Search />
                     <Toolbar.Nav>
-                        <ToolbarNav.Dropdown.Search />
-                        <ToolbarNav.Dropdown.Alarm />
-                        <ToolbarNav.Dropdown.Message />
+                        <ToolbarNav.Dropdown.Search className="d-sm-none" />
+                        <ToolbarNav.Dropdown.Alarm className="mx-1" />
+                        <ToolbarNav.Dropdown.Message className="mx-1" />
+                        <ToolbarNav.Divider />
+                        <ToolbarNav.Dropdown.Profile name="Valerie Luna" image={source} />
                     </Toolbar.Nav>
                 </Toolbar>
                 <Page>
