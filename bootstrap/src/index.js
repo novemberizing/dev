@@ -1,4 +1,5 @@
-import 'bootstrap/dist/css/bootstrap.css';
+// import 'bootstrap/dist/css/bootstrap.css';
+import './bootstrap.css';
 import './custom.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 import React from 'react';

@@ -9,26 +9,25 @@ export default class ToolbarNavDropdownProfile extends React.Component {
                     <span className="mr-2 d-none d-lg-inline text-gray-600 small">{this.props.name}</span>
                     <img className="img-profile rounded-circle" src={this.props.image} />
                 </a>
-                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                    <a class="dropdown-item" href="#">
-                        <FontAwesomeIcon icon={["fas", "user"]} size="1x" fixedWidth className="mr-2 text-gray-400" />
-                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                  Profile
-                </a>
-                <a class="dropdown-item" href="#">
-                  <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                  Settings
-                </a>
-                <a class="dropdown-item" href="#">
-                  <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                  Activity Log
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                  <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                  Logout
-                </a>
-              </div>
+                <div className="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown" style={{display:"block"}}>
+                    <a className="dropdown-item" href="#">
+                        <FontAwesomeIcon icon={["fas", "user"]} className="mr-2 text-gray-400" fixedWidth size="1x" />
+                        Profile
+                    </a>
+                    <a className="dropdown-item" href="#">
+                        <FontAwesomeIcon icon={["fas", "cogs"]} className="mr-2 text-gray-400" fixedWidth size="1x" />
+                        Settings
+                    </a>
+                    <a className="dropdown-item" href="#">
+                        <FontAwesomeIcon icon={["fas", "list"]} className="mr-2 text-gray-400" fixedWidth size="1x" />
+                        Activity Log
+                    </a>
+                    <div className="dropdown-divider"></div>
+                    <a className="dropdown-item" href="#">
+                        <FontAwesomeIcon icon={["fas", "sign-out-alt"]} className="mr-2 text-gray-400" fixedWidth size="1x" />
+                        Logout
+                    </a>
+                </div>
             </li>
         );
     }
