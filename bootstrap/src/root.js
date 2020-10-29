@@ -1,5 +1,6 @@
 import React from 'react';
 import Alert from './component/alert';
+import Link from './component/basis/link';
 
 export default class Root extends React.Component {
     render() {
@@ -7,6 +8,10 @@ export default class Root extends React.Component {
             <div>
                 <Alert type="primary">
                     PRIMARY
+                    <Link href="#">Hello world</Link>
+                    <div>
+                        <a href="#">hello world</a>
+                    </div>
                     <a href="#">hello world</a>
                 </Alert>
                 <Alert type="secondary">SECONDARY</Alert>

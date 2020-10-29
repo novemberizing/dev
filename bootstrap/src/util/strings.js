@@ -28,7 +28,9 @@ export default class Strings {
                 } else if(o) {
                     throw new Error('invalid parameter');
                 }
-            }).join(separator);
+            })
+            .filter(o => (o))
+            .join(separator);
         } else if(typeof o === 'string' || o instanceof String) {
             return o;
         }  else if(o) {
