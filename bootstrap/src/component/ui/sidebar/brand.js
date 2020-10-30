@@ -6,10 +6,11 @@ export default class SidebarBrand extends React.Component {
         return (
             <a className="sidebar-brand d-flex align-items-center justify-content-center" href={this.props.href}>
                 <div className="sidebar-brand-icon">
-                    <FontAwesomeIcon icon={["fas", "laugh-wink"]} />
+                    <FontAwesomeIcon icon={this.props.icon} />
                 </div>
-                <div class="sidebar-brand-text mx-3">
-                    datamon <sup>0.0.1</sup>
+                <div className="sidebar-brand-text mx-3">
+                    {this.props.name}
+                    {this.props.version && <sup>{this.props.version}</sup>}
                 </div>
             </a>
         );
