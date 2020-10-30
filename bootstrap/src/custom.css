@@ -183,6 +183,14 @@ span.sidebar-link-title {
     background-color: rgba(255, 255, 255, 0.25);
 }
 
+.sidebar .nav-item .nav-link .badge-counter {
+    position: absolute;
+    transform: scale(0.7);
+    transform-origin: top right;
+    right: .25rem;
+    margin-top: -.25rem;
+}
+
 .page {
     background-color: #f8f9fc;
     width: 100%;
@@ -210,6 +218,38 @@ span.sidebar-link-title {
 
 .topbar .nav-item .nav-link {
     position: relative;
+}
+
+.topbar .nav-item .nav-link {
+    height: 4.375rem;
+    display: flex;
+    align-items: center;
+    padding: 0 .75rem;
+}
+
+.topbar .dropdown {
+    position: static;
+}
+
+.topbar .dropdown .dropdown-menu {
+    width: calc(100% - 1.5rem);
+    right: .75rem;
+}
+
+.topbar.navbar-light .navbar-nav .nav-item .nav-link {
+    color: #d1d3e2;
+}
+
+.topbar .nav-item .nav-link .badge-counter {
+    position: absolute;
+    transform: scale(0.7);
+    transform-origin: top right;
+    right: .25rem;
+    margin-top: -.25rem;
+}
+
+.dropdown.no-arrow .dropdown-toggle::after {
+    display: none;
 }
 
 
