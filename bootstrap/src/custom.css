@@ -12,8 +12,8 @@
 }
 
 .sidebar {
-    /*width: 6.5rem;*/
     width: 0rem !important;
+    overflow: hidden;
     min-height: 100vh;
 }
 
@@ -48,6 +48,9 @@
     text-align: center;
     padding: 0.75rem 1rem;
     width: 6.5rem;
+}
+
+.sidebar .nav-item .nav-link {
     position: relative;
 }
 
@@ -165,7 +168,7 @@ span.sidebar-link-title {
 
 .sidebar.toggle {
     width: 6.5rem !important;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .sidebar-dark .sidebar-toggle-btn {
@@ -222,6 +225,7 @@ span.sidebar-link-title {
 @media (min-width: 768px) {
     .sidebar {
         width: 14rem !important;
+        overflow: visible;
     }
 
     .sidebar.toggle {
@@ -236,7 +240,7 @@ span.sidebar-link-title {
     .sidebar .sidebar-brand .sidebar-brand-text {
         display: inline;
     }
-    .sidebar.toggled .sidebar-brand .sidebar-brand-text {
+    .sidebar.toggle .sidebar-brand .sidebar-brand-text {
         display: none;
     }
 
