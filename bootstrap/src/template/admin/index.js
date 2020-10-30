@@ -42,9 +42,9 @@ export default class TemplateAdmin extends React.Component {
                     <Sidebar.ToggleBtn />
                 </Sidebar>
                 <div className="page d-flex flex-column">
-                    {/* <Toolbar>
+                    <Toolbar>
 
-                    </Toolbar> */}
+                    </Toolbar>
                     <div className="container-fluid">
                         Hello World
                     </div>

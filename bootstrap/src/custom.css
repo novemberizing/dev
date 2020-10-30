@@ -7,6 +7,10 @@
     content: attr(data-content);
 }
 
+.all {
+    display: flex;
+}
+
 .sidebar {
     /*width: 6.5rem;*/
     width: 0rem !important;
@@ -177,9 +181,9 @@ span.sidebar-link-title {
 }
 
 .page {
+    background-color: #f8f9fc;
     width: 100%;
-    display: flex;
-    flex: 1 0 auto;
+    overflow-x: hidden;
 }
 
 .bg-primary.gradient {
@@ -187,6 +191,24 @@ span.sidebar-link-title {
     background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
     background-size: cover;
 }
+
+.topbar {
+    height: 4.375rem;
+}
+
+.topbar .navbar-search {
+    width: 25rem;
+}
+
+.topbar .navbar-search input {
+    font-size: 0.85rem;
+    height: auto;
+}
+
+.topbar .nav-item .nav-link {
+    position: relative;
+}
+
 
 /*--breakpoint-xs: 0;
 --breakpoint-sm: 576px;

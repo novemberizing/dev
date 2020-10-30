@@ -1,28 +1,29 @@
 import React from 'react';
+import Sidebar from '../sidebar';
 
-export default class Toopbar extends React.Component {
+import TopbarBtn from './button';
+import TopbarSearch from './search';
+
+export default class Topbar extends React.Component {
 
     static __singleton = null;
 
     constructor(props) {
         super(props);
 
-        if(Toopbar.__singleton) {
+        if(Topbar.__singleton) {
             throw new Error();
         }
 
-        Toopbar.__singleton = this;
+        Topbar.__singleton = this;
     }
 
     render() {
         return (
             <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                <button className="btn btn-link rounded-circle mr-3 d-md-none">
-                    <svg aria-hidden="true" focusable="false" data-prefix="fa" data-icon="bars" className="svg-inline--fa fa-bars fa-w-14 " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                        <path fill="currentColor" d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path>
-                    </svg>
-                </button>
-                <form className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                <TopbarBtn icon={["fas", "bars"]} onClick={Sidebar.toggle} />
+                <TopbarSearch />
+                {/* <form className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                     <div className="input-group">
                         <input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2" />
                         <div className="input-group-append">
@@ -33,7 +34,8 @@ export default class Toopbar extends React.Component {
                             </button>
                         </div>
                     </div>
-                </form>
+                </form> */}
+
                 <ul className="navbar-nav ml-auto">
                     <li className="nav-item dropdown no-arrow d-sm-none">
                         <a className="nav-link dropdown-toggle" href="#">
@@ -103,3 +105,6 @@ export default class Toopbar extends React.Component {
         );
     }
 }
+
+Topbar.Btn = TopbarBtn;
+Topbar.Search = TopbarSearch;
