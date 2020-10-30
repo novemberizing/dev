@@ -176,10 +176,11 @@ span.sidebar-link-title {
     background-color: rgba(255, 255, 255, 0.25);
 }
 
-/* sidebar-toggle-btn */
-
-
-/* sidebar-toggle-btn */
+.page {
+    width: 100%;
+    display: flex;
+    flex: 1 0 auto;
+}
 
 .bg-primary.gradient {
     background-color: #4e73df;

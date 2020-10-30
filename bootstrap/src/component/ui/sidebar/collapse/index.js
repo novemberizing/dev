@@ -8,6 +8,7 @@ export default class SidebarCollapse extends React.Component {
     static hideall() {
         SidebarCollapse.__collapses.forEach(o => o.hide());
     }
+    
     static __collapses = [];
     constructor(props) {
         super(props);
