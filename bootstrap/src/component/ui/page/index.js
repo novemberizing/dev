@@ -3,6 +3,7 @@ import Reacts from '../../../util/reacts';
 
 import PageHeader from './header';
 import PageRow from './row';
+import PageColumn from './column';
 
 export default class Page extends React.Component {
     constructor(props) {
@@ -23,3 +24,4 @@ export default class Page extends React.Component {
 
 Page.Header = PageHeader;
 Page.Row = PageRow;
+Page.Column = PageColumn;

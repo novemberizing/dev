@@ -7,6 +7,13 @@ export default class Bootstraps {
         return value;
     }
 
+    static lg(category, size) {
+        if(category && size) {
+            return category + '-lg-' + size;
+        }
+        return null;
+    }
+
     static xl(category, size) {
         if(category && size) {
             return category + '-xl-' + size;
@@ -31,6 +38,13 @@ export default class Bootstraps {
     static height(v, value = 'h-100') {
         if(v) {
             return `h-${v}`;
+        }
+        return value;
+    }
+
+    static mb(v, value = "mb-4") {
+        if(v) {
+            return `mb-${v}`;
         }
         return value;
     }
