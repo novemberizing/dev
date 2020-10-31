@@ -355,6 +355,26 @@ span.sidebar-link-title {
     display: none;
 }
 
+.dropdown .dropdown-menu .dropdown-header {
+    font-weight: 800;
+    font-size: .65rem;
+    color: #b7b9cc;
+    text-transform: uppercase!important;
+}
+
+.dropdown .dropdown-menu {
+    font-size: .85rem;
+}
+
+.card .card-header .dropdown .dropdown-menu {
+    line-height: 1.5;
+}
+
+.dropdown-menu .dropdown-item:active {
+    background-color: #eaecf4;
+    color: #3a3b45;
+}
+
 /**
  * TOPBAR'S DROPDOWN MENU
  */

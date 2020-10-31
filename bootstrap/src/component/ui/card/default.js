@@ -6,9 +6,9 @@ import Strings from '../../../util/strings';
 export default class DafaultCard extends React.Component {
     render() {
         return (
-            <div className={Strings.join(["card", Bootstraps.mb(this.props.mb)])} >
+            <div className={Strings.join(["card", this.props.shadow && "shadow", Bootstraps.mb(this.props.mb)])} >
                 {Reacts.display(this.props.title,
-                    <div className="card-header">
+                    <div className={Strings.join(["card-header", "font-weight-bold", this.props.type &&Strings.join(['text', this.props.type], '-')])}>
                         {this.props.title}
                     </div>
                 )}

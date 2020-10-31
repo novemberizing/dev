@@ -6,7 +6,7 @@ import Strings from '../../../../util/strings';
 export default class DashboardCard extends React.Component {
     render() {
         return (
-            <Card xl={this.props.xl} md={this.props.md} height={this.props.height} py={this.props.py} border={this.props.border} type={this.props.type}>
+            <Card xl={this.props.xl} shadow={this.props.shadow} md={this.props.md} height={this.props.height} py={this.props.py} border={this.props.border} type={this.props.type}>
                 <div className="row no-gutters align-items-center">
                     <div className="col mr-2">
                         <div className={Strings.join(["text-xs", "font-weight-bold", "text-uppercase", "mb-1", Strings.join(["text", this.props.type], "-")])}>{this.props.title}</div>
