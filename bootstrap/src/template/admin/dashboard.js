@@ -46,12 +46,12 @@ export default class TemplateAdminDashboard extends Page {
                         <DefaultCard mb={4} title="Default Card Example">
                             This card uses Bootstrap's default styling with no utility classes added. Global styles are the only things modifying the look and feel of this default card example.
                         </DefaultCard>
-                        <DefaultCard mb={4} title="Dropdown Card Example" type="primary" shadow={true}>
+                        <DefaultCard mb={4} title="Basic Card Example" type="primary" shadow={true}>
                             The styling for this basic card example is created by using default Bootstrap utility classes. By using utility classes, the style of the card component can be easily modified with no need for any custom CSS!
                         </DefaultCard>
                     </Page.Column>
                     <Page.Column lg={6}>
-                        <DropdownCard mb={4} menu="dropdown menu" title="Basic Card Example" type="primary" shadow={true}>
+                        <DropdownCard mb={4} menu="dropdown menu" title="Dropdown Card Example" type="primary" shadow={true}>
                             <DropdownCard.Menu>
                                 <DropdownCard.Menu.Header name="Dropdown Menu" />
                                 <DropdownCard.Menu.Item href="#" name="Action" />
