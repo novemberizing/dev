@@ -11,6 +11,28 @@
     display: flex;
 }
 
+.dropdown-header {
+    display: block;
+    padding: .5rem 1.5rem;
+    margin-bottom: 0;
+    font-size: .875rem;
+    color: #858796;
+    white-space: nowrap;
+}
+
+.icon-circle {
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-gray-500 {
+    color: #b7b9cc!important;
+}
+
 .sidebar {
     width: 0rem !important;
     overflow: hidden;
@@ -231,11 +253,6 @@ span.sidebar-link-title {
     position: static;
 }
 
-.topbar .dropdown .dropdown-menu {
-    width: calc(100% - 1.5rem);
-    right: .75rem;
-}
-
 .topbar.navbar-light .navbar-nav .nav-item .nav-link {
     color: #d1d3e2;
 }
@@ -252,14 +269,89 @@ span.sidebar-link-title {
     display: none;
 }
 
+/**
+ * TOPBAR'S DROPDOWN MENU
+ */
+.topbar .dropdown .dropdown-menu {
+    width: calc(100% - 1.5rem);
+    right: .75rem;
+    font-size: .85rem;
+}
 
-/*--breakpoint-xs: 0;
+/**
+ * TOPBAR'S DROPDOWN MENU HEADER
+ */
+.topbar .dropdown .dropdown-menu .dropdown-header {
+    font-weight: 800;
+    font-size: .65rem;
+    color: #b7b9cc;
+    text-transform: uppercase!important;
+    background-color: #4e73df;
+    border: 1px solid #4e73df;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+}
+
+/**
+ * TOPBAR'S DROPDOWN MENU LIST
+ */
+.topbar .dropdown .dropdown-menu.dropdown-list {
+    padding: 0;
+    border: none;
+    overflow: hidden;
+}
+
+/**
+ * TOPBAR'S DROPDOWN MENU LIST ITEM
+ */
+.topbar .dropdown .dropdown-menu.dropdown-list .dropdown-item {
+    white-space: normal;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    border-left: 1px solid #e3e6f0;
+    border-right: 1px solid #e3e6f0;
+    border-bottom: 1px solid #e3e6f0;
+    line-height: 1.3rem;
+}
+
+
+
+
+
+
+
+
+/*
+--breakpoint-xs: 0;
 --breakpoint-sm: 576px;
 --breakpoint-md: 768px;
 --breakpoint-lg: 992px;
---breakpoint-xl: 1200px;*/
+--breakpoint-xl: 1200px;
+*/
 
 @media (min-width: 576px) {
+
+    /**
+     * TOPBAR'S DROPDOWN POSITION
+     */
+    .topbar .dropdown {
+        position: relative;
+    }
+
+    /**
+     * TOPBAR'S DROPDOWN MENU
+     */
+    .topbar .dropdown .dropdown-menu {
+        width: auto;
+        right: 0;
+    }
+
+    /**
+     * TOPBAR'S DROPDOWN LIST WIDTH
+     */
+    .topbar .dropdown .dropdown-menu.dropdown-list {
+        width: 20rem !important;
+    }
 }
 
 @media (min-width: 768px) {

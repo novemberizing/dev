@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import Reacts from '../../../../../util/reacts';
 import TopbarNavDropdown from '../dropdown';
+import TopbarNavAlarmItem from './item';
 
 export default class TopbarNavAlarm extends TopbarNavDropdown {
     constructor(props) {
@@ -20,39 +21,9 @@ export default class TopbarNavAlarm extends TopbarNavDropdown {
                         <h6 className="dropdown-header">
                             Alerts Center
                         </h6>
-                        <a className="dropdown-item d-flex align-items-center" href="#">
-                            <div className="mr-3">
-                                <div className="icon-circle bg-primary">
-                                    <i className="fas fa-file-alt text-white"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <div className="small text-gray-500">December 12, 2019</div>
-                                <span className="font-weight-bold">A new monthly report is ready to download!</span>
-                            </div>
-                        </a>
-                        <a className="dropdown-item d-flex align-items-center" href="#">
-                            <div className="mr-3">
-                                <div className="icon-circle bg-success">
-                                    <i className="fas fa-donate text-white"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <div className="small text-gray-500">December 7, 2019</div>
-                                $290.29 has been deposited into your account!
-                            </div>
-                        </a>
-                        <a className="dropdown-item d-flex align-items-center" href="#">
-                            <div className="mr-3">
-                                <div className="icon-circle bg-warning">
-                                    <i className="fas fa-exclamation-triangle text-white"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <div className="small text-gray-500">December 2, 2019</div>
-                                Spending Alert: We've noticed unusually high spending for your account.
-                            </div>
-                        </a>
+                        <TopbarNavAlarmItem icon={["fas", "file-alt"]} type="primary" date="December 12, 2019" bold={true} message="A new monthly report is ready to download!" />
+                        <TopbarNavAlarmItem icon={["fas", "donate"]} type="success" date="December 7, 2019" bold={false} message="$290.29 has been deposited into your account!" />
+                        <TopbarNavAlarmItem icon={["fas", "exclamation-triangle"]} type="warning" date="December 2, 2019" bold={false} message="Spending Alert: We've noticed unusually high spending for your account." />
                         <a className="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
                     </div>
                 )}
@@ -60,3 +31,5 @@ export default class TopbarNavAlarm extends TopbarNavDropdown {
         );
     }
 }
+
+TopbarNavAlarm.Item = TopbarNavAlarm;
