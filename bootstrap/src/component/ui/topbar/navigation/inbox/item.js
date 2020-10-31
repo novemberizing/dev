@@ -37,9 +37,7 @@ export default class TopbarNavInboxItem extends React.Component {
                         {this.props.message}
                     </div>
                     <div className="small text-gray-500">
-                        {this.props.from}
-                        ·
-                        {this.props.time}
+                        {this.props.from} · {this.props.time}
                     </div>
                 </div>
             </a>

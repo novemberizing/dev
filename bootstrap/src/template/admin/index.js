@@ -1,7 +1,10 @@
 import React from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Page from '../../component/ui/page';
 
 import Sidebar from '../../component/ui/sidebar';
 import Toolbar from '../../component/ui/topbar';
+import TemplateAdminDashboard from './dashboard';
 
 export default class TemplateAdmin extends React.Component {
     render() {
@@ -42,12 +45,13 @@ export default class TemplateAdmin extends React.Component {
                     <Sidebar.ToggleBtn />
                 </Sidebar>
                 <div className="page d-flex flex-column">
-                    <Toolbar>
-
-                    </Toolbar>
-                    <div className="container-fluid">
-                        Hello World
-                    </div>
+                    <Toolbar />
+                    <Router>
+                        <Route path="/" component={TemplateAdminDashboard} />
+                    </Router>
+                    {/* <Page title="Dashboard">
+                        <TemplateAdminDashboard />
+                    </Page> */}
                 </div>
             </div>
         );
