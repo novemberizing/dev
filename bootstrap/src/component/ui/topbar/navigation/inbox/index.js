@@ -7,7 +7,10 @@ import person from '../../../../../template/res/image/example/person.jpg';
 import Strings from '../../../../../util/strings';
 
 const __example = [
-
+    { image: person, alt: "alt", status: "primary", bold: true, message: "Hi there! I am wondering if you can help me with a problem I've been having.", from: "Emily Fowler", time: "58m" },
+    { image: person, alt: "alt", bold: false, message: "I have the photos that you ordered last month, how would you like them sent to you?", from: "Jae Chun", time: "1d" },
+    { image: person, alt: "alt", status: "success", bold: false, status: "warning", message: "Last month's report looks great, I am very happy with the progress so far, keep up the good work!", from: "Morgan Alvarez", time: "2d" },
+    { image: person, alt: "alt", status: "warning", bold: false, status: "success", message: "Am I a good boy? The reason I ask is because someone told me that people say this to all dogs, even if they aren't good...", from: "Chicken the Dog", time: "2w" }
 ];
 
 export default class TopbarNavInbox extends TopbarNavDropdown {
@@ -17,6 +20,12 @@ export default class TopbarNavInbox extends TopbarNavDropdown {
         this.state = {
             messages: __example
         };
+    }
+
+    messages() {
+        return this.state.messages.map((o, index) => {
+            return (<TopbarNavInboxItem image={o.image} alt={o.alt} status={o.status} bold={o.bold} message={o.message} from={o.from} time={o.time} key={index} />);
+        }).concat();
     }
 
     render() {
@@ -31,10 +40,7 @@ export default class TopbarNavInbox extends TopbarNavDropdown {
                         <h6 className="dropdown-header">
                             Message Center
                         </h6>
-                        <TopbarNavInboxItem image={person} alt="alt" status="primary" message="Hi there! I am wondering if you can help me with a problem I've been having." from="Emily Fowler" time="58m" />
-                        <TopbarNavInboxItem image={person} alt="alt" message="I have the photos that you ordered last month, how would you like them sent to you?" from="Jae Chun" time="1d" />
-                        <TopbarNavInboxItem image={person} alt="alt" status="warning" message="Last month's report looks great, I am very happy with the progress so far, keep up the good work!" from="Morgan Alvarez" time="2d" />
-                        <TopbarNavInboxItem image={person} alt="alt" status="success" message="Am I a good boy? The reason I ask is because someone told me that people say this to all dogs, even if they aren't good..." from="Chicken the Dog" time="2w" />
+                        {this.messages()}
                         <a className="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
                     </div>
                 )}

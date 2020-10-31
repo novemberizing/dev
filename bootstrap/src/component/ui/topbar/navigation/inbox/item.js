@@ -32,7 +32,7 @@ export default class TopbarNavInboxItem extends React.Component {
                     <img className="rounded-circle" src={this.props.image} alt={this.props.alt} />
                     <div className={Strings.join(["status-indicator",Bootstraps.className("bg", this.props.status)])}></div>
                 </div>
-                <div className="font-weight-bold">
+                <div className={this.props.bold ? "font-weight-bold" : ""}>
                     <div className={this.state.truncate ? "text-truncate" : "text-truncate-max"}>
                         {this.props.message}
                     </div>
