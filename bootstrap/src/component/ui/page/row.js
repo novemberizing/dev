@@ -1,109 +1,25 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import Card from '../card';
+import DashboardCard from '../card/dashboard';
+import DashboardProgressCard from '../card/dashboard/progress';
 
 export default class PageRow extends React.Component {
     render() {
         return (
             <div className="row">
-                <Card xl={3} md={6} height={100} />
-                <Card type="primary" border="left" xl={3} md={6} height={100} />
-                        
-                {/* <Card xl={3} md={6} height={100} py={2}>
-                    <div className="row no-gutters align-items-center">
-                        <div className="col mr-2">
-                            <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">Earnings (Monthly)</div>
-                            <div className="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-                        </div>
-                        <div className="col-auto">
-                            <i className="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </Card> */}
-                <Card type="primary" border="left" xl={3} md={6} py={2} height={100} >
-                    <div className="row no-gutters align-items-center">
-                        <div className="col mr-2">
-                            <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">Earnings (Monthly)</div>
-                            <div className="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-                        </div>
-                        <div className="col-auto">
-                            <i className="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </Card>
-                <div className="col-xl-3 col-md-6 mb-4">
-                <div className="card card-border-left-primary shadow h-100 py-2">
-                    <div className="card-body">
-                    <div className="row no-gutters align-items-center">
-                        <div className="col mr-2">
-                            <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">Earnings (Monthly)</div>
-                            <div className="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-                        </div>
-                        <div className="col-auto">
-                            {/*<FontAwesomeIcon icon={this.props.icon} className="text-gray-300" size="2x" />*/}
-                            <i className="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-                </div>
-
-            <div className="col-xl-3 col-md-6 mb-4">
-              <div className="card border-left-success shadow h-100 py-2">
-                <div className="card-body">
-                  <div className="row no-gutters align-items-center">
-                    <div className="col mr-2">
-                      <div className="text-xs font-weight-bold text-success text-uppercase mb-1">Earnings (Annual)</div>
-                      <div className="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
-                    </div>
-                    <div className="col-auto">
-                      <i className="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-xl-3 col-md-6 mb-4">
-              <div className="card border-left-info shadow h-100 py-2">
-                <div className="card-body">
-                  <div className="row no-gutters align-items-center">
-                    <div className="col mr-2">
-                      <div className="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks</div>
-                      <div className="row no-gutters align-items-center">
-                        <div className="col-auto">
-                          <div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-                        </div>
-                        <div className="col">
-                          <div className="progress progress-sm mr-2">
-                            <div className="progress-bar bg-info" role="progressbar" style={{width: "50%"}} aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-auto">
-                      <i className="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-xl-3 col-md-6 mb-4">
-              <div className="card border-left-warning shadow h-100 py-2">
-                <div className="card-body">
-                  <div className="row no-gutters align-items-center">
-                    <div className="col mr-2">
-                      <div className="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Requests</div>
-                      <div className="h5 mb-0 font-weight-bold text-gray-800">18</div>
-                    </div>
-                    <div className="col-auto">
-                      <i className="fas fa-comments fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                <DashboardCard icon={["fas", "calendar"]} type="primary" border="left" xl={3} md={6} py={2} height={100} title="Earnings (Monthly)">
+                    $40,000
+                </DashboardCard>
+                <DashboardCard icon={["fas", "dollar-sign"]} type="success" border="left" xl={3} md={6} py={2} height={100} title="Earnings (Annual)">
+                    $215,000
+                </DashboardCard>
+                <DashboardProgressCard icon={["fas", "clipboard-list"]} type="info" border="left" xl={3} md={6} py={2} height={100} title="Tasks">
+                    50%
+                </DashboardProgressCard>
+                <DashboardCard icon={["fas", "comments"]} type="warning" border="left" xl={3} md={6} py={2} height={100} title="Pending Requests">
+                    18
+                </DashboardCard>
           </div>
         );
     }

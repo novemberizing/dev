@@ -441,35 +441,35 @@ span.sidebar-link-title {
 }
 
 .card-border-left-primary {
-    border-left: .25rem solid #4e73df!important;
+    border-left: .25rem solid var(--primary) !important;
 }
 
 .card-border-left-secondary {
-
+    border-bottom: 0.25rem solid var(--secondary) !important;
 }
 
 .card-border-left-success {
-
+    border-left: .25rem solid var(--success) !important;
 }
 
 .card-border-left-info {
-
+    border-left: 0.25rem solid var(--info) !important;
 }
 
 .card-border-left-warning {
-
+    border-left: 0.25rem solid var(--warning) !important;
 }
 
 .card-border-left-danger {
-
+    border-left: 0.25rem solid var(--danger) !important;
 }
 
 .card-border-left-dark {
-
+    border-left: 0.25rem solid var(--dark) !important;
 }
 
 .card-border-left-light {
-
+    border-left: 0.25rem solid var(--light) !important;
 }
 
 .card-border-top-primary {
