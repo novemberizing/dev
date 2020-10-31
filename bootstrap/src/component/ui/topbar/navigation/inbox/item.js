@@ -14,7 +14,7 @@ export default class TopbarNavInboxItem extends React.Component {
 
         this.truncate = this.truncate.bind(this);
 
-        Sidebar.onChange(this.truncate);
+        Sidebar.on(this.truncate);
     }
 
     truncate(state) {
@@ -22,7 +22,7 @@ export default class TopbarNavInboxItem extends React.Component {
     }
 
     componentWillUnmount() {
-        Sidebar.removeOnChange(this.truncate);
+        Sidebar.off(this.truncate);
     }
 
     render() {

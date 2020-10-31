@@ -13,18 +13,18 @@ import Strings from '../../../util/strings';
  * Singleton
  */
 export default class Sidebar extends React.Component {
-    static onChangeListener = [];
+    static __listeners = [];
 
     static status() {
         return Sidebar.__singleton.state.toggle;
     }
 
-    static onChange(f) {
-        Sidebar.onChangeListener.push(f);
+    static on(f) {
+        Sidebar.__listeners.push(f);
     }
 
-    static removeOnChange(f) {
-        Sidebar.onChangeListener = Sidebar.onChangeListener.filter(o => (o !== f));
+    static off(f) {
+        Sidebar.__listeners = Sidebar.__listeners.filter(o => (o !== f));
     }
 
     static toggle() {
@@ -58,13 +58,13 @@ export default class Sidebar extends React.Component {
     }
 
     componentDidUpdate() {
-        Sidebar.onChangeListener.forEach(f => {
+        Sidebar.__listeners.forEach(f => {
             f(this.state);
         });
     }
 
     componentWillUnmount() {
-        Sidebar.onChangeListener = [];
+        Sidebar.__listeners = [];
     }
 
     render() {
