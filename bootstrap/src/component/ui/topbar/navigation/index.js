@@ -2,6 +2,7 @@ import React from 'react';
 
 import TopbarNavAlarm from './alarm';
 import TopbarNavSearch from './search';
+import TopbarNavInbox from './inbox';
 
 export default class TopbarNav extends React.Component {
     render() {
@@ -16,23 +17,68 @@ export default class TopbarNav extends React.Component {
                     </li> */}
                     <TopbarNavSearch />
                     <TopbarNavAlarm />
-                    <li className="nav-item dropdown no-arrow ">
-                        <a className="nav-link dropdown-toggle" href="#">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="envelope" className="svg-inline--fa fa-envelope fa-w-16 fa-fw " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                <path fill="currentColor" d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"></path>
-                            </svg>
-                            <span className="badge badge-danger badge-counter">
-                                4
-                            </span>
+                    <TopbarNavInbox />
+                    {/*<li class="nav-item dropdown no-arrow mx-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-envelope fa-fw"></i>
+                            <!-- Counter - Messages -->
+                            <span class="badge badge-danger badge-counter">7</span>
                         </a>
-                    </li>
+                        <!-- Dropdown - Messages -->
+                        <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+                            <h6 class="dropdown-header">
+                            Message Center
+                            </h6>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                            <div class="dropdown-list-image mr-3">
+                                <img class="rounded-circle" src="https://source.unsplash.com/fn_BT9fwg_E/60x60" alt="">
+                                <div class="status-indicator bg-success"></div>
+                            </div>
+                            <div class="font-weight-bold">
+                                <div class="text-truncate">Hi there! I am wondering if you can help me with a problem I've been having.</div>
+                                <div class="small text-gray-500">Emily Fowler · 58m</div>
+                            </div>
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                            <div class="dropdown-list-image mr-3">
+                                <img class="rounded-circle" src="https://source.unsplash.com/AU4VPcFN4LE/60x60" alt="">
+                                <div class="status-indicator"></div>
+                            </div>
+                            <div>
+                                <div class="text-truncate">I have the photos that you ordered last month, how would you like them sent to you?</div>
+                                <div class="small text-gray-500">Jae Chun · 1d</div>
+                            </div>
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                            <div class="dropdown-list-image mr-3">
+                                <img class="rounded-circle" src="https://source.unsplash.com/CS2uCrpNzJY/60x60" alt="">
+                                <div class="status-indicator bg-warning"></div>
+                            </div>
+                            <div>
+                                <div class="text-truncate">Last month's report looks great, I am very happy with the progress so far, keep up the good work!</div>
+                                <div class="small text-gray-500">Morgan Alvarez · 2d</div>
+                            </div>
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                            <div class="dropdown-list-image mr-3">
+                                <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60" alt="">
+                                <div class="status-indicator bg-success"></div>
+                            </div>
+                            <div>
+                                <div class="text-truncate">Am I a good boy? The reason I ask is because someone told me that people say this to all dogs, even if they aren't good...</div>
+                                <div class="small text-gray-500">Chicken the Dog · 2w</div>
+                            </div>
+                            </a>
+                            <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
+                        </div>
+                </li>*/}
                     <div className="topbar-divider d-none d-sm-block"></div>
                     <li className="nav-item dropdown no-arrow">
                         <a className="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span className="mr-2 d-none d-lg-inline text-gray-600 small">
                                 Valerie Luna
                             </span>
-                            <img className="img-profile rounded-circle" src="/7ab8334c39445076ed7ff326f9b8b019.jpg" />
+                            <img className="img-profile rounded-circle"  />
                         </a>
                         {/* <div className="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown" style={{display: "block"}}>
                             <a className="dropdown-item" href="#">
@@ -68,3 +114,4 @@ export default class TopbarNav extends React.Component {
 }
 
 TopbarNav.Search = TopbarNavSearch;
+TopbarNav.Inbox = TopbarNavInbox;

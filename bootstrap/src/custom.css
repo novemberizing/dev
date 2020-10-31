@@ -33,6 +33,12 @@
     color: #b7b9cc!important;
 }
 
+.text-truncate-max {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .sidebar {
     width: 0rem !important;
     overflow: hidden;
@@ -314,12 +320,38 @@ span.sidebar-link-title {
     line-height: 1.3rem;
 }
 
+/**
+ * TOPBAR'S DROPDOWN LIST ITEM IMAGE
+ */
+.topbar .dropdown-list .dropdown-item .dropdown-list-image {
+    position: relative;
+    height: 2.5rem;
+    width: 2.5rem;
+}
+  
+.topbar .dropdown-list .dropdown-item .dropdown-list-image img {
+    height: 2.5rem;
+    width: 2.5rem;
+}
+  
+.topbar .dropdown-list .dropdown-item .dropdown-list-image .status-indicator {
+    background-color: #eaecf4;
+    height: 0.75rem;
+    width: 0.75rem;
+    border-radius: 100%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border: 0.125rem solid #fff;
+}
+  
+.topbar .dropdown-list .dropdown-item .text-truncate {
+    max-width: 10rem;
+}
 
-
-
-
-
-
+.topbar .dropdown-list .dropdown-item .text-truncate-max {
+    max-width: 17.375rem;
+}
 
 /*
 --breakpoint-xs: 0;
@@ -351,6 +383,17 @@ span.sidebar-link-title {
      */
     .topbar .dropdown .dropdown-menu.dropdown-list {
         width: 20rem !important;
+    }
+
+    /**
+     * TOPBAR'S DROPDOWN LIST ITEM TEXT TRUNCATE
+     */
+    .topbar .dropdown-list .dropdown-item .text-truncate {
+        max-width: 13.375rem;
+    }
+
+    .topbar .dropdown-list .dropdown-item .text-truncate-max {
+        max-width: 13.375rem;
     }
 }
 

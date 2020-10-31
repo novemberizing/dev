@@ -5,7 +5,6 @@ import Bootstraps from '../../../../../util/bootstraps';
 import Strings from '../../../../../util/strings';
 
 export default class TopbarNavAlarmItem extends React.Component {
-    
     render() {
         return (
             <a className="dropdown-item d-flex align-items-center" href="#">

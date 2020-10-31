@@ -24,7 +24,6 @@ export default class TopbarNavDropdown extends React.Component {
     }
 
     toggle() {
-        console.log("toggle");
         if(!this.state.visible) {
             TopbarNavDropdown.hideall();
         }
