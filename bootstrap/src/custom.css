@@ -73,6 +73,183 @@ body {
     height: .5rem;
 }
 
+.btn-icon-split {
+    padding: 0;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: center;
+}
+
+.btn-icon-split .icon {
+    background: rgba(0,0,0,.15);
+    display: inline-block;
+    padding: .375rem .75rem;
+}
+
+.btn-icon-split .text {
+    display: inline-block;
+    padding: .375rem .75rem;
+}
+
+.btn-circle {
+    border-radius: 100%;
+    height: 2.5rem;
+    width: 2.5rem;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+  
+.btn-circle.btn-sm, .btn-group-sm > .btn-circle.btn {
+    height: 1.8rem;
+    width: 1.8rem;
+    font-size: 0.75rem;
+}
+  
+.btn-circle.btn-lg, .btn-group-lg > .btn-circle.btn {
+    height: 3.5rem;
+    width: 3.5rem;
+    font-size: 1.35rem;
+}
+
+.btn-google {
+    color: #fff;
+    background-color: #ea4335;
+    border-color: #fff;
+}
+  
+.btn-google:hover {
+    color: #fff;
+    background-color: #e12717;
+    border-color: #e6e6e6;
+}
+  
+.btn-google:focus {
+    color: #fff;
+    background-color: #e12717;
+    border-color: #e6e6e6;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+
+.btn-google.focus {
+    color: #fff;
+    background-color: #e12717;
+    border-color: #e6e6e6;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+  
+.btn-google.disabled {
+    color: #fff;
+    background-color: #ea4335;
+    border-color: #fff;
+}
+
+.btn-google:disabled {
+    color: #fff;
+    background-color: #ea4335;
+    border-color: #fff;
+}
+  
+.btn-google:not(:disabled):not(.disabled):active {
+    color: #fff;
+    background-color: #d62516;
+    border-color: #dfdfdf;
+}
+
+.btn-google:not(:disabled):not(.disabled).active {
+    color: #fff;
+    background-color: #d62516;
+    border-color: #dfdfdf;
+}
+
+.show > .btn-google.dropdown-toggle {
+    color: #fff;
+    background-color: #d62516;
+    border-color: #dfdfdf;
+}
+  
+.btn-google:not(:disabled):not(.disabled):active:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+
+.btn-google:not(:disabled):not(.disabled).active:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+
+.show > .btn-google.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+  
+.btn-facebook {
+    color: #fff;
+    background-color: #3b5998;
+    border-color: #fff;
+}
+  
+.btn-facebook:hover {
+    color: #fff;
+    background-color: #30497c;
+    border-color: #e6e6e6;
+}
+  
+.btn-facebook:focus {
+    color: #fff;
+    background-color: #30497c;
+    border-color: #e6e6e6;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+
+.btn-facebook.focus {
+    color: #fff;
+    background-color: #30497c;
+    border-color: #e6e6e6;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+  
+.btn-facebook.disabled {
+    color: #fff;
+    background-color: #3b5998;
+    border-color: #fff;
+}
+
+.btn-facebook:disabled {
+    color: #fff;
+    background-color: #3b5998;
+    border-color: #fff;
+}
+  
+.btn-facebook:not(:disabled):not(.disabled):active {
+    color: #fff;
+    background-color: #2d4373;
+    border-color: #dfdfdf;
+}
+
+.btn-facebook:not(:disabled):not(.disabled).active {
+    color: #fff;
+    background-color: #2d4373;
+    border-color: #dfdfdf;
+}
+
+.show > .btn-facebook.dropdown-toggle {
+    color: #fff;
+    background-color: #2d4373;
+    border-color: #dfdfdf;
+}
+  
+.btn-facebook:not(:disabled):not(.disabled):active:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+
+.btn-facebook:not(:disabled):not(.disabled).active:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+
+.show > .btn-facebook.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+
 .text-xs {
     font-size: .7rem;
 }

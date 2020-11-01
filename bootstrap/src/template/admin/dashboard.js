@@ -8,6 +8,9 @@ import DashboardProgressCard from '../../component/ui/card/dashboard/progress';
 import DefaultCard from '../../component/ui/card/default';
 import DropdownCard from '../../component/ui/card/dropdown';
 import CollapseCard from '../../component/ui/card/collapse';
+import CircleBtn from '../../component/ui/button/circle';
+import SplitBtn from '../../component/ui/button/split';
+import BrandBtn from '../../component/ui/button/brand';
 
 export default class TemplateAdminDashboard extends Page {
     constructor(props) {
@@ -50,6 +53,39 @@ export default class TemplateAdminDashboard extends Page {
                         <DefaultCard mb={4} title="Basic Card Example" type="primary" shadow={true}>
                             The styling for this basic card example is created by using default Bootstrap utility classes. By using utility classes, the style of the card component can be easily modified with no need for any custom CSS!
                         </DefaultCard>
+                        <DefaultCard mb={4} title="Circle Buttons" type="primary" shadow={true}>
+                            <p>Use Font Awesome Icons (included with this theme package) along with the circle buttons as shown in the examples below!</p>
+                            <div className="mb-2">
+                                <code>.btn-circle</code>
+                            </div>
+                            <CircleBtn href="#" icon={["fab", "facebook-f"]} type="primary" />
+                            <CircleBtn href="#" icon={["fas", "check"]} type="success" />
+                            <CircleBtn href="#" icon={["fas", "info-circle"]} type="info" />
+                            <CircleBtn href="#" icon={["fas", "exclamation-triangle"]} type="warning" />
+                            <CircleBtn href="#" icon={["fas", "trash"]} type="danger" />
+                            <div className="mt-4 mb-2">
+                                <code>.btn-circle .btn-sm</code>
+                            </div>
+                            <CircleBtn href="#" icon={["fab", "facebook-f"]} type="primary" size="sm" />
+                            <CircleBtn href="#" icon={["fas", "check"]} type="success" size="sm" />
+                            <CircleBtn href="#" icon={["fas", "info-circle"]} type="info" size="sm" />
+                            <CircleBtn href="#" icon={["fas", "exclamation-triangle"]} type="warning" size="sm" />
+                            <CircleBtn href="#" icon={["fas", "trash"]} type="danger" size="sm" />
+                            <div className="mt-4 mb-2">
+                                <code>.btn-circle .btn-lg</code>
+                            </div>
+                            <CircleBtn href="#" icon={["fab", "facebook-f"]} type="primary" size="lg" />
+                            <CircleBtn href="#" icon={["fas", "check"]} type="success" size="lg" />
+                            <CircleBtn href="#" icon={["fas", "info-circle"]} type="info" size="lg" />
+                            <CircleBtn href="#" icon={["fas", "exclamation-triangle"]} type="warning" size="lg" />
+                            <CircleBtn href="#" icon={["fas", "trash"]} type="danger" size="lg" />
+                        </DefaultCard>
+                        <DefaultCard mb={4} title="Bland Buttons" type="primary" shadow={true}>
+                            <p>Google and Facebook buttons are available featuring each company's respective brand color. They are used on the user login and registration pages.</p>
+                            <p>You can create more custom buttons by adding a new color variable in the <code>_variables.scss</code> file and then using the Bootstrap button variant mixin to create a new style, as demonstrated in the <code>_buttons.scss</code> file.</p>
+                            <BrandBtn href="#" brand="google">GOOGLE</BrandBtn>
+                            <BrandBtn href="#" brand="facebook">FAEBOOK</BrandBtn>
+                        </DefaultCard>
                     </Page.Column>
                     <Page.Column lg={6}>
                         <DropdownCard mb={4} menu="dropdown menu" title="Dropdown Card Example" type="primary" shadow={true}>
@@ -65,6 +101,28 @@ export default class TemplateAdminDashboard extends Page {
                         <CollapseCard mb={4} menu="dropdown menu" title="Dropdown Card Example" type="primary" shadow={true}>
                             This is a collapsable card example using Bootstrap's built in collapse functionality. <strong>Click on the card header</strong> to see the card body collapse and expand!
                         </CollapseCard>
+                        <DefaultCard mb={4} title="Split Buttons with Icon" type="primary" shadow={true}>
+                            <p>Works with any button colors, just use the <code>.btn-icon-split</code> class and the markup in the examples below. The examples below also use the <code>.text-white-50</code> helper class on the icons for additional styling, but it is not required.</p>
+                            <SplitBtn href="#" icon={["fas", "flag"]} type="primary">Split Button Primary</SplitBtn>
+                            <div className="my-2"></div>
+                            <SplitBtn href="#" icon={["fas", "check"]} type="success">Split Button Success</SplitBtn>
+                            <div className="my-2"></div>
+                            <SplitBtn href="#" icon={["fas", "info-circle"]} type="info">Split Button Info</SplitBtn>
+                            <div className="my-2"></div>
+                            <SplitBtn href="#" icon={["fas", "exclamation-triangle"]} type="warning">Split Button Warning</SplitBtn>
+                            <div className="my-2"></div>
+                            <SplitBtn href="#" icon={["fas", "trash"]} type="danger">Split Button Danger</SplitBtn>
+                            <div className="my-2"></div>
+                            <SplitBtn href="#" icon={["fas", "arrow-right"]} type="secondary">Split Button Secondary</SplitBtn>
+                            <div className="my-2"></div>
+                            <SplitBtn href="#" icon={["fas", "arrow-right"]} type="light">Split Button Light</SplitBtn>
+                            <div className="my-2"></div>
+                            <p>Also works with small and large button classes!</p>
+                            <SplitBtn href="#" icon={["fas", "flag"]} type="primary" size="sm">Split Button Small</SplitBtn>
+                            <div className="my-2"></div>
+                            <SplitBtn href="#" icon={["fas", "flag"]} type="primary" size="lg">Split Button Large</SplitBtn>
+                            <div className="my-2"></div>
+                        </DefaultCard>
                     </Page.Column>
                 </Page.Row>
             </div>
