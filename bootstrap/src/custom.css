@@ -69,6 +69,10 @@ body {
     justify-content: center;
 }
 
+.progress-sm {
+    height: .5rem;
+}
+
 .text-xs {
     font-size: .7rem;
 }
@@ -498,7 +502,7 @@ span.sidebar-link-title {
 }
 
 .card-border-left-secondary {
-    border-bottom: 0.25rem solid var(--secondary) !important;
+    border-left: 0.25rem solid var(--secondary) !important;
 }
 
 .card-border-left-success {
@@ -526,35 +530,35 @@ span.sidebar-link-title {
 }
 
 .card-border-top-primary {
-
+    border-top: .25rem solid var(--primary) !important;
 }
 
 .card-border-top-secondary {
-
+    border-top: 0.25rem solid var(--secondary) !important;
 }
 
 .card-border-top-success {
-
+    border-top: .25rem solid var(--success) !important;
 }
 
 .card-border-top-info {
-
+    border-top: 0.25rem solid var(--info) !important;
 }
 
 .card-border-top-warning {
-
+    border-top: 0.25rem solid var(--warning) !important;
 }
 
 .card-border-top-danger {
-
+    border-top: 0.25rem solid var(--danger) !important;
 }
 
 .card-border-top-dark {
-
+    border-top: 0.25rem solid var(--dark) !important;
 }
 
 .card-border-top-light {
-
+    border-top: 0.25rem solid var(--light) !important;
 }
 
 /*
