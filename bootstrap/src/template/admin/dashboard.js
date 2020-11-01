@@ -7,6 +7,7 @@ import DashboardCard from '../../component/ui/card/dashboard';
 import DashboardProgressCard from '../../component/ui/card/dashboard/progress';
 import DefaultCard from '../../component/ui/card/default';
 import DropdownCard from '../../component/ui/card/dropdown';
+import CollapseCard from '../../component/ui/card/collapse';
 
 export default class TemplateAdminDashboard extends Page {
     constructor(props) {
@@ -61,6 +62,9 @@ export default class TemplateAdminDashboard extends Page {
                             </DropdownCard.Menu>
                             Dropdown menus can be placed in the card header in order to extend the functionality of a basic card. In this dropdown card example, the Font Awesome vertical ellipsis icon in the card header can be clicked on in order to toggle a dropdown menu.
                         </DropdownCard>
+                        <CollapseCard mb={4} menu="dropdown menu" title="Dropdown Card Example" type="primary" shadow={true}>
+                            This is a collapsable card example using Bootstrap's built in collapse functionality. <strong>Click on the card header</strong> to see the card body collapse and expand!
+                        </CollapseCard>
                     </Page.Column>
                 </Page.Row>
             </div>

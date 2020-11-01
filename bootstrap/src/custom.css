@@ -370,6 +370,28 @@ span.sidebar-link-title {
     line-height: 1.5;
 }
 
+.card .card-header[data-toggle=collapse] {
+    text-decoration: none;
+    position: relative;
+    padding: .75rem 3.25rem .75rem 1.25rem;
+}
+
+.card .card-header[data-toggle=collapse]::after {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding-right: 1.725rem;
+    line-height: 51px;
+    font-weight: 900;
+    content: '\f107';
+    font-family: 'Font Awesome 5 Free';
+    color: #d1d3e2;
+}
+
+.card .card-header[data-toggle=collapse].collapsed::after {
+    content: '\f105';
+}
+
 .dropdown-menu .dropdown-item:active {
     background-color: #eaecf4;
     color: #3a3b45;

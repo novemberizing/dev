@@ -14,7 +14,7 @@ export default class DropdownCard extends Dropdown {
             <div className={Strings.join(["card", this.props.shadow && "shadow", Bootstraps.mb(this.props.mb)])} >
                 {Reacts.display(this.props.title,
                     <div className="card-header d-flex flex-row align-items-center justify-content-between">
-                        <h6 className="m-0 font-weight-bold text-primary">{this.props.title}</h6>
+                        <h6 className={Strings.join(["m-0", "font-weight-bold", Strings.join(["text", this.props.type], "-")])}>{this.props.title}</h6>
                         <div className="dropdown no-arrow">
                             <a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onClick={this.toggle}>
                                 <FontAwesomeIcon icon={["fas", "ellipsis-v"]} size="sm" className="text-gray-400" fixedWidth />
