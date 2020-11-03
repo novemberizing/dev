@@ -1,4 +1,4 @@
-package novemberizing;
+package example;
 /* -*- Mode: Java; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*************************************************************************
  *
