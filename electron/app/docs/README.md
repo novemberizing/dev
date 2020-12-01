@@ -86,7 +86,24 @@ The amount of data currently buffered by the data channel - as indicatyed by its
 
 __close__
 
-The data channel has completed the closing process and is now in the closed state. Its underlying data transport is completely closed at this point.
+The data channel has completed the closing process and is now in the closed state. Its underlying data transport is completely closed at this point. You can be notified before closing completes by watching for the closing event instead.
+
+__closing__
+
+The RTCDataChannel has transitioned to the closing state, indicating that it will be closed soon. You can detect the completion of the closing process by watching for the close event.
+
+__connectionstatechange__
+
+The connection's state, which can be accessed in connectionState, has changed.
+
+__datachannel__
+
+A new RTCDataChannel is available following the remote peer opening a new data channel. This event's type is RTCDataChannelEvent.
+
+__error__
+
+An RTCErrorEvent indicating that an error occurred on the data channel.
+
 
 
 
