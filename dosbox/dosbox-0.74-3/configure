@@ -5120,7 +5120,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 
 #include "SDL.h"
 void blah(){
-#if SDL_MINOR_VERSION != 2
+#if SDL_MINOR_VERSION != 3
 #error "Only SDL 1.2 supported"
 #endif
 ;
