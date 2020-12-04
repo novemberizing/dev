@@ -24,7 +24,9 @@
 #if defined (LINUX)
 #include <fcntl.h>
 #include <unistd.h>
+#if 0
 #include <linux/cdrom.h>
+#endif // 0
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -38,7 +40,7 @@ bool CDROM_Interface_Ioctl::GetUPC(unsigned char& attr, char* upc)
 {
 	int cdrom_fd = open(device_name, O_RDONLY | O_NONBLOCK);
 	if (cdrom_fd == -1) return false;
-	
+#if 0	
 	struct cdrom_mcn cdrom_mcn;
 	int ret = ioctl(cdrom_fd, CDROM_GET_MCN, &cdrom_mcn);
 	
@@ -50,10 +52,14 @@ bool CDROM_Interface_Ioctl::GetUPC(unsigned char& attr, char* upc)
 	}
 
 	return (ret > 0);
+#else
+	return false;
+#endif
 }
 
 bool CDROM_Interface_Ioctl::ReadSectors(PhysPt buffer, bool raw, unsigned long sector, unsigned long num)
 {
+#if 0
 	int cdrom_fd = open(device_name, O_RDONLY | O_NONBLOCK);
 	if (cdrom_fd == -1) return false;
 	
@@ -79,10 +85,14 @@ bool CDROM_Interface_Ioctl::ReadSectors(PhysPt buffer, bool raw, unsigned long s
 	delete[] buf;
 	
 	return (ret > 0);
+#else
+	return false;
+#endif
 }
 
 bool CDROM_Interface_Ioctl::SetDevice(char* path, int forceCD)
 {
+#if 0
 	bool success = CDROM_Interface_SDL::SetDevice(path, forceCD);
 	
 	if (success) {
@@ -92,6 +102,9 @@ bool CDROM_Interface_Ioctl::SetDevice(char* path, int forceCD)
 	}
 	
 	return success;
+#else
+	return false;
+#endif 
 }
 
 #endif
