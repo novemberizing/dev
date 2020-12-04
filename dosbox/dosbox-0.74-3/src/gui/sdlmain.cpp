@@ -82,12 +82,12 @@ typedef GLvoid* (APIENTRYP PFNGLMAPBUFFERARBPROC) (GLenum target, GLenum access)
 typedef GLboolean (APIENTRYP PFNGLUNMAPBUFFERARBPROC) (GLenum target);
 #endif
 
-PFNGLGENBUFFERSARBPROC glGenBuffersARB = NULL;
-PFNGLBINDBUFFERARBPROC glBindBufferARB = NULL;
-PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;
-PFNGLBUFFERDATAARBPROC glBufferDataARB = NULL;
-PFNGLMAPBUFFERARBPROC glMapBufferARB = NULL;
-PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB = NULL;
+//PFNGLGENBUFFERSARBPROC glGenBuffersARB = NULL;
+//PFNGLBINDBUFFERARBPROC glBindBufferARB = NULL;
+//PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;
+//PFNGLBUFFERDATAARBPROC glBufferDataARB = NULL;
+//PFNGLMAPBUFFERARBPROC glMapBufferARB = NULL;
+//PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB = NULL;
 
 #endif //C_OPENGL
 
@@ -666,7 +666,7 @@ dosurface:
 		}
 		SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 #if SDL_VERSION_ATLEAST(1, 2, 11)
-		SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 );
+//		SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 );
 #endif
 		GFX_SetupSurfaceScaled(SDL_OPENGL,0);
 		if (!sdl.surface || sdl.surface->format->BitsPerPixel<15) {
@@ -1245,12 +1245,12 @@ static void GUI_StartUp(Section * sec) {
 	sdl.opengl.texture=0;
 	sdl.opengl.displaylist=0;
 	glGetIntegerv (GL_MAX_TEXTURE_SIZE, &sdl.opengl.max_texsize);
-	glGenBuffersARB = (PFNGLGENBUFFERSARBPROC)SDL_GL_GetProcAddress("glGenBuffersARB");
-	glBindBufferARB = (PFNGLBINDBUFFERARBPROC)SDL_GL_GetProcAddress("glBindBufferARB");
-	glDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)SDL_GL_GetProcAddress("glDeleteBuffersARB");
-	glBufferDataARB = (PFNGLBUFFERDATAARBPROC)SDL_GL_GetProcAddress("glBufferDataARB");
-	glMapBufferARB = (PFNGLMAPBUFFERARBPROC)SDL_GL_GetProcAddress("glMapBufferARB");
-	glUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC)SDL_GL_GetProcAddress("glUnmapBufferARB");
+//	glGenBuffersARB = (PFNGLGENBUFFERSARBPROC)SDL_GL_GetProcAddress("glGenBuffersARB");
+//	glBindBufferARB = (PFNGLBINDBUFFERARBPROC)SDL_GL_GetProcAddress("glBindBufferARB");
+//	glDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)SDL_GL_GetProcAddress("glDeleteBuffersARB");
+//	glBufferDataARB = (PFNGLBUFFERDATAARBPROC)SDL_GL_GetProcAddress("glBufferDataARB");
+//	glMapBufferARB = (PFNGLMAPBUFFERARBPROC)SDL_GL_GetProcAddress("glMapBufferARB");
+//	glUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC)SDL_GL_GetProcAddress("glUnmapBufferARB");
 	const char * gl_ext = (const char *)glGetString (GL_EXTENSIONS);
 	if(gl_ext && *gl_ext){
 		sdl.opengl.packed_pixel=(strstr(gl_ext,"EXT_packed_pixels") != NULL);
@@ -1924,9 +1924,11 @@ int main(int argc, char* argv[]) {
 #endif
 	// Don't init timers, GetTicks seems to work fine and they can use a fair amount of power (Macs again) 
 	// Please report problems with audio and other things.
+#if 0
 	if ( SDL_Init( SDL_INIT_AUDIO|SDL_INIT_VIDEO | /*SDL_INIT_TIMER |*/ SDL_INIT_CDROM
 		|SDL_INIT_NOPARACHUTE
 		) < 0 ) E_Exit("Can't init SDL %s",SDL_GetError());
+#endif // 0
 	sdl.inited = true;
 
 #ifndef DISABLE_JOYSTICK

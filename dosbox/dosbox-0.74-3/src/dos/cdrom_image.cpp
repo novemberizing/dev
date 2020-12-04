@@ -188,14 +188,18 @@ bool CDROM_Interface_Image::GetAudioTracks(int& stTrack, int& end, TMSF& leadOut
 {
 	stTrack = 1;
 	end = (int)(tracks.size() - 1);
+#if 0
 	FRAMES_TO_MSF(tracks[tracks.size() - 1].start + 150, &leadOut.min, &leadOut.sec, &leadOut.fr);
+#endif // 0
 	return true;
 }
 
 bool CDROM_Interface_Image::GetAudioTrackInfo(int track, TMSF& start, unsigned char& attr)
 {
 	if (track < 1 || track > (int)tracks.size()) return false;
+#if 0
 	FRAMES_TO_MSF(tracks[track - 1].start + 150, &start.min, &start.sec, &start.fr);
+#endif 
 	attr = tracks[track - 1].attr;
 	return true;
 }
@@ -207,9 +211,11 @@ bool CDROM_Interface_Image::GetAudioSub(unsigned char& attr, unsigned char& trac
 	track = (unsigned char)cur_track;
 	attr = tracks[track - 1].attr;
 	index = 1;
+#if 0
 	FRAMES_TO_MSF(player.currFrame + 150, &absPos.min, &absPos.sec, &absPos.fr);
 	FRAMES_TO_MSF(player.currFrame - tracks[track - 1].start + 150, &relPos.min, &relPos.sec, &relPos.fr);
 	return true;
+#endif // 0
 }
 
 bool CDROM_Interface_Image::GetAudioStatus(bool& playing, bool& pause)
@@ -660,9 +666,13 @@ bool CDROM_Interface_Image::GetCueFrame(int &frames, istream &in)
 	in >> msf;
 	int min, sec, fr;
 	bool success = sscanf(msf.c_str(), "%d:%d:%d", &min, &sec, &fr) == 3;
+#if 0
 	frames = MSF_TO_FRAMES(min, sec, fr);
 	
 	return success;
+#else
+	return false;
+#endif
 }
 
 bool CDROM_Interface_Image::GetCueString(string &str, istream &in)
