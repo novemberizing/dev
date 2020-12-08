@@ -7,7 +7,7 @@ export default class PoseNet {
             MobileNetV1: {
                 architecture: 'MobileNetV1',
                 outputStride: 16,
-                inputResolution: { width: 640, height: 480 },
+                inputResolution: 256,
                 multiplier: 0.75
             },
             ResNet50: {
@@ -40,6 +40,7 @@ export default class PoseNet {
         this._detection = detection;
         this._confidence = confidence;
         this._net = null;
+        this._poses = null;
     }
 
     async load() {
@@ -62,38 +63,67 @@ export default class PoseNet {
     async singlePose() {
         const pose = await this._net.estimateSinglePose(this._video, this._params);
 
-        result = [
+        this._poses = [
             {
                 pose,
-                skeleton: posenet.getAdjacentKeyPoints(pose.keypoints, this._confidence)
+                skeletons: posenet.getAdjacentKeyPoints(pose.keypoints, this._confidence)
             }
         ];
 
-        this.emit('pose', result);
+        // this.emit('pose', this._poses);
 
         tf.nextFrame().then(() => this.singlePose());
 
-        return result;
+        return this._poses;
     }
 
     async multiPose() {
         const pose = await this._net.estimateSinglePose(this._video, this._params);
 
-        result = pose.map(pose => {
+        this._poses = pose.map(pose => {
             return {
                 pose,
-                skeleton: posenet.getAdjacentKeyPoints(pose.keypoints, this._confidence)
+                skeletons: posenet.getAdjacentKeyPoints(pose.keypoints, this._confidence)
             }
         });
 
-        this.emit('pose', result);
+        // this.emit('pose', this._poses);
 
         tf.nextFrame().then(() => this.multiPose());
 
-        return result;
+        return this._poses;
     }
 
     emit(type, o) {
-        console.log(type, o);
+        // console.log(type, o);
+    }
+
+    skeleton(context) {
+        if(this._poses) {
+            this._poses.forEach(o => {
+                o.skeletons.forEach(skeleton => {
+                    context.strokeStyle = 'green';
+                    context.beginPath();
+                    context.moveTo(skeleton[0].position.x, skeleton[0].position.y);
+                    context.lineTo(skeleton[1].position.x, skeleton[1].position.y);
+                    context.stroke();
+                });
+            });
+        }
+    }
+
+    keypoints(context) {
+        if(this._poses) {
+            this._poses.forEach(o => {
+                o.pose.keypoints.forEach(keypoint => {
+                    if(keypoint.score > 0.2) {
+                        context.strokeStyle = 'green';
+                        context.beginPath();
+                        context.arc(keypoint.position.x, keypoint.position.y, 10, 0, 2 * Math.PI);
+                        context.stroke();
+                    }
+                });
+            });
+        }
     }
 }

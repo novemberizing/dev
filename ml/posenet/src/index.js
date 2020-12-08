@@ -1,10 +1,21 @@
+import Camera from './camera';
+import Canvas from './canvas';
+import Posenet from './posenet';
+
+const canvas = new Canvas(document.getElementById('canvas'));
+const posenet = new Posenet(document.getElementById('video'), 'single', Posenet.MODEL.MobileNetV1, Posenet.PARAMS.MobileNetV1, 0.5);
+
+async function on() {
+    await Camera.on(document.getElementById('video'), canvas);
+    canvas.push(()=> posenet.skeleton(canvas.context));
+    canvas.push(()=> posenet.keypoints(canvas.context));
+    await posenet.load();
+    canvas.on();
+
+    return true;
+}
+
+on();
 
 
 
-if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
-      video.srcObject = stream;
-      video.play();
-      console.log('create video');
-    });
-  }
