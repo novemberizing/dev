@@ -3,6 +3,7 @@ WEBPACK
 
 [WEBPACK/GETTING STARTED](https://webpack.js.org/guides/getting-started/)
 [POSE DETECTION IN THE BROWSER: POSENET MODEL](https://github.com/tensorflow/tfjs-models/tree/master/posenet)
+[REAL TIME HUMAN POSE ESTIMATION IN THE BROWSER WITH TENSORFLOW.JS](https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5)
 
 ## LOADING A PRETRAINED POSENET MODEL
 
