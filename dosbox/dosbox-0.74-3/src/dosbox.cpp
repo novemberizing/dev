@@ -126,6 +126,11 @@ Bit32u ticksScheduled;
 bool ticksLocked;
 void increaseticks();
 
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+static void dosbox_main_loop(void);
+#endif // 
+
 static Bitu Normal_Loop(void) {
 	Bits ret;
 	while (1) {
@@ -310,11 +315,21 @@ void DOSBOX_SetNormalLoop() {
 	loop=Normal_Loop;
 }
 
+static int _count = 0;
 void DOSBOX_RunMachine(void){
+#if 0
 	Bitu ret;
 	do {
 		ret=(*loop)();
 	} while (!ret);
+#else
+	printf("%d\n", _count);
+	if(_count == 0) {
+		emscripten_set_main_loop(dosbox_main_loop, 0, 1);
+		_count = 1;
+	}
+//	emscripten_set_main_loop(dosbox_main_loop, 0, 1);
+#endif // 0
 }
 
 static void DOSBOX_UnlockSpeed( bool pressed ) {
@@ -658,7 +673,7 @@ void DOSBOX_Init(void) {
 	secprop->AddInitFunction(&MOUSE_Init); //Must be after int10 as it uses CurMode
 	secprop->AddInitFunction(&JOYSTICK_Init);
 	const char* joytypes[] = { "auto", "2axis", "4axis", "4axis_2", "fcs", "ch", "none",0};
-	Pstring = secprop->Add_string("joysticktype",Property::Changeable::WhenIdle,"auto");
+	Pstring = secprop->Add_string("joysticktype",Property::Changeable::WhenIdle,"none");
 	Pstring->Set_values(joytypes);
 	Pstring->Set_help(
 		"Type of joystick to emulate: auto (default), none,\n"
@@ -767,3 +782,10 @@ void DOSBOX_Init(void) {
 
 	control->SetStartUp(&SHELL_Init);
 }
+
+#ifdef EMSCRIPTEN
+static void dosbox_main_loop(void)
+{
+	(*loop)();
+}
+#endif // EMSCRIPTEN

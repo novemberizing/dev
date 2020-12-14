@@ -1440,6 +1440,7 @@ void GFX_LosingFocus(void) {
 #endif
 
 void GFX_Events() {
+//	printf("GFX EVENT\n");
 	//Don't poll too often. This can be heavy on the OS, especially Macs.
 	//In idle mode 3000-4000 polls are done per second without this check.
 	//Macs, with this code,  max 250 polls per second. (non-macs unused default max 500)
@@ -1450,6 +1451,7 @@ void GFX_Events() {
 	if (current_check - last_check <=  DB_POLLSKIP) return;
 	last_check = current_check;
 #endif
+//	printf("NOT RETURN\n");
 
 	SDL_Event event;
 #if defined (REDUCE_JOYSTICK_POLLING)
@@ -1474,6 +1476,7 @@ void GFX_Events() {
 			}
 		}
 #endif
+		printf("event type: %d\n", event.type);
 
 		switch (event.type) {
 		case SDL_ACTIVEEVENT:
@@ -1582,6 +1585,7 @@ void GFX_Events() {
 #if defined (MACOSX)			
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
+			printf("key press");
 			/* On macs CMD-Q is the default key to close an application */
 			if (event.key.keysym.sym == SDLK_q && (event.key.keysym.mod == KMOD_RMETA || event.key.keysym.mod == KMOD_LMETA) ) {
 				KillSwitch(true);
@@ -1924,8 +1928,8 @@ int main(int argc, char* argv[]) {
 #endif
 	// Don't init timers, GetTicks seems to work fine and they can use a fair amount of power (Macs again) 
 	// Please report problems with audio and other things.
-#if 0
-	if ( SDL_Init( SDL_INIT_AUDIO|SDL_INIT_VIDEO | /*SDL_INIT_TIMER |*/ SDL_INIT_CDROM
+#if 1
+	if ( SDL_Init( SDL_INIT_AUDIO|SDL_INIT_VIDEO /*SDL_INIT_TIMER |*/ 
 		|SDL_INIT_NOPARACHUTE
 		) < 0 ) E_Exit("Can't init SDL %s",SDL_GetError());
 #endif // 0

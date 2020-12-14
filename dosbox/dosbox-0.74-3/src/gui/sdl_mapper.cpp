@@ -417,8 +417,11 @@ Bitu GetKeyCode(SDL_keysym keysym) {
 		} 
 #if !defined (WIN32) && !defined (MACOSX) && !defined(OS2)
 		/* Linux adds 8 to all scancodes */
-		else key-=8;
+//		else key-=8;
 #endif
+		printf("SDL_SCANCODE_F: %d\n", SDL_SCANCODE_F);
+		printf("%d\n", keysym.scancode);
+		printf("%d\n", key);
 #if defined (WIN32)
 		switch (key) {
 			case 0x1c:	// ENTER
@@ -447,6 +450,7 @@ Bitu GetKeyCode(SDL_keysym keysym) {
 		/* special handling of 102-key under windows */
 		if ((keysym.sym==SDLK_BACKSLASH) && (keysym.scancode==0x56)) return (Bitu)SDLK_LESS;
 #endif
+		printf("= 1 =\n");
 		return (Bitu)keysym.sym;
 	}
 }
@@ -497,8 +501,11 @@ public:
 	bool CheckEvent(SDL_Event * event) {
 		if (event->type!=SDL_KEYDOWN && event->type!=SDL_KEYUP) return false;
 		Bitu key=GetKeyCode(event->key.keysym);
+		printf("%d\n", key);
+		printf("%d\n", event->key.keysym.sym);
 //		LOG_MSG("key type %i is %x [%x %x]",event->type,key,event->key.keysym.sym,event->key.keysym.scancode);
 		assert(Bitu(event->key.keysym.sym)<keys);
+		printf("check key event\n");
 		if (event->type==SDL_KEYDOWN) ActivateBindList(&lists[key],0x7fff,true);
 		else DeactivateBindList(&lists[key],true);
 		return 0;
@@ -708,6 +715,7 @@ public:
 	}
 
 	virtual bool CheckEvent(SDL_Event * event) {
+		/*
 		SDL_JoyAxisEvent * jaxis = NULL;
 		SDL_JoyButtonEvent * jbutton = NULL;
 		Bitu but = 0;
@@ -733,6 +741,7 @@ public:
 				}
 				break;
 		}
+		*/
 		return false;
 	}
 
@@ -2152,7 +2161,10 @@ static bool MAPPER_LoadBinds(void) {
 
 void MAPPER_CheckEvent(SDL_Event * event) {
 	for (CBindGroup_it it=bindgroups.begin();it!=bindgroups.end();it++) {
-		if ((*it)->CheckEvent(event)) return;
+		if((*it)) {
+			if ((*it)->CheckEvent(event)) return;
+		}
+//		if ((*it)->CheckEvent(event)) return;
 	}
 }
 
@@ -2243,6 +2255,9 @@ static void InitializeJoysticks(void) {
 
 static void CreateBindGroups(void) {
 	bindgroups.clear();
+	printf("CreateBindGroups\n");
+	new CKeyBindGroup(SDLK_LAST);
+#if 0
 	new CKeyBindGroup(SDLK_LAST);
 	if (joytype != JOY_NONE) {
 #if defined (REDUCE_JOYSTICK_POLLING)
@@ -2284,6 +2299,7 @@ static void CreateBindGroups(void) {
 			break;
 		}
 	}
+#endif // 0
 }
 
 #if defined (REDUCE_JOYSTICK_POLLING)
