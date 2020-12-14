@@ -2,97 +2,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
-// General Format of a ZIP file
-// ----------------------------
-
-//   Files stored in arbitrary order.  Large zipfiles can span multiple
-//   diskette media.
-
-//   Overall zipfile format:
-
-//     [local file header + file data + data_descriptor] . . .
-//     [central directory] end of central directory record
-
-
-//   A.  Local file header:
-
-// 	local file header signature     4 bytes  (0x04034b50)
-// 	version needed to extract       2 bytes
-// 	general purpose bit flag        2 bytes
-// 	compression method              2 bytes
-
-// 	last mod file time              2 bytes
-// 	last mod file date              2 bytes
-
-// 	crc-32                          4 bytes
-// 	compressed size                 4 bytes
-// 	uncompressed size               4 bytes
-// 	filename length                 2 bytes
-// 	extra field length              2 bytes
-
-// 	filename (variable size)
-// 	extra field (variable size)
-
-
-//   B.  Data descriptor:
-
-// 	crc-32                          4 bytes
-// 	compressed size                 4 bytes
-// 	uncompressed size               4 bytes
-
-//       This descriptor exists only if bit 3 of the general
-//       purpose bit flag is set (see below).  It is byte aligned
-//       and immediately follows the last byte of compressed data.
-//       This descriptor is used only when it was not possible to
-//       seek in the output zip file, e.g., when the output zip file
-//       was standard output or a non seekable device.
-
-//   C.  Central directory structure:
-
-//       [file header] . . .  end of central dir record
-
-//       File header:
-
-// 	central file header signature   4 bytes  (0x02014b50)
-// 	version made by                 2 bytes
-// 	version needed to extract       2 bytes
-// 	general purpose bit flag        2 bytes
-// 	compression method              2 bytes
-// 	last mod file time              2 bytes
-// 	last mod file date              2 bytes
-// 	crc-32                          4 bytes
-// 	compressed size                 4 bytes
-// 	uncompressed size               4 bytes
-// 	filename length                 2 bytes
-// 	extra field length              2 bytes
-// 	file comment length             2 bytes
-// 	disk number start               2 bytes
-// 	internal file attributes        2 bytes
-// 	external file attributes        4 bytes
-// 	relative offset of local header 4 bytes
-
-// 	filename (variable size)
-// 	extra field (variable size)
-// 	file comment (variable size)
-
-//       End of central dir record:
-
-// 	end of central dir signature    4 bytes  (0x06054b50)
-// 	number of this disk             2 bytes
-// 	number of the disk with the start of the central directory  2 bytes
-// 	total number of entries in the central dir on this disk    2 bytes
-// 	total number of entries in the central dir                 2 bytes
-// 	size of the central directory   4 bytes
-// 	offset of start of central directory with respect to the starting disk number        4 bytes
-// 	zipfile comment length          2 bytes
-// 	zipfile comment (variable size)
-
-
-/**
- *     [local file header + file data + data_descriptor] . . .
-    [central directory] end of central directory record
- */
+// http://www.iana.org/assignments/media-types/application/zip
 
 uint32_t get_signature(FILE * fp);
 
@@ -233,7 +145,7 @@ uint32_t get_signature(FILE * fp)
     uint32_t signature = 0;
     if(fread(&signature, 1, sizeof(uint32_t), fp) != sizeof(uint32_t)) {
         printf("fail to read\n");
-        return NULL;
+        return 0;
     }
     fseek(fp, -4, SEEK_CUR);
     return signature;
@@ -270,7 +182,7 @@ local_file * get_local_file(local_file * o, FILE * fp)
         if(fread(o->filename, 1, o->header.filename, fp) != o->header.filename) {
             free(o->filename);
             fclose(fp);
-            return -1;
+            return NULL;
         }
         o->filename[o->header.filename] = 0;
         if(o->extra) {
@@ -280,7 +192,7 @@ local_file * get_local_file(local_file * o, FILE * fp)
         if(fread(o->extra, 1, o->header.extra, fp) != o->header.extra) {
             free(o->extra);
             fclose(fp);
-            return -1;
+            return NULL;
         }
         if(o->header.flags & 0x08) {
             printf("check this\n");
@@ -318,7 +230,7 @@ central * get_central(central * o, FILE * fp) {
         if(fread(o->filename, 1, o->header.filename, fp) != o->header.filename) {
             free(o->filename);
             fclose(fp);
-            return -1;
+            return NULL;
         }
         o->filename[o->header.filename] = 0;
         if(o->extra) {
@@ -328,7 +240,7 @@ central * get_central(central * o, FILE * fp) {
         if(fread(o->extra, 1, o->header.extra, fp) != o->header.extra) {
             free(o->extra);
             fclose(fp);
-            return -1;
+            return NULL;
         }
         if(o->comment) {
             free(o->comment);
@@ -337,7 +249,7 @@ central * get_central(central * o, FILE * fp) {
         if(fread(o->comment, 1, o->header.comment, fp) != o->header.comment) {
             free(o->comment);
             fclose(fp);
-            return -1;
+            return NULL;
         }
         o->comment[o->header.comment] = 0;
         if(o->header.flags & 0x08) {
@@ -377,13 +289,16 @@ end_central * get_end_central(end_central * o, FILE * fp)
         if(fread(o->comment, 1, o->header.comment, fp) != o->header.comment) {
             free(o->comment);
             fclose(fp);
-            return -1;
+            return NULL;
         }
         o->comment[o->header.comment] = 0;
     }
     return o;
 }
 
+/**
+ * FREE END CENTRAL HEADER
+ */
 end_central * free_end_central(end_central * o)
 {
     if(o) {
