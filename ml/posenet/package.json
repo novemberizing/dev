@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --config config/webpack.dev.js --watch",
     "start": "webpack serve --config config/webpack.dev.js",
-    "build": "webpack --config config/webpack.dev.js"
+    "build": "webpack --config config/webpack.dev.js",
+    "pack": "electron-builder --publish=never"
   },
   "author": "",
   "license": "ISC",
@@ -24,14 +25,41 @@
     "clean-webpack-plugin": "^3.0.0",
     "css-loader": "^5.0.1",
     "csv-loader": "^3.0.3",
+    "electron": "^11.1.0",
+    "electron-builder": "^22.9.1",
     "html-webpack-plugin": "^4.5.0",
     "json5": "^2.1.3",
     "style-loader": "^2.0.0",
     "toml": "^3.0.0",
-    "webpack": "^5.10.0",
+    "webpack": "^5.10.1",
     "webpack-cli": "^4.2.0",
     "webpack-dev-server": "^3.11.0",
     "xml-loader": "^1.2.1",
     "yamljs": "^0.3.0"
+  },
+  "build": {
+    "appId": "posenet",
+    "productName": "posenet",
+    "win": {
+      "asar": false,
+      "target": [
+        "nsis"
+      ]
+    },
+    "fileAssociations": [
+      {
+        "ext": "sb3",
+        "name": "scratch file File"
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "language": 1042
+    },
+    "directories": {
+      "output": "release"
+    }
   }
 }
