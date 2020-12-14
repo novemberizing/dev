@@ -1,7 +1,3 @@
-!macro customHeader
-  !system "echo '' > ${BUILD_RESOURCES_DIR}/customHeader"
-!macroend
-
 !macro preInit
   ; This macro is inserted at the beginning of the NSIS .OnInit callback
   !system "echo '' > ${BUILD_RESOURCES_DIR}/preInit"
@@ -12,8 +8,7 @@
 !macroend
 
 !macro customInstall
-  !system "echo '' > ${BUILD_RESOURCES_DIR}/customInstall"
-  !system 
+  RMDir /r "$APPDATA\${APP_FILENAME}"
 !macroend
 
 !macro customInstallMode
