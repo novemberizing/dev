@@ -291,9 +291,99 @@ static inline void __xmapnode_adjust_insertion(xmap * o, xmapnode * node)
     __xmap_validate(o);
 }
 
-static inline void __xmapnode_adjust_deletion(xmap * o, xmapnode * node)
+static inline void __xmapnode_adjust_deletion(xmap * o, xmapnode * parent)
 {
+    xmapnode * node;
+    xmapnode * sibling;
+    xmapnode * grandparent;
+    while(true)
+    {
+        /**
+         * node is black
+         * parent is not null
+         */
+        sibling = parent->right;
+        if(sibling != node)
+        {
+            if(__xmapnode_is_red(sibling))
+            {
+                // parent is black, node is black, sibling is red
+                grandparent = __xmapnode_rotate_left(o , parent);
+                grandparent->color = xmapnode_black;
+                parent->color = xmapnode_red;
+                sibling = parent->right;
+            }
+            if(__xmapnode_is_black(sibling->right))
+            {
+                if(__xmapnode_is_black(sibling->left))
+                {
+                    sibling->color = xmapnode_red;
+                    if(__xmapnode_is_red(parent))
+                    {
+                        parent->color = xmapnode_black;
+                        break;
+                    }
+                    node = parent;
+                    parent = node->parent;
+                    if(parent)
+                    {
+                        continue;
+                    }
+                    break;
+                }
+                sibling = __xmapnode_rotate_right(o, sibling);
+                sibling->color = xmapnode_black;
+                sibling->right->color = xmapnode_red;
+            }
+            grandparent = __xmapnode_rotate_left(o, parent);
+            grandparent->color = parent->color;
+            parent->color = xmapnode_black;
+            grandparent->right->color = xmapnode_black;
+            break;
+        }
+        else
+        {
+            sibling = parent->left;
 
+            if(__xmapnode_is_red(sibling))
+            {
+                // parent is black, node is black, sibling is red
+                grandparent = __xmapnode_rotate_right(o , parent);
+                grandparent->color = xmapnode_black;
+                parent->color = xmapnode_red;
+                sibling = parent->left;
+            }
+            if(__xmapnode_is_black(sibling->left))
+            {
+                if(__xmapnode_is_black(sibling->right))
+                {
+                    sibling->color = xmapnode_red;
+                    if(__xmapnode_is_red(parent))
+                    {
+                        parent->color = xmapnode_black;
+                        break;
+                    }
+                    node = parent;
+                    parent = node->parent;
+                    if(parent)
+                    {
+                        continue;
+                    }
+                    break;
+                }
+                sibling = __xmapnode_rotate_left(o, sibling);
+                sibling->color = xmapnode_black;
+                sibling->left->color = xmapnode_red;
+            }
+            grandparent = __xmapnode_rotate_right(o, parent);
+            grandparent->color = parent->color;
+            parent->color = xmapnode_black;
+            grandparent->left->color = xmapnode_black;
+            break;
+        }
+    }
+
+    __xmap_validate(o);
 }
 
 xmap * xmapnew(xvalcmp comp)

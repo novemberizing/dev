@@ -108,6 +108,7 @@ int main(int argc, char ** argv)
     total = random() % xdefault_check_size;
     fprintf(stdout, "check list(%d) => %s\n", total, check_list(total) ? "ok" : "fail");
     total = random() % xdefault_check_size;
+    total = 16;
     fprintf(stdout, "check map(%d) => %s\n", total, check_map(total) ? "ok" : "fail");
 
     return 0;
