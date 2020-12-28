@@ -1,1 +1,10 @@
 autom4te.cache
+Makefile
+.deps
+config.h
+config.log
+config.status
+stamp-h1
+*.a
+*.o
+novemberizing-check
