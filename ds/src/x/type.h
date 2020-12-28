@@ -10,4 +10,7 @@ typedef __UINT16_TYPE__     xuint16;
 typedef __UINT32_TYPE__     xuint32;
 typedef __UINT64_TYPE__     xuint64;
 
+#define xsuccess            0
+#define xfail               -1
+
 #endif // __NOVEMBERIZING_X__TYPE__H__
