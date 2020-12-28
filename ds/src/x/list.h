@@ -27,8 +27,8 @@ typedef struct xlist xlist;
 extern xlist * xlistnew();
 extern xlist * xlistrem(xlist * o, xvalget f);
 
-extern xlist * xlistclr(xlist * o, xvalget f);
-extern xlist * xlistpush(xlist * o, xval v);
-extern xval    xlistpop(xlist * o);
+extern void xlistclr(xlist * o, xvalget f);
+extern int xlistpush(xlist * o, xval v);
+extern int xlistpop(xlist * o, xvalget f);
 
 #endif // __NOVEMBERIZING_X__LIST__H__

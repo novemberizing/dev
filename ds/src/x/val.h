@@ -11,7 +11,9 @@ union xval
 };
 
 typedef union xval  xval;
+
 typedef void (*xvalget)(xval);
+typedef int (*xvalcmp)(xval, xval);
 
 extern xval xvalgen(xuint64 v);
 

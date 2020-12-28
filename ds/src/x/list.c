@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <errno.h>
 
 #include "log.h"
@@ -38,7 +39,7 @@ xlist * xlistrem(xlist * o, xvalget f)
     return NULL;
 }
 
-xlist * xlistpush(xlist * o, xval v)
+int xlistpush(xlist * o, xval v)
 {
     assertion(o == NULL, "o is null");
 
@@ -58,33 +59,37 @@ xlist * xlistpush(xlist * o, xval v)
     }
     o->size = o->size + 1;
 
-    return o;
+    return true;
 }
 
-xval xlistpop(xlist * o)
+int xlistpop(xlist * o, xvalget f)
 {
-    assertion(o == NULL || o->size == 0, "o is null or size is zero");
-
-    xlistnode * node = o->head;
-    xval v = o->head->value;
-    
-    o->head = o->head->next;
-    if(o->head)
+    if(o && o->size > 0)
     {
-        o->head->prev = NULL;
-    }
-    else
-    {
-        o->tail = NULL;
-    }
-    free(node);
+        f = (f ? f : __xlistvalget);
 
-    o->size = o->size - 1;
+        xlistnode * node = o->head;
+        xval v = o->head->value;
+        
+        o->head = o->head->next;
+        if(o->head)
+        {
+            o->head->prev = NULL;
+        }
+        else
+        {
+            o->tail = NULL;
+        }
+        free(node);
 
-    return v;
+        o->size = o->size - 1;
+
+        return true;
+    }
+    return false;
 }
 
-xlist * xlistclr(xlist * o, xvalget f)
+void xlistclr(xlist * o, xvalget f)
 {
     assertion(o == NULL, "o is null");
     xlistnode * node;
@@ -109,6 +114,4 @@ xlist * xlistclr(xlist * o, xvalget f)
     }
 
     assertion(o->size != 0 || o->head != NULL || o->tail != NULL, "invalidate");
-    
-    return o;
 }
