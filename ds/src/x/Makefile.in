@@ -108,7 +108,7 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
-am_libnovemberizing_a_OBJECTS = list.$(OBJEXT)
+am_libnovemberizing_a_OBJECTS = val.$(OBJEXT) list.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 am_novemberizing_check_OBJECTS = check.$(OBJEXT)
 novemberizing_check_OBJECTS = $(am_novemberizing_check_OBJECTS)
@@ -128,7 +128,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/check.Po ./$(DEPDIR)/list.Po
+am__depfiles_remade = ./$(DEPDIR)/check.Po ./$(DEPDIR)/list.Po \
+	./$(DEPDIR)/val.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -259,7 +260,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = -I$(top_srcdir)/src
 noinst_LIBRARIES = libnovemberizing.a
-libnovemberizing_a_SOURCES = list.c
+libnovemberizing_a_SOURCES = val.c  \
+                                 list.c
+
 novemberizing_check_SOURCES = check.c
 novemberizing_check_LDADD = libnovemberizing.a
 all: all-am
@@ -319,6 +322,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/val.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -467,6 +471,7 @@ clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/check.Po
 	-rm -f ./$(DEPDIR)/list.Po
+	-rm -f ./$(DEPDIR)/val.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -514,6 +519,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/check.Po
 	-rm -f ./$(DEPDIR)/list.Po
+	-rm -f ./$(DEPDIR)/val.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

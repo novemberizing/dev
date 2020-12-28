@@ -4,7 +4,8 @@ noinst_LIBRARIES               = libnovemberizing.a
 
 noinst_PROGRAMS                = novemberizing-check
 
-libnovemberizing_a_SOURCES = list.c
+libnovemberizing_a_SOURCES     = val.c  \
+                                 list.c
 
-novemberizing_check_SOURCES = check.c
-novemberizing_check_LDADD   = libnovemberizing.a
+novemberizing_check_SOURCES    = check.c
+novemberizing_check_LDADD      = libnovemberizing.a

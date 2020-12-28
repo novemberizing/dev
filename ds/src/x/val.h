@@ -11,5 +11,10 @@ union xval
 };
 
 typedef union xval  xval;
+typedef void (*xvalget)(xval);
+
+extern xval xvalgen(xuint64 v);
+
+
 
 #endif // __NOVEMBERIZING_X__VAL__H__

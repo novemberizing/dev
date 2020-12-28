@@ -22,9 +22,13 @@ struct xlist
 
 typedef struct xlist xlist;
 
+#define xcontainer_type_list        1
+
 extern xlist * xlistnew();
-extern xlist * xlistinit(xlist * o);
-extern xlist * xlistterm(xlist * o);
-extern xlist * xlistrem(xlist * o);
+extern xlist * xlistrem(xlist * o, xvalget f);
+
+extern xlist * xlistclr(xlist * o, xvalget f);
+extern xlist * xlistpush(xlist * o, xval v);
+extern xval    xlistpop(xlist * o);
 
 #endif // __NOVEMBERIZING_X__LIST__H__
