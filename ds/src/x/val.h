@@ -16,6 +16,7 @@ typedef void (*xvalget)(xval);
 typedef int (*xvalcmp)(xval, xval);
 
 extern xval xvalgen(xuint64 v);
+extern xval xvalgenptr(void * p);
 
 
 

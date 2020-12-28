@@ -12,5 +12,6 @@ typedef __UINT64_TYPE__     xuint64;
 
 #define xsuccess            0
 #define xfail               -1
+#define xnil                (void *)(0)
 
 #endif // __NOVEMBERIZING_X__TYPE__H__
