@@ -3,6 +3,7 @@
 
 #include <x/type.h>
 #include <x/val.h>
+#include <x/list.h>
 
 struct xthread
 {
@@ -27,5 +28,18 @@ typedef struct xthread xthread;
 
 extern xthread * xthreadnew(int (*run)(struct xthread *));
 extern xthread * xthreadrem(xthread * o, xvalget destructor);
+
+struct xthreadpool
+{
+    xlist * threads;
+    xlist * idles;
+    xlist * queue;
+};
+
+typedef struct xthreadpool xthreadpool;
+
+extern xthreadpool * xthreadpoolnew(xuint32 n);
+extern xthreadpool * xthreadpoolrem(xthreadpool * o);
+extern xthread * xthreadpoolget(xthreadpool * o);
 
 #endif // __NOVEMBERIZING_X__THREAD__H__

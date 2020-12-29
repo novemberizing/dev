@@ -34,6 +34,10 @@ xlist * xlistrem(xlist * o, xvalget f)
     if(o)
     {
         xlistclr(o, f);
+        if(o->sync)
+        {
+            xsyncoff(o->sync);
+        }
         free(o);
     }
     return NULL;

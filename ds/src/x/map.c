@@ -403,6 +403,10 @@ xmap * xmaprem(xmap * o, xvalget f)
     if(o)
     {
         xmapclr(o, f);
+        if(o->sync)
+        {
+            xsyncrem(o->sync);
+        }
         free(o);
     }
     return NULL;

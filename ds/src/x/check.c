@@ -10,10 +10,25 @@
 #include <x/sync.h>
 
 // #define xdefault_check_size 1024
-#define xdefault_check_size     32
+#define xdefault_check_size     16
 #define xdefault_check_add      65536
 #define xdefault_check_del      32768
 #define xdefault_check_until    65536
+
+static int check_thread_pool(int total)
+{
+    xthreadpool * pool = xthreadpoolnew(total);
+
+    xuint64 n = random() % xdefault_check_until;
+
+    for(xuint64 i = 0; i < n; i++)
+    {
+        xthreadpoolreg();
+    }
+
+    xthreadpoolrem(pool);
+    return true;
+}
 
 static int __count = 0;
 static xsync * sync = xnil;
@@ -240,6 +255,7 @@ int main(int argc, char ** argv)
     fprintf(stdout, "check mutex(%d) => %s\n", total, check_mutex(total) ? "ok" : "fail");
     total = random() % xdefault_check_size;
     fprintf(stdout, "check condition(%d) => %s\n", total, check_condition(total) ? "ok" : "fail");
-
+    total = random() % xdefault_check_size;
+    fprintf(stdout, "check thread pool(%d) => %s\n", total, check_thread_pool(total) ? "ok" : "fail");
     return 0;
 }

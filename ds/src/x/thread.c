@@ -97,3 +97,88 @@ xthread * xthreadrem(xthread * o, xvalget destructor)
 
     return xnil;
 }
+
+static int __xthreadpool_routine(struct xthread * o)
+{
+    xthreadpool * pool = (xthreadpool *) o->parameter.ptr;
+    assertion(pool == xnil, "pool == xnil");
+
+    while((o->status & xthread_status_cancelling) != xthread_status_cancelling)
+    {
+        xsynclock(pool->queue->sync);
+        while(pool->queue->size > 0)
+        {
+            xlistnode * node = pool->queue->head;
+            xlistpop(pool->queue, xnil);
+            xsyncunlock(pool->queue->sync);
+            if(node)
+            {
+            }
+            xsynclock(pool->queue->sync);
+        }
+        if(pool->queue->size == 0)
+        {
+            xsyncwait(pool->queue->sync, xnil);
+        }
+        xsyncunlock(pool->queue->sync);
+    }
+
+    return xsuccess;
+}
+
+xthreadpool * xthreadpoolnew(xuint32 n)
+{
+    xthreadpool * o = (xthreadpool *) calloc(sizeof(xthreadpool), 1);
+    assertion(o == xnil, "calloc => %d", errno);
+
+    o->threads = xlistnew();
+    o->idles = xlistnew();
+    o->idles->sync = xsyncnew(xsync_type_mutex);
+    xsyncon(o->idles->sync, true);
+    o->queue = xlistnew();
+    o->queue->sync = xsyncnew(xsync_type_mutex);
+    xsyncon(o->queue->sync, true);
+
+    for(xuint32 i = 0; i < n; i++)
+    {
+        xthread * thread = xthreadnew(__xthreadpool_routine);
+        xlistpush(o->threads, xvalgenptr(thread));
+        xthreadon(thread, xvalgenptr(o));
+        xlistpush(o->idles, xvalgenptr(thread));
+    }
+
+    return o;
+}
+
+xthreadpool * xthreadpoolrem(xthreadpool * o)
+{
+    assertion(o == xnil, "o == xnil");
+
+    while(o->threads->head)
+    {
+        xthread * thread = (xthread *) o->threads->head->value.ptr;
+        thread->status = (thread->status | xthread_status_cancelling);
+    }
+    xsyncwakeup(o->queue->sync, true);
+    while(o->threads->head)
+    {
+        xthread * thread = (xthread *) o->threads->head->value.ptr;
+        xthreadrem(thread, xnil);
+        xlistpop(o->threads, xnil);
+    }
+    xlistrem(o->threads, xnil);
+    xlistrem(o->idles, xnil);
+    xlistrem(o->queue, xnil);
+
+    free(o);
+
+    return xnil;
+}
+
+xthread * xthreadpoolget(xthreadpool * o)
+{
+    xsynclock(o->idles->sync);
+    xthread * thread = xlistpop(o->idles, xnil);
+    xsyncunlock(o->idles->sync);
+    return thread;
+}

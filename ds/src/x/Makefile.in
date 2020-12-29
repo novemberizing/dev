@@ -109,8 +109,8 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
-am_libnovemberizing_a_OBJECTS = val.$(OBJEXT) sync.$(OBJEXT) \
-	thread.$(OBJEXT) list.$(OBJEXT) map.$(OBJEXT)
+am_libnovemberizing_a_OBJECTS = val.$(OBJEXT) func.$(OBJEXT) \
+	sync.$(OBJEXT) thread.$(OBJEXT) list.$(OBJEXT) map.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 am_novemberizing_check_OBJECTS = check.$(OBJEXT)
 novemberizing_check_OBJECTS = $(am_novemberizing_check_OBJECTS)
@@ -134,8 +134,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/check.Po ./$(DEPDIR)/event.Po \
-	./$(DEPDIR)/list.Po ./$(DEPDIR)/map.Po ./$(DEPDIR)/sync.Po \
-	./$(DEPDIR)/thread.Po ./$(DEPDIR)/val.Po
+	./$(DEPDIR)/func.Po ./$(DEPDIR)/list.Po ./$(DEPDIR)/map.Po \
+	./$(DEPDIR)/sync.Po ./$(DEPDIR)/thread.Po ./$(DEPDIR)/val.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -268,6 +268,7 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = -I$(top_srcdir)/src
 noinst_LIBRARIES = libnovemberizing.a
 libnovemberizing_a_SOURCES = val.c          \
+                                 func.c         \
                                  sync.c         \
                                  thread.c       \
                                  list.c         \
@@ -338,6 +339,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/func.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
@@ -491,6 +493,7 @@ clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/check.Po
 	-rm -f ./$(DEPDIR)/event.Po
+	-rm -f ./$(DEPDIR)/func.Po
 	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/map.Po
 	-rm -f ./$(DEPDIR)/sync.Po
@@ -543,6 +546,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/check.Po
 	-rm -f ./$(DEPDIR)/event.Po
+	-rm -f ./$(DEPDIR)/func.Po
 	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/map.Po
 	-rm -f ./$(DEPDIR)/sync.Po

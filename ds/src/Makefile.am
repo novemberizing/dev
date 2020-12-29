@@ -8,5 +8,6 @@ x/type.h                        \
 x/sync.h                        \
 x/thread.h                      \
 x/val.h                         \
+x/func.h                        \
 x/list.h                        \
 x/map.h

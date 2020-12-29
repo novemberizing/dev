@@ -2,6 +2,7 @@
 #define   __NOVEMBERIZING_X__LIST__H__
 
 #include <x/val.h>
+#include <x/sync.h>
 
 struct xlistnode
 {
@@ -14,6 +15,7 @@ typedef struct xlistnode xlistnode;
 
 struct xlist
 {
+    xsync * sync;
     xuint32 type;
     xuint64 size;
     struct xlistnode * head;

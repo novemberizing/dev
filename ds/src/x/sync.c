@@ -147,12 +147,12 @@ static inline int __xsync_mutex_wait(xsync * p, const struct timespec * timespec
         if(timespec)
         {
             ret = pthread_cond_timedwait(o->condition, o->mutex, timespec);
-            assertion(ret != xsuccess, "pthread_cond_timedwait => %d", errno);
+            assertion(ret != xsuccess && ret !=ETIMEDOUT && ret == EINTR, "pthread_cond_timedwait => %d", ret);
         }
         else
         {
             ret = pthread_cond_wait(o->condition, o->mutex);
-            assertion(ret != xsuccess, "pthread_cond_wait => %d", errno);
+            assertion(ret != xsuccess && ret !=ETIMEDOUT && ret == EINTR, "pthread_cond_wait => %d", ret);
         }
     }
     else

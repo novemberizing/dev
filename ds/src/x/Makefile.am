@@ -5,6 +5,7 @@ noinst_LIBRARIES               = libnovemberizing.a
 noinst_PROGRAMS                = novemberizing-check novemberizing-event
 
 libnovemberizing_a_SOURCES     = val.c          \
+                                 func.c         \
                                  sync.c         \
                                  thread.c       \
                                  list.c         \

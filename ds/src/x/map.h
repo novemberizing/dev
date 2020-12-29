@@ -2,6 +2,7 @@
 #define   __NOVEMBERZING_X__MAP__H__
 
 #include <x/val.h>
+#include <x/sync.h>
 
 struct xmapnode
 {
@@ -16,6 +17,7 @@ typedef struct xmapnode xmapnode;
 
 struct xmap
 {
+    xsync * sync;
     xuint32 type;
     xuint64 size;
     xmapnode * root;

@@ -20,5 +20,11 @@
         abort();                                                                                                            \
     }                                                                                                                       \
 } while(0)
+#define debug(x, ret, format, ...)  do {                                                                                    \
+    if(x) {                                                                                                                 \
+        fprintf(stdout, "[assert] %s/%ld " __FILE__ ":%d " format "\n", __func__, pthread_self(), __LINE__, ##__VA_ARGS__); \
+        return ret;                                                                                                         \
+    }                                                                                                                       \
+} while(0)
 
 #endif // __NOVEMBERIZING_X__LOG__H__
