@@ -28,6 +28,7 @@ extern xlist * xlistnew();
 extern xlist * xlistrem(xlist * o, xvalget f);
 
 extern void xlistclr(xlist * o, xvalget f);
+
 extern int xlistpush(xlist * o, xval v);
 extern int xlistpop(xlist * o, xvalget f);
 

@@ -109,8 +109,8 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
-am_libnovemberizing_a_OBJECTS = val.$(OBJEXT) list.$(OBJEXT) \
-	map.$(OBJEXT)
+am_libnovemberizing_a_OBJECTS = val.$(OBJEXT) sync.$(OBJEXT) \
+	thread.$(OBJEXT) list.$(OBJEXT) map.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 am_novemberizing_check_OBJECTS = check.$(OBJEXT)
 novemberizing_check_OBJECTS = $(am_novemberizing_check_OBJECTS)
@@ -134,7 +134,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/check.Po ./$(DEPDIR)/event.Po \
-	./$(DEPDIR)/list.Po ./$(DEPDIR)/map.Po ./$(DEPDIR)/val.Po
+	./$(DEPDIR)/list.Po ./$(DEPDIR)/map.Po ./$(DEPDIR)/sync.Po \
+	./$(DEPDIR)/thread.Po ./$(DEPDIR)/val.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -267,13 +268,15 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = -I$(top_srcdir)/src
 noinst_LIBRARIES = libnovemberizing.a
 libnovemberizing_a_SOURCES = val.c          \
+                                 sync.c         \
+                                 thread.c       \
                                  list.c         \
                                  map.c
 
 novemberizing_check_SOURCES = check.c
-novemberizing_check_LDADD = libnovemberizing.a
+novemberizing_check_LDADD = libnovemberizing.a -lpthread
 novemberizing_event_SOURCES = event.c
-novemberizing_event_LDADD = libnovemberizing.a
+novemberizing_event_LDADD = libnovemberizing.a -lpthread
 all: all-am
 
 .SUFFIXES:
@@ -337,6 +340,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/val.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -488,6 +493,8 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/event.Po
 	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/map.Po
+	-rm -f ./$(DEPDIR)/sync.Po
+	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f ./$(DEPDIR)/val.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -538,6 +545,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/event.Po
 	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/map.Po
+	-rm -f ./$(DEPDIR)/sync.Po
+	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f ./$(DEPDIR)/val.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
