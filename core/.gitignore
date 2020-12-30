@@ -3,5 +3,10 @@
 /config.log
 /config.status
 /stamp-h1
+/src/x/libnovemberizing.a
+/src/check/x/libnovemberizing-check.a
+/src/check/novemberizing-check
 Makefile
 .deps
+*.o
+*.a

@@ -86,7 +86,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-noinst_PROGRAMS = check$(EXEEXT)
+noinst_PROGRAMS = novemberizing-check$(EXEEXT)
 subdir = src/check
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -98,9 +98,10 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_check_OBJECTS = check.$(OBJEXT)
-check_OBJECTS = $(am_check_OBJECTS)
-check_DEPENDENCIES = x/libnovemberizing-check.a
+am_novemberizing_check_OBJECTS = check.$(OBJEXT)
+novemberizing_check_OBJECTS = $(am_novemberizing_check_OBJECTS)
+novemberizing_check_DEPENDENCIES = x/libnovemberizing-check.a \
+	../x/libnovemberizing.a
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -130,8 +131,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(check_SOURCES)
-DIST_SOURCES = $(check_SOURCES)
+SOURCES = $(novemberizing_check_SOURCES)
+DIST_SOURCES = $(novemberizing_check_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -290,8 +291,8 @@ top_srcdir = @top_srcdir@
 # NOVEMBERIZING'S CORE CHECK
 AM_CFLAGS = -I$(top_srcdir)/src
 SUBDIRS = x
-check_SOURCES = check.c
-check_LDADD = x/libnovemberizing-check.a
+novemberizing_check_SOURCES = check.c
+novemberizing_check_LDADD = x/libnovemberizing-check.a ../x/libnovemberizing.a
 all: all-recursive
 
 .SUFFIXES:
@@ -329,9 +330,9 @@ $(am__aclocal_m4_deps):
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
-check$(EXEEXT): $(check_OBJECTS) $(check_DEPENDENCIES) $(EXTRA_check_DEPENDENCIES) 
-	@rm -f check$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(check_OBJECTS) $(check_LDADD) $(LIBS)
+novemberizing-check$(EXEEXT): $(novemberizing_check_OBJECTS) $(novemberizing_check_DEPENDENCIES) $(EXTRA_novemberizing_check_DEPENDENCIES) 
+	@rm -f novemberizing-check$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(novemberizing_check_OBJECTS) $(novemberizing_check_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

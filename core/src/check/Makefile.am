@@ -3,7 +3,7 @@ AM_CFLAGS = -I$(top_srcdir)/src
 
 SUBDIRS = x
 
-noinst_PROGRAMS = check
+noinst_PROGRAMS = novemberizing-check
 
-check_SOURCES = check.c
-check_LDADD = x/libnovemberizing-check.a
+novemberizing_check_SOURCES = check.c
+novemberizing_check_LDADD = x/libnovemberizing-check.a ../x/libnovemberizing.a
