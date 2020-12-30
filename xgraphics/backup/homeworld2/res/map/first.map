@@ -1,0 +1,16 @@
+{
+    "size": {
+        "max": [ 10000.0,  10000.0,  10000.0],
+        "min": [-10000.0, -10000.0, -10000.0]
+    },
+    "basecamp": null,
+    "units": [
+        {
+            "reference": "salamis",
+            "ai": {
+                "type": "patrol",
+                "location":
+            }
+        },
+    ]
+}

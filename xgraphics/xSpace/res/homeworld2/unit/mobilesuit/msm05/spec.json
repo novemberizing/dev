@@ -1,0 +1,8 @@
+{
+    "category": "mobilesuit",
+    "type": "msm05",
+    "name": "MSM-05",
+    "energy": 1000,
+    "velocity": 65,
+    "mass": 50.3
+}
