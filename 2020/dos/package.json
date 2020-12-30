@@ -1,0 +1,45 @@
+{
+  "name": "dos",
+  "version": "0.0.1",
+  "description": "novemberizing dos emulator web service",
+  "main": "src/index.js",
+  "private": true,
+  "scripts": {
+    "start": "webpack serve --config config/webpack.dev.js",
+    "build": "webpack --config config/webpack.dev.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/novemberizing/dos.git"
+  },
+  "keywords": [
+    "novemberizing",
+    "dos",
+    "emulator",
+    "web",
+    "emscripten"
+  ],
+  "author": "novemberizing <novemberizing@gmail.com>",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/novemberizing/dos/issues"
+  },
+  "homepage": "https://github.com/novemberizing/dos#readme",
+  "dependencies": {
+    "@novemberizing/dosbox": "0.0.13"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/preset-env": "^7.12.11",
+    "babel-loader": "^8.2.2",
+    "exports-loader": "^1.1.1",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.5.0",
+    "terser-webpack-plugin": "^5.0.3",
+    "webpack": "^5.10.3",
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0",
+    "webpack-license-plugin": "^4.1.2"
+  }
+}
