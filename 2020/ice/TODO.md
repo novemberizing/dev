@@ -1,0 +1,10 @@
+- [x] xmaprem 이 마음에 들지 않는다. xmapnew / xmapfree 로 이름을 변경하자. - xmaprem 을 free 로 xmap del 을 item delete
+- [x] xlistdel 메서드를 xlistfree 로 변경하도록 하자.
+- [x] __xmapnode_adjust_deletion 에 버그가 있다.
+- [ ] xarray 를 구현해야 한다.
+- [ ] xhash 를 구현해야 한다.
+- [ ] c++ 을 지원하도록 하자. (우선순위 낮음)
+- [ ] network engine
+- [ ] event engine
+- [ ] queue/stack/priority queue
+- [ ] net 이란 패키지 대신에 event 라고 이름 붙이자.
