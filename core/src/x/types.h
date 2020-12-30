@@ -6,7 +6,6 @@
 #define xnil                (void *)(0)
 #define xsuccess            0
 #define xfail               -1
-#define xallocated          0x80000000U
 
 typedef __INT8_TYPE__       xint8;
 typedef __INT16_TYPE__      xint16;
@@ -29,8 +28,11 @@ typedef union xval xval;
 struct xobj;
 
 typedef struct xobj xobj;
-typedef xobj * (*destructor)(xobj *);
+
+typedef void * (*destructor)(void *);
 typedef xobj * (*constructor)(void);
+
+typedef xobj * (*xfunc)(xobj *);
 
 struct xobj
 {
@@ -38,9 +40,43 @@ struct xobj
     destructor rem;
 };
 
+#define xobj_status_allocated   0x80000000U
+
+#define xobj_type_mask          0x0000FFFFU
+
 #define xobjhas(o, v) (o->flags & v)
+#define xobjis(o, v)  ((o->flags & xobj_type_mask) == v)
 
-extern xobj * xobjrem(xobj * o);
+extern void * xobjrem(void * o);
 
+struct xfun;
+
+typedef struct xfun xfun;
+
+typedef void (*xfuncb)(xfun *);
+
+#define xfun_status_called      0x40000000U
+#define xfun_status_success     0x20000000U
+#define xfun_status_fail        0x10000000U
+
+#define xobj_type_fun           0x00000001U
+
+#define xfun_is_inprogress(o)   ((o->flags & xfun_status_called) && (o->flags & (xfun_status_success | xfun_status_fail)) == 0)
+
+struct xfun
+{
+    xuint32    flags;
+    destructor rem;
+
+    xobj *     param;
+    xobj *     result;
+    xfunc      func;
+    xfuncb     cb;
+};
+
+extern xfun * xfunnew(xfunc func, xobj * param, xfuncb cb, destructor rem);
+extern void * xfunrem(void * o);
+extern xfun * xfuninit(xfun * o, xfunc func, xobj * param, xfuncb cb, destructor rem);
+extern xfun * xfunterm(xfun * o);
 
 #endif // __NOVEMBERIZING_X__TYPES__H__
