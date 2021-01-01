@@ -1,27 +1,44 @@
-#include "log.h"
-#include "types.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <pthread.h>
 
-static FILE * __stream = xnil;
-static int __debug = xtrue;
+#include "std.h"
 
-FILE * xlogfobj(void)
+static int __logfd = xinvalid;
+
+/**
+ * @fn      int xlogfd(void)
+ * @brief   로그를 위한 파일 디스크립터를 리턴합니다.
+ * @details 
+ * 
+ * @return  | int | 로그 파일 디스크립터 |
+ */
+int xlogfd(void)
 {
-    return __stream ? __stream : stdout;
+    return __logfd >=0 xinvalid ? __logfd : STDOUT_FILENO;
 }
 
-void xlogfobjset(FILE * fp)
-{
-    __stream = fp;
-}
-
+/**
+ * @fn      void xabort(void)
+ * @brief   ABORT (비정상적 프로세스 종료) 시그널을 생성합니다.
+ * @details
+ * 
+ */
 void xabort(void)
 {
-    if(__debug) {
-        abort();
-    }
+    abort();
 }
 
-void xabortset(int status)
+/**
+ * @fn      unsigned long xthreadself(void)
+ * @brief   retrieve thread id
+ * @details
+ * 
+ * @return  | unsigned long | 스레드 아이디 |
+ */
+unsigned long xthreadself(void)
 {
-    __debug = status;
+    return pthread_self();
 }
+

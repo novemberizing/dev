@@ -3,5 +3,5 @@
 SUBDIRS = x check
 
 nobase_include_HEADERS =        \
-x/log.h                         \
-x/types.h
+x/std.h
+

@@ -53,6 +53,7 @@ extern xobj * xobjnew(xuint64 size, xuint32 type, destructor rem);
 extern void * xobjrem(void * p);
 
 // TODO: STRING
+// TODO: BUFFER
 
 struct xfun;
 
@@ -88,5 +89,52 @@ extern void * xfunrem(void * p);
 
 extern void xfuncall(xfun * o);
 extern void xfuncancel(xfun * o);
+
+struct xsync;
+
+typedef struct xsync xsync;
+
+struct xsync
+{
+    int (*on)(xsync *);
+    int (*off)(xsync *);
+    int (*lock)(xsync *);
+    int (*unlock)(xsync *);
+};
+
+#define xsync_type_none     0
+#define xsync_type_mutex    1
+
+extern xsync * xsyncnew(xuint32 type);
+extern void * xsyncrem(void * p);
+
+#define xsyncon(o)  o ? o->on(o) : xsuccess
+#define xsyncoff(o)  o ? o->off(o) : xsuccess
+#define xsynclock(o)  o ? o->lock(o) : xsuccess
+#define xsyncunlock(o)  o ? o->unlock(o) : xsuccess
+
+//
+
+struct xlistnode;
+
+typedef struct xlistnode xlistnode;
+
+struct xlistnode
+{
+    xlistnode * prev;
+    xlistnode * next;
+    xval        value;
+};
+
+struct xlist
+{
+    xuint32 flags;
+    destructor rem;
+
+    xlistnode * head;
+    xlistnode * tail;
+};
+
+1
 
 #endif // __NOVEMBERIZING_X__TYPES__H__
