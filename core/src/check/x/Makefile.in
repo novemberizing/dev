@@ -105,7 +105,7 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libnovemberizing_check_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_check_a_LIBADD =
-am_libnovemberizing_check_a_OBJECTS = _log.$(OBJEXT)
+am_libnovemberizing_check_a_OBJECTS = _log.$(OBJEXT) _types.$(OBJEXT)
 libnovemberizing_check_a_OBJECTS =  \
 	$(am_libnovemberizing_check_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -123,7 +123,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/_log.Po
+am__depfiles_remade = ./$(DEPDIR)/_log.Po ./$(DEPDIR)/_types.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -255,7 +255,9 @@ top_srcdir = @top_srcdir@
 # NOVEMBERIZING'S CORE SAMPLE LIB
 AM_CFLAGS = -I$(top_srcdir)/src
 noinst_LIBRARIES = libnovemberizing-check.a
-libnovemberizing_check_a_SOURCES = _log.c
+libnovemberizing_check_a_SOURCES = _log.c   \
+                                   _types.c
+
 all: all-am
 
 .SUFFIXES:
@@ -305,6 +307,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/_log.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/_types.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -451,6 +454,7 @@ clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/_log.Po
+	-rm -f ./$(DEPDIR)/_types.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -497,6 +501,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/_log.Po
+	-rm -f ./$(DEPDIR)/_types.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -2,7 +2,7 @@
 #include "types.h"
 
 static FILE * __stream = xnil;
-static int __debug = true;
+static int __debug = xtrue;
 
 FILE * xlogfobj(void)
 {

@@ -1,11 +1,11 @@
 #ifndef   __NOVEMBERIZING_X__TYPES__H__
 #define   __NOVEMBERIZING_X__TYPES__H__
 
-#include <stdbool.h>
-
 #define xnil                (void *)(0)
 #define xsuccess            0
 #define xfail               -1
+#define xtrue               1
+#define xfalse              0
 
 typedef __INT8_TYPE__       xint8;
 typedef __INT16_TYPE__      xint16;
@@ -25,14 +25,15 @@ union xval
 
 typedef union xval xval;
 
+#define xvalgen(v)      (xval) { .u64 = v }
+#define xvalgenptr(v)   (xval) { .ptr = v }
+
 struct xobj;
 
 typedef struct xobj xobj;
 
 typedef void * (*destructor)(void *);
 typedef xobj * (*constructor)(void);
-
-typedef xobj * (*xfunc)(xobj *);
 
 struct xobj
 {
@@ -42,41 +43,50 @@ struct xobj
 
 #define xobj_status_allocated   0x80000000U
 
-#define xobj_type_mask          0x0000FFFFU
+#define xobj_mask_types         0x0000FFFFU
 
-#define xobjhas(o, v) (o->flags & v)
-#define xobjis(o, v)  ((o->flags & xobj_type_mask) == v)
+#define xobj_type_primitive     0x00000001U
 
-extern void * xobjrem(void * o);
+#define xobjtype(o) (o->flags & xobj_mask_types)
+
+extern xobj * xobjnew(xuint64 size, xuint32 type, destructor rem);
+extern void * xobjrem(void * p);
+
+// TODO: STRING
 
 struct xfun;
 
 typedef struct xfun xfun;
 
-typedef void (*xfuncb)(xfun *);
+#define xobj_type_fun           0x00000002U
 
 #define xfun_status_called      0x40000000U
 #define xfun_status_success     0x20000000U
 #define xfun_status_fail        0x10000000U
+#define xfun_status_cancelled   0x08000000U
 
-#define xobj_type_fun           0x00000001U
+#define xfunisrunning(o)        ((o->flags & xfun_status_called) && (o->flags & (xfun_status_success | xfun_status_fail)) == 0)
 
-#define xfun_is_inprogress(o)   ((o->flags & xfun_status_called) && (o->flags & (xfun_status_success | xfun_status_fail)) == 0)
+typedef xobj * (*xfunc)(xobj *);
+typedef void (*xcb)(xfun *);
 
 struct xfun
 {
-    xuint32    flags;
+    xuint32 flags;
     destructor rem;
 
-    xobj *     param;
-    xobj *     result;
-    xfunc      func;
-    xfuncb     cb;
+    xobj * param;
+    xobj * result;
+    xfunc  func;
+    xcb    cb;
 };
 
-extern xfun * xfunnew(xfunc func, xobj * param, xfuncb cb, destructor rem);
-extern void * xfunrem(void * o);
-extern xfun * xfuninit(xfun * o, xfunc func, xobj * param, xfuncb cb, destructor rem);
-extern xfun * xfunterm(xfun * o);
+#define xfuninit(func, param, cb)   (xfun) { xobj_type_fun, xfunrem, param, xnil, func, cb }
+
+extern xfun * xfunnew(xfun * o, xfunc func, xobj * param, xcb cb);
+extern void * xfunrem(void * p);
+
+extern void xfuncall(xfun * o);
+extern void xfuncancel(xfun * o);
 
 #endif // __NOVEMBERIZING_X__TYPES__H__

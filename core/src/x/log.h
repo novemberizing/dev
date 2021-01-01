@@ -59,7 +59,7 @@ extern void xabortset(int status);
  */
 #define xcheck(condition, ret, format, ...) do {                                                                                        \
     if(condition) {                                                                                                                     \
-        fprintf(xlogfobj(), "[assertion] %s:%d %s:%lu => " format "\n", __FILE__, __LINE__, __func__, pthread_self(), ##__VA_ARGS__);   \
+        fprintf(xlogfobj(), "[check] %s:%d %s:%lu => " format "\n", __FILE__, __LINE__, __func__, pthread_self(), ##__VA_ARGS__);       \
         return ret;                                                                                                                     \
     }                                                                                                                                   \
 } while(0)
@@ -76,7 +76,7 @@ extern void xabortset(int status);
  */
 #define xcheckvoid(condition, format, ...) do {                                                                                         \
     if(condition) {                                                                                                                     \
-        fprintf(xlogfobj(), "[assertion] %s:%d %s:%lu => " format "\n", __FILE__, __LINE__, __func__, pthread_self(), ##__VA_ARGS__);   \
+        fprintf(xlogfobj(), "[check] %s:%d %s:%lu => " format "\n", __FILE__, __LINE__, __func__, pthread_self(), ##__VA_ARGS__);       \
         return;                                                                                                                         \
     }                                                                                                                                   \
 } while(0)

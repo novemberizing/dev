@@ -13,7 +13,7 @@ int check_log_function(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_critical(int total)
@@ -26,7 +26,7 @@ int check_log_critical(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_error(int total)
@@ -39,7 +39,7 @@ int check_log_error(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_warning(int total)
@@ -52,7 +52,7 @@ int check_log_warning(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_caution(int total)
@@ -65,7 +65,7 @@ int check_log_caution(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_notice(int total)
@@ -78,7 +78,7 @@ int check_log_notice(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_information(int total)
@@ -91,7 +91,7 @@ int check_log_information(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_debug(int total)
@@ -104,7 +104,7 @@ int check_log_debug(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_verbose(int total)
@@ -117,22 +117,22 @@ int check_log_verbose(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_assertion(int total)
 {
     FILE * fp = fopen("/dev/null", "w");
     xlogfobjset(fp);
-    xabortset(false);
+    xabortset(xfalse);
     for(int i = 0; i < total; i++)
     {
         xassertion(random() % 2, "assertion => %d", i);
     }
-    xabortset(true);
+    xabortset(xtrue);
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 static int __check_log_function(int condition, int i)
@@ -161,7 +161,7 @@ int check_log_check(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_checkvoid(int total)
@@ -175,7 +175,7 @@ int check_log_checkvoid(int total)
     }
     fclose(fp);
     xlogfobjset(xnil);
-    return true;
+    return xtrue;
 }
 
 int check_log_all(int total)
@@ -193,5 +193,5 @@ int check_log_all(int total)
     fprintf(stdout, "[check/log] check => %s\n", check_log_check(total) ? "ok" : "fail");
     fprintf(stdout, "[check/log] checkvoid => %s\n", check_log_checkvoid(total) ? "ok" : "fail");
 
-    return true;
+    return xtrue;
 }
