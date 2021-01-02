@@ -10,7 +10,6 @@ AC_CONFIG_FILES([
     Makefile
     src/Makefile
     src/x/Makefile
-    src/x/objs/Makefile
     src/check/Makefile
     src/check/x/Makefile
 ])

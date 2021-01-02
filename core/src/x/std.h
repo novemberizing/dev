@@ -84,7 +84,7 @@ extern int xlogfd(void);
                                                                   __func__,           \
                                                                   xthreadself(),      \
                                                                   ##__VA_ARGS__);     \
-        return ret;                                                                   \
+        return;                                                                   \
     }                                                                                 \
 } while(0)
 
@@ -110,6 +110,12 @@ union xval
 
 typedef union xval xval;
 
+#define xvalget(o)      o.u64
+#define xvalgetptr(o)   o.ptr
+
+#define xvalgen(v)      (xval) { .u64 = v }
+#define xvalgenptr(p)   (xval) { .ptr = p }
+
 struct xobj;
 
 typedef struct xobj xobj;
@@ -122,11 +128,17 @@ typedef void * (*destructor)(void *);
 
 #define xobj_type_primitive     0x00000001U
 
+#define xobjtype(o) (o->flags & xobj_mask_types)
+
 struct xobj
 {
     xuint32    flags;
     destructor destruct;
 };
+
+/**
+ * PRIMITIVE 타입 객체 정의
+ */
 
 #define xobj_type_val       0x00000002U
 
@@ -146,5 +158,111 @@ typedef struct xobjval xobjval;
 
 extern xobjval * xobjvalnew(xval v);
 
+/**
+ * 함수 객체의 정의
+ */
+
+#define xobj_type_fun       0x00000003U
+
+struct xfun;
+
+typedef struct xfun xfun;
+
+#define xfun_mask_called    0x40000000U
+#define xfun_mask_success   0x20000000U
+#define xfun_mask_fail      0x10000000U
+#define xfun_mask_cancelled 0x08000000U
+
+#define xfunisrunning(o)    ((o->flags & xfun_mask_called) && (o->flags & (xfun_mask_success | xfun_mask_fail)) == 0)
+
+typedef xobj * (*xfunc)(xobj *);
+typedef void (*xcb)(xfun *);
+
+struct xfun
+{
+    xuint32 flags;
+    destructor destruct;
+
+    xobj * param;
+    xobj * result;
+    xfunc func;
+    xcb cb;
+};
+
+#define xfuninit(func, param, cb)   (xfun) { xobj_type_fun, xfunrem, param, xnil, func, cb }
+
+extern xfun * xfunnew(xfunc func, xobj * param, xcb cb);
+extern void * xfunrem(void * p);
+
+extern void xfuncall(xfun * o);
+extern void xfuncancel(xfun * o);
+
+/**
+ * 동기화
+ */
+
+#define xobj_type_sync      0x00000004U
+
+#define xsync_type_mask     0x00FF0000U
+
+#define xsync_type_none     0x00010000U
+#define xsync_type_mutex    0x00020000U
+
+#define xsynctype(o)        (o->flags & xsync_type_mask)
+
+struct xsync;
+
+typedef struct xsync xsync;
+
+struct xsync
+{
+    xuint32 flags;
+    destructor destruct;
+
+    int (*on)(xsync *);
+    int (*off)(xsync *);
+    int (*lock)(xsync *);
+    int (*unlock)(xsync *);
+    int (*wait)(xsync *, xuint64);
+    int (*wakeup)(xsync *, int);
+    int (*condon)(xsync *);
+    int (*condoff)(xsync *);
+};
+
+#define xsyncon(o)                  (o ? o->on(o) : xsuccess)
+#define xsyncoff(o)                 (o ? o->off(o) : xsuccess)
+#define xsynclock(o)                (o ? o->lock(o) : xsuccess)
+#define xsyncunlock(o)              (o ? o->unlock(o) : xsuccess)
+#define xsyncwait(o, nanosecond)    (o ? o->wait(o, nanosecond) : xsuccess)
+#define xsyncwakeup(o, all)         (o ? o->wakeup(o, wakeup) : xsuccess)
+#define xsynccondon(o)              (o ? o->condon(o) : xsuccess)
+#define xsynccondoff(o)             (o ? o->condoff(o) : xsuccess)
+
+extern xsync * xsyncnew(xuint32 type);
+extern void * xsyncrem(void * o);
+
+/**
+ * 스레드 
+ */
+
+#define xobj_type_thread        0x00000005U
+
+struct xthread;
+
+typedef struct xthread xthread;
+
+typedef xobj * (*xthreadfun)(xobj *);
+
+struct xthread
+{
+    xuint32 flags;
+    destructor destruct;
+
+    xobj * param;
+    xobj * result;
+    xthreadfun func;
+};
+
+extern xthread * xthreadnew(xthreadfun func, xobj * param);
 
 #endif // __NOVEMBERIZING_X__STD__H__

@@ -18,7 +18,20 @@
 //     return 0;
 // }
 
+#include <time.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <x/std.h>
+
+#include "x/_std.h"
+
 int main(int argc, char ** argv)
 {
+    srandom(time(xnil));
+
+    fprintf(stdout, "check xobjval => %s\n", check_xobjval(random() % 16) ? "ok" : "fail");
+    fprintf(stdout, "check xfun => %s\n", check_xfun(random() % 16) ? "ok" : "fail");
+    
     return 0;
 }

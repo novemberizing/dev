@@ -45,15 +45,17 @@ void * xobjrem(void * p)
 
     if(o->destruct)
     {
-        o->destruct(o);
+        o = (xobj *) o->destruct(o);
     }
 
-    if(o->flags & xobj_mask_allocated)
+    if(o)
     {
-        free(o);
-        o = xnil;
+        if(o->flags & xobj_mask_allocated)
+        {
+            free(o);
+            o = xnil;
+        }
     }
 
     return o;
 }
-
