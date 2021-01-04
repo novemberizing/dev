@@ -251,8 +251,6 @@ struct xthread;
 
 typedef struct xthread xthread;
 
-typedef xobj * (*xthreadfun)(xobj *);
-
 struct xthread
 {
     xuint32 flags;
@@ -260,9 +258,13 @@ struct xthread
 
     xobj * param;
     xobj * result;
-    xthreadfun func;
+    xfunc func;
+    xcb cb;
 };
 
-extern xthread * xthreadnew(xthreadfun func, xobj * param);
+extern xthread * xthreadnew(xfunc func, xobj * param, xcb cb);
+// extern xthread * xthreadrem(xthread * o);
+// extern int xthreadon(xthread * o);
+// extern int xthreadoff(xthread * o);
 
 #endif // __NOVEMBERIZING_X__STD__H__
