@@ -48,8 +48,10 @@ xthread * xthreadnew(xfunc func, xobj * param, xcb cb)
     return o;
 }
 
-// xthread * xthreadrem(xthread * o)
-// {
+void * xthreadrem(void * p)
+{
+    xthread * o = (xthread *) p;
+    xcheck(o == xnil, xnil, "o == xnil");
 
-//     return o;
-// }
+    return o;
+}

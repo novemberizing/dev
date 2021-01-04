@@ -247,6 +247,11 @@ extern void * xsyncrem(void * o);
 
 #define xobj_type_thread        0x00000005U
 
+#define xthread_mask_called     0x40000000U
+#define xthread_mask_success    0x20000000U
+#define xthread_mask_fail       0x10000000U
+#define xthread_mask_cancelled  0x08000000U
+
 struct xthread;
 
 typedef struct xthread xthread;
@@ -263,7 +268,7 @@ struct xthread
 };
 
 extern xthread * xthreadnew(xfunc func, xobj * param, xcb cb);
-// extern xthread * xthreadrem(xthread * o);
+extern void * xthreadrem(void * o);
 // extern int xthreadon(xthread * o);
 // extern int xthreadoff(xthread * o);
 
