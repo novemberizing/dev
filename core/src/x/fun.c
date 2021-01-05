@@ -5,55 +5,48 @@
 #include "std.h"
 
 /**
- * @fn      xfun * xfunnew(xobj * (*func)(xobj *), xobj * param, void (*cb)(xfun *))
- * @brief   동적으로 함수 객체를 생성합니다.
- * @details 수행되어져야 하는 함수가 널인 경우 동작하지 않습니다.
+ * @fn      xfunction * xfunctionnew(xfunc func, xobj * param, xcallback cb)
+ * @brief   함수 객체를 메모리에 생성합니다.
+ * @details
  * 
- * @param   | func  | in | xobj * (*func)(xobj *) | 수행 함수입니다. |
- * @param   | param | in | xobj *                 | 함수를 실행할 때의 파라미터입니다. |
- * @param   | cb    | in | void (*cb)(xfun *)     | 함수가 실행되고 난 후 수행하는 콜백 함수입니다. |
+ * @param   | func  | in | xfunc     | 함수 |
+ * @param   | param | in | xobj *    | 파라미터 |
+ * @param   | cb    | in | xcallback | 콜백 |
  * 
- * @return  | xfun * | 동적할당으로 생성된 함수입니다. |
+ * @return  | xfunction * | 생성된 메모리 객체 주소 |
  */
-xfun * xfunnew(xfunc func, xobj * param, xcb cb)
+xfunction * xfunctionnew(xfunc func, xobj * param, xcallback cb)
 {
-    xassertion(func == xnil, "func == xnil");
+    xfunction * o = (xfunction *) calloc(sizeof(xfunction), 1);
+    xassertion(o == xnil, "fail to calloc (%d)", errno);
 
-    xfun * o = (xfun *) calloc(sizeof(xfun), 1);
-    xassertion(o == xnil, "o == xnil => calloc (%d)", errno);
+    o->flags = xobj_mask_allocated | xobj_type_function;
+    o->destruct = xfunctionrem;
 
-    o->flags = xobj_mask_allocated | xobj_type_fun;
-    o->destruct = xfunrem;
-
-    o->param = param;
     o->func = func;
+    o->param = param;
     o->cb = cb;
 
     return o;
 }
 
 /**
- * @fn      void * xfunrem(void * p)
- * @brief   함수 객체와 관련된 메모리를 해제합니다.
+ * @fn      void * xfunctionrem(void * p)
+ * @brief   함수 객체 멤버 중 메모리 상에서 해제되어야 하는 멤버들을 해제합니다. 객체 자신 역시 메모리에 생성되었다면 객체를 해제하고 널을 리턴합니다. 그렇지 않고 스택 상에서 생성되었다면, 스택의 주소를 리턴합니다.
  * @details
  * 
- * @param   | p | in | void * | 함수 객체의 주소 값 |
+ * @param   | p | in | void * | 해제하고자 하는 객체의 메모리 주소 값 |
  * 
- * @return  | void * | 함수의 객체를 해제합니다. |
+ * @return  | void * | 해제한 객체의 주소 값으로 객체가 동적할당으로 생성되었다면 메모리 상에서 객체를 헤제하고 널을 리턴합니다. |
  */
-void * xfunrem(void * p)
+void * xfunctionrem(void * p)
 {
-    xfun * o = (xfun *) p;
-
-    xcheck(o == xnil, xnil, "o == xnil");
-
-    xassertion(xobjtype(o) != xobj_type_fun, "xobjtype(o) == xobj_type_func");
-    xassertion(xfunisrunning(o), "xfunisrunning");
+    xfunction * o = (xfunction *) p;
+    xcheck(o == xnil, xnil, "object is null");
+    xassertion(xobjtype(o) != xobj_type_function, "object type is not function");
 
     o->param = xobjrem(o->param);
-    o->result = xobjrem(o->result);
-    o->func = xnil;
-    o->cb = xnil;
+    o->result = objrem(o->result);
 
     if(o->flags & xobj_mask_allocated)
     {
@@ -64,49 +57,19 @@ void * xfunrem(void * p)
     return o;
 }
 
-/**
- * @fn      void xfuncall(xfun * o)
- * @brief   함수 객체의 함수를 수행합니다.
- * @details 
- * 
- * @param   | o | in | xfun * | 함수 객체 |
- * 
- */
-void xfuncall(xfun * o)
+xobj * xfunctioncall(xfunction * o)
 {
-    xassertion(o == xnil || (o->flags & xfun_mask_called), "o == xnil || (o->flags & xfun_mask_called)");
+    xassertion(o == xnil || xfunction_is_running(o), "object is null or function is running");
 
-    xcheckvoid(o->flags & xfun_mask_cancelled, "o->flags & xfun_mask_cancelled");
-
-    o->flags |= xfun_mask_called;
-
-    o->result = o->func(o->param);
-
-    o->flags |= xfun_mask_success;
-
-    if(o->cb)
+    if((o->flags & xfunction_is_cancel(o)) == xfalse)
     {
+        o->flags |= xfunction_mask_cancelling;
         o->cb(o);
+        o->flags |= xfunction_mask_cancelled;
     }
 }
 
-/**
- * @fn      void xfuncancel(xfun * o)
- * @brief   함수 객체가 실행 전이면 함수 객체 상태를 취소 상태로 변경합니다.
- * @details
- * 
- * @param   | o | in | xfun * | 함수 객체 |
- */
-void xfuncancel(xfun * o)
+void xfunctioncancel(xfunction * o)
 {
-    xassertion(o == xnil || (o->flags & xfun_mask_called), "o == xnil || (o->flags & xfun_mask_called)");
 
-    if((o->flags & xfun_mask_cancelled) == xfalse)
-    {
-        o->flags |= xfun_mask_cancelled;
-        if(o->cb)
-        {
-            o->cb(o);
-        }
-    }
 }

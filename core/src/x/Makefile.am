@@ -5,9 +5,9 @@ AM_CFLAGS = -I$(top_srcdir)/src
 
 lib_LIBRARIES = libnovemberizing.a
 
-libnovemberizing_a_SOURCES = log.c  \
-                             obj.c  \
-                             val.c  \
-                             fun.c  \
+libnovemberizing_a_SOURCES = log.c       \
+                             obj.c       \
+                             primitive.c \
+                             fun.c       \
                              sync.c 
 
