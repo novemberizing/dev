@@ -57,19 +57,27 @@ void * xfunctionrem(void * p)
     return o;
 }
 
+/**
+ * @fn      xobj * xfunctioncall(xfunction * o)
+ * @brief   
+ */
 xobj * xfunctioncall(xfunction * o)
 {
-    xassertion(o == xnil || xfunction_is_running(o), "object is null or function is running");
+    xassertion(o == xnil || o->flags & (xfunction_mask_called | xfunction_mask_cancelling), "object is null or function is already called or cancelling");
 
-    if((o->flags & xfunction_is_cancel(o)) == xfalse)
+    o->flags |= xfunction_mask_called;
+    o->result = o->func(o);
+    o->flags |= xfunction_mask_success;
+    if(o->cb)
     {
-        o->flags |= xfunction_mask_cancelling;
         o->cb(o);
-        o->flags |= xfunction_mask_cancelled;
     }
+    return o->result;
 }
 
 void xfunctioncancel(xfunction * o)
 {
+    xassertion(o == xnil || o->flags & (xfunction_mask_called | xfunction_mask_cancelling), "object is null or function is already called or cancelling");
 
+    
 }

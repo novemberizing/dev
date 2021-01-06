@@ -174,6 +174,7 @@ extern void * xprimitiverem(void * p);
 /**
  * FUNCTION
  * 
+ * 함수는 여러번 호출될 수 있나?
  * 
  */
 
@@ -183,7 +184,7 @@ struct xfunction;
 
 typedef struct xfunction xfunction;
 
-typedef xobj * (*xfunc)(xobj *);
+typedef xobj * (*xfunc)(xfunction *);
 typedef void (*xcallback)(xfunction *);
 
 struct xfunction
@@ -205,6 +206,7 @@ struct xfunction
 
 #define xfunction_is_cancel(o)      (o->flags & (xfunction_mask_cancelled | xfunction_mask_cancelling) != xfalse)
 #define xfunction_is_running(o)     ((o->flags & xfunction_mask_called) && (o->flags & (xfunction_mask_success | xfunction_mask_fail)) == xfalse)
+#define xfunction_is_done(o)        (o->flags & (xfunction_mask_success | xfunction_mask_fail))
 
 #define xfunctioninit(func, param, cb)  (xfunction) { xobj_type_function, xfunctionrem, param, xnil, func, cb}
 
