@@ -202,9 +202,8 @@ struct xfunction
 #define xfunction_mask_success      0x20000000U
 #define xfunction_mask_fail         0x10000000U
 #define xfunction_mask_cancelled    0x08000000U
-#define xfunction_mask_cancelling   0x04000000U
 
-#define xfunction_is_cancel(o)      (o->flags & (xfunction_mask_cancelled | xfunction_mask_cancelling) != xfalse)
+#define xfunction_is_cancel(o)      (o->flags & (xfunction_mask_cancelled) != xfalse)
 #define xfunction_is_running(o)     ((o->flags & xfunction_mask_called) && (o->flags & (xfunction_mask_success | xfunction_mask_fail)) == xfalse)
 #define xfunction_is_done(o)        (o->flags & (xfunction_mask_success | xfunction_mask_fail))
 
@@ -213,10 +212,13 @@ struct xfunction
 extern xfunction * xfunctionnew(xfunc func, xobj * param, xcallback cb);
 extern void * xfunctionrem(void *);
 
-extern xobj * xfunctioncall(xfunction * o);
+extern const xobj * xfunctioncall(xfunction * o);
 extern void xfunctioncancel(xfunction * o);
 
-
+/**
+ * THREAD
+ * ㅇㅇㅇ
+ */
 
 
 
