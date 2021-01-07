@@ -117,7 +117,7 @@ union xval
 };
 
 typedef void (*xvalcb)(xval);
-typedef void (*xvalcmp)(xval, xval);
+typedef int (*xvalcmp)(xval, xval);
 
 #define xvalget(o)      o.u64
 #define xvalgetptr(o)   o.ptr
@@ -397,6 +397,7 @@ extern xmap * xmapsyncoff(xmap * o);
 
 extern int xmapadd(xmap * o, xval v, xvalcb f);
 extern int xmapdel(xmap * o, xval v, xvalcb f);
+extern int xmapget(xmap * o, xval v, xvalcb f);
 extern xmap * xmapclear(xmap * o, xvalcb f);
 
 #endif // __NOVEMBERIZING_X__STD__H__
