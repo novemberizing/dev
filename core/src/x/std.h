@@ -252,6 +252,46 @@ extern void * xthreadrem(void *);
 extern xthread * xthreadon(xthread *);
 extern xthread * xthreadoff(xthread *);
 
+/**
+ * SYNC
+ */
+
+#define xobj_type_sync      0x00000003U
+
+struct xsync;
+
+typedef struct xsync xsync;
+
+struct xsync
+{
+    xuint32     flags;
+    xdestructor destruct;
+
+    int (*lock)(xsync *);
+    int (*unlock)(xsync *);
+    int (*wait)(xsync *, xuint64);
+    int (*wakeup)(xsync *, xint32);
+};
+
+#define xsync_mask_types    0x00FF0000U
+
+#define xsync_type_none     0x00010000U
+#define xsync_type_mutex    0x00020000U
+
+#define xsynclock(o)        (o ? o->lock(o) : xsuccess)
+#define xsyncunlock(o)      (o ? o->unlock(o) : xsuccess)
+#define xsyncwait(o, v)     (o ? o->wait(o, v) : xsuccess)
+#define xsyncwakeup(o, v)   (o ? o->wakeup(o, v) : xsuccess)
+
+extern xsync * xsyncon(xsync * o);
+extern xsync * xsyncoff(xsync * o);
+extern xsync * xsynccondon(xsync * o);
+extern xsync * xsynccondoff(xsync * o);
+
+extern xsync * xsyncnew(xuint32 type);
+extern void * xsyncrem(void * p);
+
+
 
 
 
