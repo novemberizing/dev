@@ -249,9 +249,11 @@ void xlisteach(xlist * o, xvalcb f)
     xsynclock(o->sync);
     while(node)
     {
-        xsyncunlock(o->sync);
+        // unlock & lock check:
+        // lock & unlock 을 한 상태에서 다른 스레드에서 노드가 삭제되면,
+        // 그리고 그 다음 노드 역시 삭제되면 문제가 생길 수 있다.
+        // 그렇게 때문에 전체 락을 걸 수 밖에 없다.
         f(node->value);
-        xsynclock(o->sync);
         node = node->next;
     }
     xsyncunlock(o->sync);

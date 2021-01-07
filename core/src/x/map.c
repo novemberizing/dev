@@ -4,13 +4,69 @@
 
 #include "std.h"
 
-static xmapnode * xmapnodenew(xval v, xmapnode * parent);
-static void xmapnode_adjust_insertion(xmap * o, xmapnode * node);
-static void xmapnode_adjust_deletion(xmap * o, xmapnode * node);
+static inline xmapnode * xmapnodenew(xval v, xmapnode * parent)
+{
+    xmapnode * o = (xmapnode *) calloc(sizeof(xmapnode), 1);
 
-static xmapnode * xmapnode_get_minimum(xmapnode * n);
-static xmapnode * xmapnode_get_next(xmapnode * n);
+    o->parent = parent;
+    o->color = xmapnode_red;
+    o->value = v;
 
+    return o;
+}
+
+static inline void xmapnode_adjust_insertion(xmap * o, xmapnode * node)
+{
+
+}
+
+static inline void xmapnode_adjust_deletion(xmap * o, xmapnode * node)
+{
+
+}
+
+static inline xmapnode * xmapnode_get_minimum(xmapnode * n)
+{
+    while(n && n->left)
+    {
+        n = n->left;
+    }
+    return n;
+}
+static inline xmapnode * xmapnode_get_next(xmapnode * n)
+{
+    if(n)
+    {
+        if(n->right)
+        {
+            n = xmapnode_get_minimum(n);
+        }
+        else
+        {
+            if(n->parent)
+            {
+                if(n->parent->left == n)
+                {
+                    n = n->parent;
+                }
+                else
+                {
+                    n = xnil;
+                }
+            }
+            else
+            {
+                n = xnil;
+            }
+        }
+    }
+    return n;
+}
+
+static inline void xmap_check_validation(xmap * o)
+{
+    // TODO: IMPLEMENT THIS
+}
 
 xmap * xmapnew(xvalcmp comp)
 {
@@ -116,6 +172,7 @@ int xmapadd(xmap * o, xval v, xvalcb f)
             node->right = xmapnodenew(v, node);
             o->size = o->size + 1;
             xmapnode_adjust_insertion(o, node->right);
+            xmap_check_validation(o);
             xsyncunlock(o->sync);
             return xsuccess;
         }
@@ -129,6 +186,7 @@ int xmapadd(xmap * o, xval v, xvalcb f)
             node->right = xmapnodenew(v, node);
             o->size = o->size + 1;
             xmapnode_adjust_insertion(o, node->left);
+            xmap_check_validation(o);
             xsyncunlock(o->sync);
             return xsuccess;
         }
@@ -136,6 +194,7 @@ int xmapadd(xmap * o, xval v, xvalcb f)
         {
             xval old = node->value;
             node->value = v;
+            xmap_check_validation(o);
             xsyncunlock(o->sync);
             if(f)
             {
@@ -147,6 +206,7 @@ int xmapadd(xmap * o, xval v, xvalcb f)
     o->root = xmapnodenew(v, xnil);
     o->root->color = xmapnode_black;
     o->size = o->size + 1;
+    xmap_check_validation(o);
     xsyncunlock(o->sync);
     return xsuccess;
 }
@@ -216,6 +276,7 @@ int xmapdel(xmap * o, xval v, xvalcb f)
                 }
                 node->left->color = xmapnode_black;
                 o->size = o->size - 1;
+                xmap_check_validation(o);
                 xsyncunlock(o->sync);
                 if(f)
                 {
@@ -245,6 +306,7 @@ int xmapdel(xmap * o, xval v, xvalcb f)
                 }
                 node->right->color = xmapnode_black;
                 o->size = o->size - 1;
+                xmap_check_validation(o);
                 xsyncunlock(o->sync);
                 if(f)
                 {
@@ -275,6 +337,7 @@ int xmapdel(xmap * o, xval v, xvalcb f)
                     xmapnode_adjust_deletion(o, node);
                 }
                 o->size = o->size - 1;
+                xmap_check_validation(o);
                 xsyncunlock(o->sync);
                 if(f)
                 {
@@ -362,4 +425,30 @@ int xmapget(xmap * o, xval v, xvalcb f)
     }
     xsyncunlock(o->sync);
     return xfail;
+}
+
+/**
+ * @fn      void xmapeach(xmap * o, xvalcb f)
+ * @brief   맵을 순환하는 함수입니다.
+ * @details 
+ * 
+ * @param   | o | in | xmap * | 맵 |
+ * @param   | f | in | xvalcb | 콜백함수 |
+ */
+void xmapeach(xmap * o, xvalcb f)
+{
+    xcheck(o == xnil || o->size == 0 || f == xnil, o, "object is null or size is zero or callback is not exist");
+
+    xsynclock(o->sync);
+    xmapnode * node = xmapnode_get_minimum(o->root);
+    while(node)
+    {
+        // unlock & lock check:
+        // lock & unlock 을 한 상태에서 다른 스레드에서 노드가 삭제되면,
+        // 그리고 그 다음 노드 역시 삭제되면 문제가 생길 수 있다.
+        // 그렇게 때문에 전체 락을 걸 수 밖에 없다.
+        f(node->value);
+        node = xmapnode_get_next(node);
+    }
+    xsyncunlock(o->sync);
 }

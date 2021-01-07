@@ -399,5 +399,6 @@ extern int xmapadd(xmap * o, xval v, xvalcb f);
 extern int xmapdel(xmap * o, xval v, xvalcb f);
 extern int xmapget(xmap * o, xval v, xvalcb f);
 extern xmap * xmapclear(xmap * o, xvalcb f);
+extern void xmapeach(xmap * o, xvalcb f);
 
 #endif // __NOVEMBERIZING_X__STD__H__
