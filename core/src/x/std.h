@@ -117,6 +117,7 @@ union xval
 };
 
 typedef void (*xvalcb)(xval);
+typedef void (*xvalcmp)(xval, xval);
 
 #define xvalget(o)      o.u64
 #define xvalgetptr(o)   o.ptr
@@ -299,6 +300,10 @@ extern void * xsyncrem(void * p);
  * STANDARD TEMPLATE LIBRARY
  */
 
+/**
+ * LIST TEMPLATE 
+ */
+
 #define xobj_type_list      0x00000004U
 
 struct xlistnode;
@@ -321,6 +326,7 @@ struct xlist
     xuint32 flags;
     xdestructor destruct;
 
+    xsync * sync;
     xuint64 size;
 
     xlistnode * head;
@@ -334,10 +340,63 @@ struct xlist
 
 extern xlist * xlistnew(void);
 extern void * xlistrem(void * p);
+
+extern xlist * xlistsyncon(xlist * o, xuint32 type);
+extern xlist * xlistsyncoff(xlist * o);
+
 extern void xlistadd(xlist * o, xval v);
 extern void xlistpush(xlist * o, xval v);
-extern void xlistpop(xlist * o, xvalcb f);
-extern void xlistdel(xlist * o, xvalcb f);
-extern void xlisteach(xlist * o);
+extern int xlistpop(xlist * o, xvalcb f);
+extern int xlistdel(xlist * o, xvalcb f);
+extern void xlisteach(xlist * o, xvalcb f);
+extern xlist * xlistclear(xlist * o, xvalcb f);
+
+/**
+ * MAP
+ */
+
+#define xobj_type_map       0x00000005U
+
+#define xmapnode_red        0x00000001U
+#define xmapnode_black      0x00000000U
+
+struct xmapnode;
+
+typedef struct xmapnode xmapnode;
+
+struct xmapnode
+{
+    xuint32 color;
+    xmapnode * parent;
+    xmapnode * left;
+    xmapnode * right;
+    xval value;
+};
+
+struct xmap;
+
+typedef struct xmap xmap;
+
+struct xmap
+{
+    xuint32 flags;
+    xdestructor destruct;
+
+    xsync * sync;
+    xuint64 size;
+
+    xmapnode * root;
+    xvalcmp comp;
+};
+
+extern xmap * xmapnew(xvalcmp comp);
+extern void * xmaprem(void * p);
+
+extern xmap * xmapsyncon(xmap * o, xuint32 type);
+extern xmap * xmapsyncoff(xmap * o);
+
+extern int xmapadd(xmap * o, xval v, xvalcb f);
+extern int xmapdel(xmap * o, xval v, xvalcb f);
+extern xmap * xmapclear(xmap * o, xvalcb f);
 
 #endif // __NOVEMBERIZING_X__STD__H__
