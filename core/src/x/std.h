@@ -184,7 +184,7 @@ struct xfunction;
 
 typedef struct xfunction xfunction;
 
-typedef xobj * (*xfunc)(xfunction *);
+typedef void (*xfunc)(xfunction *);
 typedef void (*xcallback)(xfunction *);
 
 struct xfunction
@@ -212,17 +212,45 @@ struct xfunction
 extern xfunction * xfunctionnew(xfunc func, xobj * param, xcallback cb);
 extern void * xfunctionrem(void *);
 
-extern const xobj * xfunctioncall(xfunction * o);
+extern void xfunctioncall(xfunction * o);
 extern void xfunctioncancel(xfunction * o);
 
 /**
  * THREAD
- * ㅇㅇㅇ
+ * 
  */
 
+#define xobj_type_thread     0x00000002U
 
+struct xthread;
 
+typedef struct xthread xthread;
 
+struct xthread
+{
+    xuint32     flags;
+    xdestructor destruct;
+
+    xobj * param;
+    xobj * result;
+    xfunc func;
+    xcallback cb;
+};
+
+#define xthread_mask_called         0x40000000U
+#define xthread_mask_success        0x20000000U
+#define xthread_mask_fail           0x10000000U
+#define xthread_mask_cancelled      0x08000000U
+
+#define xthread_is_cancel(o)        (o->flags & (xthread_mask_cancelled) != xfalse)
+#define xthread_is_running(o)       ((o->flags & xthread_mask_called) && (o->flags & (xthread_mask_success | xthread_mask_fail)) == xfalse)
+#define xthread_is_done(o)          (o->flags & (xthread_mask_success | xthread_mask_fail))
+
+extern xthread * xthreadnew(xfunc func, xobj * param, xcallback cb);
+extern void * xthreadrem(void *);
+
+extern xthread * xthreadon(xthread *);
+extern xthread * xthreadoff(xthread *);
 
 
 
