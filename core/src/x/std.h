@@ -334,9 +334,10 @@ struct xlist
 
 extern xlist * xlistnew(void);
 extern void * xlistrem(void * p);
-extern void xlistadd(xval v);
-extern void xlistpush(xval v);
-extern void xlistpop(xvalcb f);
-extern void xlistdel(xvalcb f);
+extern void xlistadd(xlist * o, xval v);
+extern void xlistpush(xlist * o, xval v);
+extern void xlistpop(xlist * o, xvalcb f);
+extern void xlistdel(xlist * o, xvalcb f);
+extern void xlisteach(xlist * o);
 
 #endif // __NOVEMBERIZING_X__STD__H__
