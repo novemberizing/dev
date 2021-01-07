@@ -324,6 +324,17 @@ xmap * xmapclear(xmap * o, xvalcb f)
     return o;
 }
 
+/**
+ * @fn      int xmapget(xmap * o, xval v, xvalcb f)
+ * @brief   맵에서 값을 찾습니다.
+ * @details
+ * 
+ * @param   | o | in | xmap * | 맵의 객체 |
+ * @param   | v | in | xval   | 찾고자 하는 값 |
+ * @param   | f | in | xvalcb | 찾았을 때 호출되는 콜백 함수 |
+ * 
+ * @return  | int | 맵의 리턴 값 (success or fail) |
+ */
 int xmapget(xmap * o, xval v, xvalcb f)
 {
     xassertion(o == xnil || f == xnil, "object is null or callback is not exist");
