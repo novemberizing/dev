@@ -158,8 +158,10 @@ static xsync * xsync_none_new(void)
     xsync * o = (xsync *) malloc(sizeof(xsync));
 
     o->flags = xobj_type_sync | xsync_type_none;
+    
     return o;
 }
+
 static void * xsync_none_rem(void * p);
 static xsync * xsync_none_on(xsync * o);
 static xsync * xsync_none_off(xsync * o);
