@@ -7,9 +7,27 @@
 
 static xsync * xsync_none_new(void);
 static void * xsync_none_rem(void * p);
+static xsync * xsync_none_on(xsync * o);
+static xsync * xsync_none_off(xsync * o);
+static xsync * xsync_none_condon(xsync * o);
+static xsync * xsync_none_condoff(xsync * o);
+
+static int xsync_none_lock(xsync * o);
+static int xsync_none_unlock(xsync * o);
+static int xsync_none_wait(xsync * o, xuint64 nanosecond);
+static int xsync_none_wakeup(xsync * o, xuint32 all);
 
 static xsync * xsync_mutex_new(void);
 static void * xsync_mutex_rem(void * p);
+static xsync * xsync_mutex_on(xsync * o);
+static xsync * xsync_mutex_off(xsync * o);
+static xsync * xsync_mutex_condon(xsync * o);
+static xsync * xsync_mutex_condoff(xsync * o);
+
+static int xsync_mutex_lock(xsync * o);
+static int xsync_mutex_unlock(xsync * o);
+static int xsync_mutex_wait(xsync * o, xuint64 nanosecond);
+static int xsync_mutex_wakeup(xsync * o, xuint32 all);
 
 /**
  * @fn      xsync * xsyncnew(xuint32 type)
@@ -53,40 +71,102 @@ void * xsyncrem(void * p)
     xassertion(xtrue, "unsupported type");
 }
 
-extern xsync * xsyncon(xsync * o);
-extern xsync * xsyncoff(xsync * o);
-extern xsync * xsynccondon(xsync * o);
-extern xsync * xsynccondoff(xsync * o);
-
-
-
-// static int xsync_none_on(xsync * o);
-// static int xsync_none_off(xsync * o);
-// static int xsync_none_lock(xsync * o);
-// static int xsync_none_unlock(xsync * o);
-// static int xsync_none_condon(xsync * o);
-// static int xsync_none_condoff(xsync * o);
-// static int xsync_none_wait(xsync * o, xuint64 nanosecond);
-// static int xsync_none_wakeup(xsync * o, xint32 all);
-// static void * xsync_none_rem(void * p);
-// static xsync * xsync_none_new(void);
-
 /**
- * xsync * o = xsyncon(xsyncnew());
+ * @fn      xsync * xsyncon(xsync * o)
+ * @brief   동기화 객체를 활성화시킨다.
+ * @details
+ * 
+ * @param   | o | in | xsync * | 동기화 객체 |
+ * 
+ * @return  | xsync * | 동기화 객체 |
  */
+xsync * xsyncon(xsync * o)
+{
+    xassertion(o == xnil, "invalid parameter (o == xnil");
+    switch(o->flags & xsync_mask_types)
+    {
+        case xsync_type_none: return xsync_none_on(o);
+        case xsync_type_mutex: return xsync_mutex_on(o);
+    }
+    return o;
+}
 
 /**
- *
-xsync * xsyncnew(xuint32 type)
+ * @fn      xsync * xsyncoff(xsync * o)
+ * @brief   활성화된 동기화 객체를 비활성화 시킨다.
+ * @details
+ * 
+ * @param   | o | in | xsync * | 동기화 객체 |
+ * 
+ * @return  | xsync * | 동기화 객체 |
+ */
+xsync * xsyncoff(xsync * o)
 {
-    switch(type)
+    xassertion(o == xnil, "invalid parameter (o == xnil");
+    switch(o->flags & xsync_mask_types)
     {
-        case xsync_type_none:  return xsync_none_new();
-        case xsync_type_mutex: return xsync_mutex_new();
+        case xsync_type_none: return xsync_none_off(o);
+        case xsync_type_mutex: return xsync_mutex_off(o);
     }
-    xassertion(xtrue, "unknown type");
+    return o;
 }
 
-void * xsyncrem(void * p)
+/**
+ * @fn      xsync * xsynccondon(xsync * o)
+ * @brief   동기화 객체의 컨디션을 활성화 시킨다.
+ * @details
+ * 
+ * @param   | o | in | xsync * | 동기화 객체 |
+ * 
+ * @return  | xsync * | 동기화 객체 |
+ */
+xsync * xsynccondon(xsync * o)
 {
+    xassertion(o == xnil, "invalid parameter (o == xnil");
+    switch(o->flags & xsync_mask_types)
+    {
+        case xsync_type_none: return xsync_none_condon(o);
+        case xsync_type_mutex: return xsync_mutex_condon(o);
+    }
+    return o;
 }
+
+/**
+ * @fn      xsync * xsynccondoff(xsync * o)
+ * @brief   동기화 객체의 컨디션을 비활성화 시킨다.
+ * @details
+ * 
+ * @param   | o | in | xsync * | 동기화 객체 |
+ * 
+ * @return  | xsync * | 동기화 객체 |
+ */
+xsync * xsynccondoff(xsync * o)
+{
+    xassertion(o == xnil, "invalid parameter (o == xnil");
+    switch(o->flags & xsync_mask_types)
+    {
+        case xsync_type_none: return xsync_none_condoff(o);
+        case xsync_type_mutex: return xsync_mutex_condoff(o);
+    }
+    return o;
+}
+
+
+
+static xsync * xsync_none_new(void)
+{
+    xsync * o = (xsync *) malloc(sizeof(xsync));
+
+    o->flags = xobj_type_sync | xsync_type_none;
+    return o;
+}
+static void * xsync_none_rem(void * p);
+static xsync * xsync_none_on(xsync * o);
+static xsync * xsync_none_off(xsync * o);
+static xsync * xsync_none_condon(xsync * o);
+static xsync * xsync_none_condoff(xsync * o);
+
+static int xsync_none_lock(xsync * o);
+static int xsync_none_unlock(xsync * o);
+static int xsync_none_wait(xsync * o, xuint64 nanosecond);
+static int xsync_none_wakeup(xsync * o, xuint32 all);
