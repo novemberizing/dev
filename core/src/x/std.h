@@ -116,6 +116,8 @@ union xval
     void *  ptr;
 };
 
+typedef void (*xvalcb)(xval);
+
 #define xvalget(o)      o.u64
 #define xvalgetptr(o)   o.ptr
 
@@ -292,5 +294,49 @@ extern xsync * xsynccondoff(xsync * o);
 
 extern xsync * xsyncnew(xuint32 type);
 extern void * xsyncrem(void * p);
+
+/**
+ * STANDARD TEMPLATE LIBRARY
+ */
+
+#define xobj_type_list      0x00000004U
+
+struct xlistnode;
+
+typedef struct xlistnode xlistnode;
+
+struct xlistnode
+{
+    xlistnode * prev;
+    xlistnode * next;
+    xval        value;
+};
+
+struct xlist;
+
+typedef struct xlist xlist;
+
+struct xlist
+{
+    xuint32 flags;
+    xdestructor destruct;
+
+    xuint64 size;
+
+    xlistnode * head;
+    xlistnode * tail;
+};
+
+#define xlistinit()     (xlist) { xobj_type_list, xlistrem, 0, xnil, xnil }
+
+#define xlistsize(o)    (o->size)
+#define xlistempty(o)   (o->size == 0)
+
+extern xlist * xlistnew(void);
+extern void * xlistrem(void * p);
+extern void xlistadd(xval v);
+extern void xlistpush(xval v);
+extern void xlistpop(xvalcb f);
+extern void xlistdel(xvalcb f);
 
 #endif // __NOVEMBERIZING_X__STD__H__
