@@ -46,9 +46,6 @@ struct xevent
  * signal
  * i/o
  * 
- * 
- * 
- * 
  */
 
 
