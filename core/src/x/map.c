@@ -15,14 +15,105 @@ static inline xmapnode * xmapnodenew(xval v, xmapnode * parent)
     return o;
 }
 
-static inline void xmapnode_adjust_insertion(xmap * o, xmapnode * node)
+static inline xuint32 xmapnode_is_red(xmapnode * o)
 {
-
+    return o != xnil && o->color == xmapnode_red;
 }
 
-static inline void xmapnode_adjust_deletion(xmap * o, xmapnode * node)
+static inline xuint32 xmapnode_is_black(xmapnode * o)
 {
+    return o == xnil || o->color == xmapnode_black;
+}
 
+static inline void xmapnode_adjust_insertion(xmap * o, xmapnode * node)
+{
+    xmapnode * parent = xnil;
+    xmapnode * grandparent = xnil;
+    xmapnode * uncle = xnil;
+    while(xtrue)
+    {
+        // invariant:
+        //  - node is red
+        parent = node->parent;
+        if(parent == xnil)
+        {
+            node->color = xmapnode_black;
+            break;
+        }
+        if(xmapnode_is_black(parent))
+        {
+            break;
+        }
+        /**
+         * 0. grandparent always exist (because root's color black, current color is red)
+         * 1. node color is red
+         * 2. parent color is red
+         * 3. grandparent color is black
+         */
+        grandparent = parent->parent;
+        uncle = grandparent->right;
+        if(uncle != parent)
+        {
+            if(xmapnode_is_red(uncle))
+            {
+                grandparent->color = xmapnode_red;
+                parent->color = xmapnode_black;
+                uncle->color = xmapnode_black;
+                node = grandparent;
+                continue;
+            }
+            if(parent->right == node)
+            {
+                parent = xmapnode_rotate_left(o, parent);
+                node = parent->left;
+            }
+            grandparent = xmapnode_rotate_right(o, grandparent);
+            grandparent->color = xmapnode_black;
+            grandparent->left->color = xmapnode_red;
+            grandparent->right->color = xmapnode_red;
+            break;
+        }
+        else
+        {
+            uncle = grandparent->left;
+
+            if(xmapnode_is_red(uncle))
+            {
+                grandparent->color = xmapnode_red;
+                parent->color = xmapnode_black;
+                uncle->color = xmapnode_black;
+                node = grandparent;
+                continue;
+            }
+            if(parent->left == node)
+            {
+                parent = xmapnode_rotate_right(o, parent);
+                node = parent->left;
+            }
+            grandparent = xmapnode_rotate_left(o, grandparent);
+            grandparent->color = xmapnode_black;
+            grandparent->left->color = xmapnode_red;
+            grandparent->right->color = xmapnode_red;
+            break;
+        }
+    }
+}
+
+static inline void xmapnode_adjust_deletion(xmap * o, xmapnode * parent)
+{
+    // xmapnode * node = xnil;
+    // xmapnode * sibling = xnil;
+    // xmapnode * grandparent = xnil;
+    // while(xtrue)
+    // {
+    //     /**
+    //      * invariant:
+    //      *  - node's color is black
+    //      *  - parent's always exist
+    //      */
+    //     sibling = parent->right;
+
+    // }
 }
 
 static inline xmapnode * xmapnode_get_minimum(xmapnode * n)
@@ -327,14 +418,14 @@ int xmapdel(xmap * o, xval v, xvalcb f)
                     {
                         node->parent->right = xnil;
                     }
+                    if(node->color != xmapnode_red)
+                    {
+                        xmapnode_adjust_deletion(o, node->parent);
+                    }
                 }
                 else
                 {
                     o->root = xnil;
-                }
-                if(node->color != xmapnode_red)
-                {
-                    xmapnode_adjust_deletion(o, node);
                 }
                 o->size = o->size - 1;
                 xmap_check_validation(o);
