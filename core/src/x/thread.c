@@ -47,7 +47,7 @@ xthread * xthreadnew(xfunc func, xobj * param, xcallback cb)
     o->param = param;
     o->cb = cb;
 
-    return o;
+    return (xthread *) o;
 }
 
 /**
@@ -68,7 +68,7 @@ void * xthreadrem(void * p)
     xpthread * o = (xpthread *) p;
     xcheck(o == xnil, xnil, "invalid parameter (p == xnil)");
 
-    xthreadoff(o);
+    xthreadoff((xthread *) o);
 
     o->param = xobjrem(o->param);
     o->result = xobjrem(o->result);
@@ -105,7 +105,7 @@ xthread * xthreadon(xthread * p)
         xassertion(ret != xsuccess, "fail to pthread_create (%d)", ret);
     }
 
-    return o;
+    return (xthread *) o;
 }
 
 /**
@@ -132,7 +132,7 @@ xthread * xthreadoff(xthread * p)
         o->id = xnil;
     }
 
-    return o;
+    return (xthread *) o;
 }
 
 /**
@@ -148,7 +148,7 @@ static void * xpthreadroutiune(void * p)
     xpthread * o = (xpthread *) p;
 
     o->flags |= xthread_mask_called;
-    o->func(o);
+    o->func((xfunction *) o);
     o->flags |= xthread_mask_success;
 
     return o->result;

@@ -273,7 +273,7 @@ struct xsync
     int (*lock)(xsync *);
     int (*unlock)(xsync *);
     int (*wait)(xsync *, xuint64);
-    int (*wakeup)(xsync *, xint32);
+    int (*wakeup)(xsync *, xuint32);
 };
 
 #define xsync_mask_types    0x00FF0000U

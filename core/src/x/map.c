@@ -25,6 +25,78 @@ static inline xuint32 xmapnode_is_black(xmapnode * o)
     return o == xnil || o->color == xmapnode_black;
 }
 
+static xmapnode * xmapnode_rotate_left(xmap * o, xmapnode * parent)
+{
+    xmapnode * grandparent = parent->parent;
+    xmapnode * node = parent->right;
+    xmapnode * left = node->left;
+    xmapnode * right = node->right;
+
+    parent->right = left;
+    if(left)
+    {
+        left->parent = parent;
+    }
+
+    if(grandparent)
+    {
+        if(grandparent->left == parent)
+        {
+            grandparent->left = node;
+        }
+        else
+        {
+            grandparent->right = node;
+        }
+    }
+    else
+    {
+        o->root = node;
+    }
+    node->parent = grandparent;
+
+    node->left = parent;
+    parent->parent = node;
+    
+    return node;
+}
+
+static xmapnode * xmapnode_rotate_right(xmap * o, xmapnode * parent)
+{
+    xmapnode * grandparent = parent->parent;
+    xmapnode * node = parent->left;
+    xmapnode * left = node->left;
+    xmapnode * right = node->right;
+
+    parent->left = right;
+    if(right)
+    {
+        right->parent = parent;
+    }
+
+    if(grandparent)
+    {
+        if(grandparent->left == parent)
+        {
+            grandparent->left = node;
+        }
+        else
+        {
+            grandparent->right = node;
+        }
+    }
+    else
+    {
+        o->root = node;
+    }
+    node->parent = grandparent;
+
+    node->right = parent;
+    parent->parent = node;
+    
+    return node;
+}
+
 static inline void xmapnode_adjust_insertion(xmap * o, xmapnode * node)
 {
     xmapnode * parent = xnil;
@@ -101,19 +173,88 @@ static inline void xmapnode_adjust_insertion(xmap * o, xmapnode * node)
 
 static inline void xmapnode_adjust_deletion(xmap * o, xmapnode * parent)
 {
-    // xmapnode * node = xnil;
-    // xmapnode * sibling = xnil;
-    // xmapnode * grandparent = xnil;
-    // while(xtrue)
-    // {
-    //     /**
-    //      * invariant:
-    //      *  - node's color is black
-    //      *  - parent's always exist
-    //      */
-    //     sibling = parent->right;
-
-    // }
+    xmapnode * node = xnil;
+    xmapnode * sibling = xnil;
+    xmapnode * grandparent = xnil;
+    while(xtrue)
+    {
+        sibling = parent->right;
+        if(sibling != node)
+        {
+            if(xmapnode_is_red(sibling))
+            {
+                grandparent = xmapnode_rotate_left(o, parent);
+                grandparent->color = xmapnode_black;
+                parent->color = xmapnode_red;
+                sibling = parent->right;
+            }
+            if(xmapnode_is_black(sibling->right))
+            {
+                if(xmapnode_is_black(sibling->left))
+                {
+                    sibling->color = xmapnode_red;
+                    if(xmapnode_is_red(parent))
+                    {
+                        parent->color = xmapnode_black;
+                        break;
+                    }
+                    node = parent;
+                    parent = node->parent;
+                    if(parent)
+                    {
+                        continue;
+                    }
+                    break;
+                }
+                sibling = xmapnode_rotate_right(o, sibling);
+                sibling->color = xmapnode_black;
+                sibling->right->color = xmapnode_red;
+            }
+            grandparent = xmapnode_rotate_right(o, parent);
+            grandparent->color = parent->color;
+            grandparent->right->color = xmapnode_black;
+            parent->color = xmapnode_black;
+            break;
+        }
+        else
+        {
+            sibling = parent->left;
+            if(xmapnode_is_red(sibling))
+            {
+                grandparent = xmapnode_rotate_right(o, parent);
+                grandparent->color = xmapnode_black;
+                parent->color = xmapnode_red;
+                sibling = parent->left;
+            }
+            if(xmapnode_is_black(sibling->left))
+            {
+                if(xmapnode_is_black(sibling->right))
+                {
+                    sibling->color = xmapnode_red;
+                    if(xmapnode_is_red(parent))
+                    {
+                        parent->color = xmapnode_black;
+                        break;
+                    }
+                    node = parent;
+                    parent = node->parent;
+                    if(parent)
+                    {
+                        continue;
+                    }
+                    break;
+                }
+                sibling = xmapnode_rotate_left(o, sibling);
+                sibling->color = xmapnode_black;
+                sibling->left->color = xmapnode_red;
+            }
+            grandparent = xmapnode_rotate_left(o, parent);
+            grandparent->color = parent->color;
+            grandparent->left->color = xmapnode_black;
+            parent->color = xmapnode_black;
+            break;
+        }
+    }
 }
 
 static inline xmapnode * xmapnode_get_minimum(xmapnode * n)
@@ -130,25 +271,17 @@ static inline xmapnode * xmapnode_get_next(xmapnode * n)
     {
         if(n->right)
         {
-            n = xmapnode_get_minimum(n);
+            return xmapnode_get_minimum(n);
         }
         else
         {
-            if(n->parent)
+            xmapnode * parent = n->parent;
+            while(parent && parent->right == n)
             {
-                if(n->parent->left == n)
-                {
-                    n = n->parent;
-                }
-                else
-                {
-                    n = xnil;
-                }
+                n = parent;
+                parent = n->parent;
             }
-            else
-            {
-                n = xnil;
-            }
+            return parent;
         }
     }
     return n;
@@ -528,7 +661,7 @@ int xmapget(xmap * o, xval v, xvalcb f)
  */
 void xmapeach(xmap * o, xvalcb f)
 {
-    xcheck(o == xnil || o->size == 0 || f == xnil, o, "object is null or size is zero or callback is not exist");
+    xcheckvoid(o == xnil || o->size == 0 || f == xnil, "object is null or size is zero or callback is not exist");
 
     xsynclock(o->sync);
     xmapnode * node = xmapnode_get_minimum(o->root);

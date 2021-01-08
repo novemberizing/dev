@@ -134,7 +134,8 @@ am__v_AR_1 =
 libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
 am_libnovemberizing_a_OBJECTS = log.$(OBJEXT) obj.$(OBJEXT) \
-	val.$(OBJEXT) fun.$(OBJEXT) sync.$(OBJEXT)
+	primitive.$(OBJEXT) fun.$(OBJEXT) sync.$(OBJEXT) \
+	thread.$(OBJEXT) list.$(OBJEXT) map.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -151,8 +152,10 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/fun.Po ./$(DEPDIR)/log.Po \
-	./$(DEPDIR)/obj.Po ./$(DEPDIR)/sync.Po ./$(DEPDIR)/val.Po
+am__depfiles_remade = ./$(DEPDIR)/fun.Po ./$(DEPDIR)/list.Po \
+	./$(DEPDIR)/log.Po ./$(DEPDIR)/map.Po ./$(DEPDIR)/obj.Po \
+	./$(DEPDIR)/primitive.Po ./$(DEPDIR)/sync.Po \
+	./$(DEPDIR)/thread.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -286,11 +289,14 @@ AM_CFLAGS = -I$(top_srcdir)/src
 
 # SUBDIRS = objs
 lib_LIBRARIES = libnovemberizing.a
-libnovemberizing_a_SOURCES = log.c  \
-                             obj.c  \
-                             val.c  \
-                             fun.c  \
-                             sync.c 
+libnovemberizing_a_SOURCES = log.c       \
+                             obj.c       \
+                             primitive.c \
+                             fun.c       \
+                             sync.c      \
+                             thread.c    \
+                             list.c      \
+                             map.c
 
 all: all-am
 
@@ -369,10 +375,13 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fun.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/obj.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/primitive.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/val.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -522,10 +531,13 @@ clean-am: clean-generic clean-libLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/fun.Po
+	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/log.Po
+	-rm -f ./$(DEPDIR)/map.Po
 	-rm -f ./$(DEPDIR)/obj.Po
+	-rm -f ./$(DEPDIR)/primitive.Po
 	-rm -f ./$(DEPDIR)/sync.Po
-	-rm -f ./$(DEPDIR)/val.Po
+	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -572,10 +584,13 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/fun.Po
+	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/log.Po
+	-rm -f ./$(DEPDIR)/map.Po
 	-rm -f ./$(DEPDIR)/obj.Po
+	-rm -f ./$(DEPDIR)/primitive.Po
 	-rm -f ./$(DEPDIR)/sync.Po
-	-rm -f ./$(DEPDIR)/val.Po
+	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

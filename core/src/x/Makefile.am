@@ -9,5 +9,8 @@ libnovemberizing_a_SOURCES = log.c       \
                              obj.c       \
                              primitive.c \
                              fun.c       \
-                             sync.c 
+                             sync.c      \
+                             thread.c    \
+                             list.c      \
+                             map.c
 

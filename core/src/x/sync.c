@@ -43,7 +43,7 @@ xsync * xsyncnew(xuint32 type)
     switch(type)
     {
         case xsync_type_none:   return xsync_none_new();
-        case xsync_type_mutex:  return xsync_none_mutex();
+        case xsync_type_mutex:  return xsync_mutex_new();
     }
     xassertion(xtrue, "unsupported type");
 }
@@ -233,7 +233,7 @@ struct xpmutexsync
     int (*lock)(xsync *);
     int (*unlock)(xsync *);
     int (*wait)(xsync *, xuint64);
-    int (*wakeup)(xsync *, xint32);
+    int (*wakeup)(xsync *, xuint32);
 
     pthread_mutex_t * mutex;
     pthread_cond_t * cond;
@@ -251,7 +251,7 @@ static xsync * xsync_mutex_new(void)
     o->wait = xsync_mutex_wait;
     o->wakeup = xsync_mutex_wakeup;
 
-    return o;
+    return (xsync *) o;
 }
 
 static void * xsync_mutex_rem(void * p)
@@ -276,28 +276,28 @@ static void * xsync_mutex_rem(void * p)
 static xsync * xsync_mutex_on(xsync * p)
 {
     xpmutexsync * o = (xpmutexsync *) p;
-    xcheck(o == xnil, o, "invalid paramter (p == xnil)");
+    xcheck(o == xnil, (xsync *) o, "invalid paramter (p == xnil)");
 
     xassertion(xobjtype(o) != xobj_type_sync && xsynctype(o) != xsync_type_mutex, "object is not sync and mutex");
 
-    xcheck(o->mutex, o, "mutex is already created");
+    xcheck(o->mutex, (xsync * ) o, "mutex is already created");
 
     o->mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
     xassertion(o->mutex == xnil, "fail to malloc (%d)", errno);
 
     *o->mutex = (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
 
-    return o;
+    return (xsync * ) o;
 }
 
 static xsync * xsync_mutex_off(xsync * p)
 {
     xpmutexsync * o = (xpmutexsync *) p;
-    xcheck(o == xnil, o, "invalid paramter (p == xnil)");
+    xcheck(o == xnil, (xsync * ) o, "invalid paramter (p == xnil)");
 
     xassertion(xobjtype(o) != xobj_type_sync && xsynctype(o) != xsync_type_mutex, "object is not sync and mutex");
 
-    xcheck(o->mutex == xnil, o, "mutex is already destroyed");
+    xcheck(o->mutex == xnil, (xsync * ) o, "mutex is already destroyed");
 
     int ret = pthread_mutex_destroy(o->mutex);
     xassertion(ret != xsuccess, "fail to pthread_mutex_destroy (%d)", errno);
@@ -305,34 +305,34 @@ static xsync * xsync_mutex_off(xsync * p)
     free(o->mutex);
     o->mutex = xnil;
 
-    return o;
+    return (xsync * ) o;
 }
 
 static xsync * xsync_mutex_condon(xsync * p)
 {
     xpmutexsync * o = (xpmutexsync *) p;
-    xcheck(o == xnil, o, "invalid paramter (p == xnil)");
+    xcheck(o == xnil, (xsync * ) o, "invalid paramter (p == xnil)");
 
     xassertion(xobjtype(o) != xobj_type_sync && xsynctype(o) != xsync_type_mutex, "object is not sync and mutex");
 
-    xcheck(o->cond, o, "mutex condition is already created");
+    xcheck(o->cond, (xsync * ) o, "mutex condition is already created");
 
     o->cond = (pthread_cond_t *) malloc(sizeof(pthread_cond_t));
     xassertion(o->cond == xnil, "fail to malloc (%d)", errno);
 
     *o->cond = (pthread_cond_t) PTHREAD_COND_INITIALIZER;
 
-    return o;
+    return (xsync * ) o;
 }
 
 static xsync * xsync_mutex_condoff(xsync * p)
 {
     xpmutexsync * o = (xpmutexsync *) p;
-    xcheck(o == xnil, o, "invalid paramter (p == xnil)");
+    xcheck(o == xnil, (xsync * ) o, "invalid paramter (p == xnil)");
 
     xassertion(xobjtype(o) != xobj_type_sync && xsynctype(o) != xsync_type_mutex, "object is not sync and mutex");
 
-    xcheck(o->cond == xnil, o, "mutex is already destroyed");
+    xcheck(o->cond == xnil, (xsync * ) o, "mutex is already destroyed");
 
     int ret = pthread_cond_destroy(o->cond);
     xassertion(ret != xsuccess, "fail to pthread_cond_destroy (%d)", errno);
@@ -340,13 +340,13 @@ static xsync * xsync_mutex_condoff(xsync * p)
     free(o->cond);
     o->cond = xnil;
 
-    return o;
+    return (xsync * ) o;
 }
 
 static int xsync_mutex_lock(xsync * p)
 {
     xpmutexsync * o = (xpmutexsync *) p;
-    xcheck(o == xnil, o, "invalid paramter (p == xnil)");
+    xcheck(o == xnil, xsuccess, "invalid paramter (p == xnil)");
 
     xassertion(xobjtype(o) != xobj_type_sync && xsynctype(o) != xsync_type_mutex, "object is not sync and mutex");
 
@@ -362,7 +362,7 @@ static int xsync_mutex_lock(xsync * p)
 static int xsync_mutex_unlock(xsync * p)
 {
     xpmutexsync * o = (xpmutexsync *) p;
-    xcheck(o == xnil, o, "invalid paramter (p == xnil)");
+    xcheck(o == xnil, xsuccess, "invalid paramter (p == xnil)");
 
     xassertion(xobjtype(o) != xobj_type_sync && xsynctype(o) != xsync_type_mutex, "object is not sync and mutex");
 
@@ -378,7 +378,7 @@ static int xsync_mutex_unlock(xsync * p)
 static int xsync_mutex_wait(xsync * p, xuint64 nanosecond)
 {
     xpmutexsync * o = (xpmutexsync *) p;
-    xcheck(o == xnil, o, "invalid paramter (p == xnil)");
+    xcheck(o == xnil, xsuccess, "invalid paramter (p == xnil)");
 
     xassertion(xobjtype(o) != xobj_type_sync && xsynctype(o) != xsync_type_mutex, "object is not sync and mutex");
     
@@ -403,7 +403,7 @@ static int xsync_mutex_wait(xsync * p, xuint64 nanosecond)
 static int xsync_mutex_wakeup(xsync * p, xuint32 all)
 {
     xpmutexsync * o = (xpmutexsync *) p;
-    xcheck(o == xnil, o, "invalid paramter (p == xnil)");
+    xcheck(o == xnil, xsuccess, "invalid paramter (p == xnil)");
 
     xassertion(xobjtype(o) != xobj_type_sync && xsynctype(o) != xsync_type_mutex, "object is not sync and mutex");
     

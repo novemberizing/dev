@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+
 #include "std.h"
 
 static xlistnode * xlistnodenew(xval v);

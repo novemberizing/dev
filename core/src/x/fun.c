@@ -46,7 +46,7 @@ void * xfunctionrem(void * p)
     xassertion(xobjtype(o) != xobj_type_function, "object type is not function");
 
     o->param = xobjrem(o->param);
-    o->result = objrem(o->result);
+    o->result = xobjrem(o->result);
 
     if(o->flags & xobj_mask_allocated)
     {
