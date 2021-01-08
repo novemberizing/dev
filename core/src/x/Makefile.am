@@ -12,5 +12,5 @@ libnovemberizing_a_SOURCES = log.c       \
                              sync.c      \
                              thread.c    \
                              list.c      \
-                             map.c
-
+                             map.c       \
+                             hash.c
