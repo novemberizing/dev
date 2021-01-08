@@ -51,12 +51,15 @@ struct xevent
  * 
  */
 
+
 struct xeventengine
 {
     xlist generators;
 };
 
 #define xeventengine_init() (xeventengine) { 0, }
+
+extern int xeventengine_run(xeventengine * o);
 
 
 
