@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group 'novemberizing'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    runtime files('/usr/lib/libreoffice/program')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile 'org.libreoffice:jurt:6.4.3'
+    compile 'org.libreoffice:ridl:6.4.3'
+    compile 'org.libreoffice:juh:6.4.3'
+    compile 'org.libreoffice:unoil:6.4.3'
+    compile 'org.libreoffice:officebean:6.4.3'
+}

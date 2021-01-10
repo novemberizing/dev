@@ -1,0 +1,27 @@
+{
+    "name": "databean's hello chrome extension",
+    "version": "0.0",
+    "permissions": ["activeTab", "declarativeContent","storage"],
+    "description": "databean's hello chrome extension",
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+    "page_action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "images/iconfinder_api-code-window_16.png",
+            "32": "images/iconfinder_api-code-window_32.png",
+            "48": "images/iconfinder_api-code-window_48.png",
+            "128": "images/iconfinder_api-code-window_128.png"
+        }
+    },
+    "icons": {
+        "16": "images/iconfinder_api-code-window_16.png",
+        "32": "images/iconfinder_api-code-window_32.png",
+        "48": "images/iconfinder_api-code-window_48.png",
+        "128": "images/iconfinder_api-code-window_128.png"
+    },
+    "options_page": "options.html",
+    "manifest_version": 2
+}
