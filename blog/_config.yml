@@ -1,0 +1,28 @@
+# SETUP
+title: novemberizing
+url: https://novemberizing.github.io
+baseurl: "/blog"
+tagline: "to be novemberizing"
+paginate: 1
+permalink: pretty
+
+# GEM
+plugins:
+  - jekyll-gist
+  - jekyll-paginate
+  - jekyll-seo-tag
+
+exclude:
+  - .git
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - LICENSE
+
+# OPTIONS
+author:
+  name: novemberizing
+  email: novemberizing@gmail.com
+  url: https://novemberizing.github.io
+
+version: 0.0.1
