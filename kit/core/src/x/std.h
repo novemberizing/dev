@@ -25,6 +25,8 @@ typedef __UINT16_TYPE__ xuint16;
 typedef __UINT32_TYPE__ xuint32;
 typedef __UINT64_TYPE__ xuint64;
 
+typedef unsigned char   xbyte;
+
 union xval;
 struct xobj;
 
@@ -126,5 +128,62 @@ struct xthread
     xval * result;
     xcallback callback;
 };
+
+/* BUFFER ***************************************************************/
+
+struct xbuffer;
+
+typedef struct xbuffer xbuffer;
+
+struct xbuffer
+{
+    xbyte * bytes;
+    xuint64 position;
+    xuint64 size;
+    xuint64 capacity;
+};
+
+// BUFFER POOL
+// PAGE
+// POSITION, CAPACITY, SIZE
+
+/* DATA STRUCTURE *******************************************************/
+
+#define xlistsize(o)    (o ? o->size : 0)
+#define xlistempty(o)   (o == xnil || o->size == 0)
+
+#define xlisthead(o)    (o ? o->head : xnil)
+#define xlistnext(item) (item ? item->next : xnil)
+
+/* DATA STRUCTURE *******************************************************/
+
+#define xqueuesize(o)   (o ? o->size : 0)
+#define xqueueempty(o)  (o == xnil || o->size == 0)
+
+#define xqueuepush(o, item) do {                                \
+    xassertion(o == xnil || item == xnil, "null pointer");      \
+    item->prev = o->tail;                                       \
+    if(o->tail) {                                               \
+        o->tail->next = item;                                   \
+    } else {                                                    \
+        o->head = item;                                         \
+    }                                                           \
+    o->tail = item;                                             \
+    o->size = o->size + 1;                                      \
+} while(0)
+
+#define xqueuepop(o) o->head;                                   \
+do {                                                            \
+    if(o->head) {                                               \
+        if(o->head->next) {                                     \
+            o->head->next->prev = xnil;                         \
+            o->head = o->head->next;                            \
+        } else {                                                \
+            o->tail = xnil;                                     \
+            o->head = xnil;                                     \
+        }                                                       \
+        o->size = o->size - 1;                                  \
+    }                                                           \
+} while(0)
 
 #endif // __NOVEMBERIZING_X__STD__H__
