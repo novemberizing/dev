@@ -44,6 +44,15 @@ typedef __UINT64_TYPE__     xuint64;
 
 /** DATA STRUCTUE **********************************/
 
+#define xlisthead(list)     (list->head)
+#define xlistnext(node)     (node->next)
+/**
+for(xgenerator * generator = xlisthead(engine->generator); generator != xnil; generator = xlistnext(generator))
+{
+
+}
+ */
+
 struct xlist
 {
 };

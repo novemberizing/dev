@@ -13,9 +13,8 @@ int xenginerun(xengine * o)
 {
     xassertion(o == xnil || o->generators == xnil, "null pointer");
 
-    for(xgenerator * generator = o->generators->head; generator != xnil; generator = generator->next)
+    for(xgenerator * generator = xlisthead(o->generators); generator != xnil; generator = xlistnext(generator))
     {
-        
     }
 
     return xsuccess;
