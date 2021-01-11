@@ -143,6 +143,8 @@ struct xbuffer
     xuint64 capacity;
 };
 
+// REQUEST / RESPONSE
+
 // BUFFER POOL
 // PAGE
 // POSITION, CAPACITY, SIZE
