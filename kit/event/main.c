@@ -46,6 +46,27 @@ struct xevent
 
 };
 
+struct xeventqueue_node;
+
+typedef struct xeventqueue_node xeventqueue_node;
+
+struct xeventqueue_node
+{
+    xeventqueue_node * next;
+    xevent * event;
+};
+
+struct xeventqueue;
+
+typedef struct xeventqueue;
+
+struct xeventqueue
+{
+    xeventqueue_node * head;
+    xeventqueue_node * tail;
+    xuint64 size;
+};
+
 struct xgenerator;
 
 typedef struct xgenerator xgenerator;
@@ -102,6 +123,7 @@ int xenginerun(xengine * o)
             xgeneratorrun(generator, o);
         }
     }
+    xprocessorrun(o);
     return xsuccess;
 }
 
