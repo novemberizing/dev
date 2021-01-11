@@ -37,6 +37,15 @@ struct xsocket
     int fd;
 };
 
+struct xevent;
+
+typedef struct xevent xevent;
+
+struct xevent
+{
+
+};
+
 struct xgenerator;
 
 typedef struct xgenerator xgenerator;
@@ -46,12 +55,24 @@ struct xgenerator
     xgenerator * next;
 };
 
+struct xprocessor;
+
+typedef struct xprocessor xprocessor;
+
+struct xprocessor
+{
+
+};
+
 struct xengine;
 
 typedef struct xengine xengine;
 
 #define xengine_status_void         0x00000000U
 #define xengine_status_cancel       0x80000000U
+
+extern void xgeneratorrun(xgenerator * o, xengine * engine);
+extern xevent * xgeneratoremit(xgenerator * o, xengine * engine);
 
 struct xengine
 {
@@ -62,6 +83,7 @@ struct xengine
 #define xengineinit()   (xengine) { xengine_status_void }
 
 extern int xenginerun(xengine * o);
+extern void xenginedispatch(xengine * o, xevent * event);
 
 int main(int argc, char ** argv)
 {
@@ -81,4 +103,15 @@ int xenginerun(xengine * o)
         }
     }
     return xsuccess;
+}
+
+void xgeneratorrun(xgenerator * o, xengine * engine)
+{
+    xassertion(o == xnil || engine == xnil, "invalid paramter");
+    xevent * event = xnil;
+    
+    while((event = xgeneratoremit(o, engine)) != xnil)
+    {
+        xenginedispatch(engine, event);
+    }
 }
