@@ -297,7 +297,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = x
-nobase_include_HEADERS = x/std.h
+nobase_include_HEADERS = x/std.h    \
+                         x/event.h
+
 all: all-recursive
 
 .SUFFIXES:

@@ -34,6 +34,27 @@ extern int xlogfd(void);
 #define xobj_mask_allocated     0x80000000U
 #define xobj_mask_types         0x0000FFFFU
 
+/** DATA STRUCTURE */
+
+#define xqueuepush(queue, item) do {    \
+    if(queue->tail) {                   \
+        queue->tail->next = item;       \
+        item->prev = queue->tail;       \
+        queue->tail = item;             \
+    } else {                            \
+        queue->head = item;             \
+        queue->tail = item;             \
+    }                                   \
+    queue->size = queue->size + 1;      \
+} while(0)
+
+#define xqueuepop(queue) queue->head, ( \
+    queue->head ? (queue->head = queue->head->next, queue->size = queue->size - 1) : xnil, \
+    queue->head ? (queue->head->prev = xnil, queue->tail = xnil) : xnil)
+
+#define xqueuesize(queue)   queue->size
+#define xqueueempty(queue)  queue ? queue->size == 0 : xtrue
+
 /** BUFFER */
 
 #define xobj_type_buffer        0x0000FFFFU
@@ -55,13 +76,6 @@ struct xbuffer
 extern xbuffer * xbuffernew(xuint64 capacity);
 extern void * xbufferrem(void * p);
 
-/**
- * @def     xbufferfront(buffer)
- * @brief   버퍼 객체의 내부 데이터 주소 값 (사용한 후의 버퍼의 주소)
- * @details
- * 
- * @param   | buffer | in | xbuffer * | 버퍼 객체 |
- */
 #define xbufferfront(buffer)    (buffer->data + buffer->position)
 
 /**
