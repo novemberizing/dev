@@ -34,4 +34,56 @@ extern int xlogfd(void);
 #define xobj_mask_allocated     0x80000000U
 #define xobj_mask_types         0x0000FFFFU
 
+/** BUFFER */
+
+#define xobj_type_buffer        0x0000FFFFU
+
+struct xbuffer;
+
+typedef struct xbuffer xbuffer;
+
+struct xbuffer
+{
+    xuint32 flags;
+
+    xbyte * data;
+    xuint64 position;
+    xuint64 size;
+    xuint64 capacity;
+};
+
+extern xbuffer * xbuffernew(xuint64 capacity);
+extern void * xbufferrem(void * p);
+
+/**
+ * @def     xbufferfront(buffer)
+ * @brief   버퍼 객체의 내부 데이터 주소 값 (사용한 후의 버퍼의 주소)
+ * @details
+ * 
+ * @param   | buffer | in | xbuffer * | 버퍼 객체 |
+ */
+#define xbufferfront(buffer)    (buffer->data + buffer->position)
+
+/**
+ * @def     xbufferback(buffer)
+ * @brief   버퍼 객체의 내부 데이터 주소 값 (사용하지 않은 버퍼의 주소)
+ * @details
+ * 
+ * @param   | buffer | in | xbuffer * | 버퍼 객체 |
+ */
+#define xbufferback(buffer)     (buffer->data + buffer->size)
+
+/**
+ * @def     xbufferremain(buffer)
+ * @brief   버퍼 객체의 남은 크기
+ * @details
+ * 
+ * @param   | buffer | in | xbuffer * | 버퍼 객체 |
+ */
+#define xbufferremain(buffer)   (buffer->capacity - buffer->size)
+
+/** THREAD ********************************************/
+
+extern unsigned long xthreadid(void);
+
 #endif // __NOVEMBERIZING_X__STD__H__
