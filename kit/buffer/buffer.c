@@ -1,31 +1,8 @@
 #include <stdio.h>
 
-#define xnil            (void *)(0)
+#include <x/std.h>
 
-#define xassertion(condition, format, ...) do {     \
-    if(condition) {                                 \
-        dprintf(xlogfd(), "[assertion] %s:%d "      \
-                          "%s:%lu => "              \
-                          format "\n",              \
-                          __FILE__, __LINE__,       \
-                          __func__, xthreadid(),    \
-                          ##__VA_ARGS__);           \
-    }                                               \
-} while(0)
-
-typedef __INT8_TYPE__   xint8;
-typedef __INT16_TYPE__  xint16;
-typedef __INT32_TYPE__  xint32;
-typedef __INT64_TYPE__  xint64;
-typedef __UINT8_TYPE__  xuint8;
-typedef __UINT16_TYPE__ xuint16;
-typedef __UINT32_TYPE__ xuint32;
-typedef __UINT64_TYPE__ xuint64;
-typedef unsigned char   xbyte;
-
-#define xobj_mask_allocated     0x80000000U
-
-#define xobj_type_buffer        0x00000001U
+#define xobj_type_buffer        0x0000FFFFU
 
 struct xbuffer;
 
@@ -46,6 +23,7 @@ extern xbuffer * xbuffernew(xuint64 capacity);
 
 int main(int argc, char ** argv)
 {
+    xlogfd();
     return 0;
 }
 
