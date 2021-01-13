@@ -18,6 +18,10 @@ typedef unsigned char       xbyte;
 #define xfalse          0
 #define xtrue           1
 
+/** HELPER */
+
+#define xaddressof(o)   (&o)
+
 extern int xlogfd(void);
 
 #define xassertion(condition, format, ...) do {     \
@@ -34,26 +38,67 @@ extern int xlogfd(void);
 #define xobj_mask_allocated     0x80000000U
 #define xobj_mask_types         0x0000FFFFU
 
+/** THREAD */
+
+#define xsynclock(sync)
+#define xsyncunlock(sync)
+
 /** DATA STRUCTURE */
 
-#define xqueuepush(queue, item) do {    \
-    if(queue->tail) {                   \
-        queue->tail->next = item;       \
-        item->prev = queue->tail;       \
-        queue->tail = item;             \
-    } else {                            \
-        queue->head = item;             \
-        queue->tail = item;             \
-    }                                   \
-    queue->size = queue->size + 1;      \
+// GENERIC CONTAINR
+#define xcontainerlock(container)   xsynclock(container->sync);
+#define xcontainerunlock(container) xsyncunlock(container->sync);
+
+// LIST
+
+#define xlistfront(collection)  (collection->head)
+#define xlistnext(item)         (item->next)
+#define xlistempty(collection)  (collection->size == 0)
+#define xlistsize(collection)   (collection->size)
+
+#define xlistpushback(collection, type, item) do {      \
+    type * real = item;                                 \
+    real->prev = collection->tail;                      \
+    if(real->prev) {                                    \
+        real->prev->next = real;                        \
+    } else {                                            \
+        collection->head = real;                        \
+    }                                                   \
+    collection->tail = real;                            \
+    collection->size = collection->size + 1;            \
 } while(0)
 
-#define xqueuepop(queue) queue->head, ( \
-    queue->head ? (queue->head = queue->head->next, queue->size = queue->size - 1) : xnil, \
-    queue->head ? (queue->head->prev = xnil, queue->tail = xnil) : xnil)
+#define xlistpopfront(collection, type, callback) do {  \
+    if(collection->head) {                              \
+        type * item = collection->head;                 \
+        collection->head = item->next;                  \
+        if(collection->head) {                          \
+            collection->head->prev = xnil;              \
+        } else {                                        \
+            collection->tail = xnil;                    \
+        }                                               \
+        collection->size = collection->size - 1;        \
+        item->next = xnil;                              \
+        if(callback) {                                  \
+            callback(item);                             \
+        }                                               \
+    }                                                   \
+} while(0)
 
-#define xqueuesize(queue)   queue->size
-#define xqueueempty(queue)  queue ? queue->size == 0 : xtrue
+#define xlisteach(collection, type, func) do {          \
+    for(type * item = xlistfront(collection);           \
+        item != xnil;                                   \
+        item = xlistnext(item)) {                       \
+        func(item);                                     \
+    }                                                   \
+} while(0);
+
+// TODO: CHECK OUT SECTION
+
+#define xqueuepush(collection, type, item)      xlistpushback(collection, type, item)
+#define xqueuepop(collection, type, callback)   xlistpopfront(collection, type, callback)
+#define xqueueempty(collection)                 xlistempty(collection)
+#define xqueuesize(collection)                  xlistsize(collection)
 
 /** BUFFER */
 

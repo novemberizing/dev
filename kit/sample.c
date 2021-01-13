@@ -1,51 +1,86 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <x/std.h>
 
-struct qitem
+struct queue;
+struct integer;
+
+typedef struct queue queue;
+typedef struct integer integer;
+
+struct queue
 {
-    struct qitem * next;
-    struct qitem * prev;
+    integer * head;
+    integer * tail;
+    xuint64 size;
+};
+
+struct integer
+{
+    integer * prev;
+    integer * next;
     int value;
 };
 
-extern struct qitem * qitemnew(int value)
+extern integer * integernew(int value)
 {
-    struct qitem * o = calloc(sizeof(struct qitem), 1);
+    printf("called\n");
+    integer * o = (integer *) calloc(sizeof(integer), 1);
     o->value = value;
     return o;
 }
 
-struct q
+
+#define xqueuepush(collection, type, item) do {     \
+    type * real = item;                             \
+    real->prev = collection->tail;                  \
+    if(real->prev) {                                \
+        real->prev->next = real;                    \
+    } else {                                        \
+        collection->head = real;                    \
+    }                                               \
+    collection->tail = real;                        \
+    collection->size = collection->size + 1;        \
+} while(0)
+
+#define xqueuepop(collection, type, callback) do {  \
+    if(collection->head) {                          \
+        type * item = collection->head;             \
+        collection->head = item->next;              \
+        if(collection->head) {                      \
+            collection->head->prev = xnil;          \
+        } else {                                    \
+            collection->tail = xnil;                \
+        }                                           \
+        collection->size = collection->size - 1;    \
+        item->next = xnil;                          \
+        callback(item);                             \
+    }                                               \
+} while(0)
+
+#define xqueueempty(collection) (collection->size == 0)
+
+static inline void integer_item_cb(integer * item) 
 {
-    struct qitem * head;
-    struct qitem * tail;
-    xuint64 size;
-};
-
-#ifdef xqueuepop
-#undef xqueuepop
-#endif 
-
-#define xqueuepop(queue)    queue->head, queue->head
-    
+    printf("%d\n", item->value);
+    free(item);
+}
 
 int main(int argc, char ** argv)
 {
-    struct q queue = { 0, };
+    srandom(time(xnil));
+    queue q = { 0, };
+    for(int i = 0; i < (int) random() % 64; i++) {
+        printf("count: %d\n", i);
+        xqueuepush(xaddressof(q), integer , integernew((int) random()));
+    }
+    
+    while(xqueueempty(xaddressof(q)) == xfalse) {
+        xqueuepop(xaddressof(q), integer, integer_item_cb);
+    }
 
-    struct q * p = &queue;
-
-    struct qitem * item = qitemnew(1);
-
-    xqueuepush(p, item);
-    // struct qitem * item = (p->head), (p->head);
-
-    item = xqueuepop(p);
-    printf("%lx\n", item);
-    free(item);
-    // printf("%lx\n", item);
-
+    
     return 0;
 }
