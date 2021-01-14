@@ -70,7 +70,7 @@ struct xeventengine
     xevents events;
     xeventgenerators generators;
     xeventprocessor processor;
-    xeventhandler customeventhandle;
+    xeventhandler customeventproc;
 };
 
 typedef void (*xgenerator_run_func)(xeventgenerator *, xeventengine *);
@@ -92,15 +92,19 @@ extern void xeventengine_plug_generator(xeventengine * o, xeventgenerator * gene
     xlistpushback(xaddressof(o->generators), xeventgenerator, generator);
 }
 
+extern void xeventengine_plug_handler(xeventengine * o, xeventhandler func) {
+    o->customeventproc = func;
+}
+
 #define xeventprocessor_run(engine) if(engine->processor) {     \
     engine->processor(engine);                                  \
 }
 
 static inline xevent * xeventengine_handle_custom(xevent * o, xeventengine * engine)
 {
-    if(engine->customeventhandle)
+    if(engine->customeventproc)
     {
-        return engine->customeventhandle(o, engine);
+        return engine->customeventproc(o, engine);
     }
     return xnil;
 }
@@ -212,12 +216,15 @@ extern xeventgenerator * xcustomgeneratornew()
     return (xeventgenerator *) o;
 }
 
-static inline void customeventhandle(xevent * o, xeventengine * engine)
+
+
+static inline xevent * customeventhandle(xevent * o, xeventengine * engine)
 {
     switch((o->type & xevent_mask_types))
     {
-        case custom_event_type_helloworld: printf("hello world"); break;
+        case custom_event_type_helloworld: printf("hello world"); free(o); break;
     }
+    return xnil;
 }
 
 int main(int argc, char ** argv)
