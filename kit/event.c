@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "event.h"
 
@@ -17,6 +18,19 @@ typedef struct xeventgenerators xeventgenerators;
 
 typedef void (*xeventprocessor)(xeventengine *);
 typedef xevent * (*xeventhandler)(xevent *, xeventengine *);
+
+#define xsignalmax      SIGRTMAX
+#define xsingalno(no)   (no)
+
+struct xsignalhandler {
+
+};
+
+// xsignals
+
+/**
+ * 
+ */
 
 #define xevent_mask_categories  0xFF000000U
 #define xevent_mask_types       0x0000FFFFU
@@ -64,6 +78,8 @@ struct xeventgenerators
     xuint64 size;
 };
 
+// typedef void (*xsignalhandler)(xeventhandler)
+
 struct xeventengine
 {
     xuint32 status;
@@ -71,6 +87,7 @@ struct xeventengine
     xeventgenerators generators;
     xeventprocessor processor;
     xeventhandler customeventproc;
+    xeventhandler * signalhandlers;
 };
 
 typedef void (*xgenerator_run_func)(xeventgenerator *, xeventengine *);
@@ -175,6 +192,8 @@ extern int xeventengine_run(xeventengine * o)
     xassertion(o->status != xeventengine_status_void, "");
     o->status |= xeventengine_status_on;
 
+    o->signalhandlers = calloc(sizeof(xeventhandler), xsignalmax);
+
     while((o->status & xeventengine_status_cancel) != xeventengine_status_cancel)
     {
         for(xeventgenerator * generator = xlistfront(xaddressof(o->generators)); generator != xnil; generator = xlistnext(generator))
@@ -182,6 +201,11 @@ extern int xeventengine_run(xeventengine * o)
             xeventgenerator_run(generator, o);
         }
         xeventprocessor_run(o);
+    }
+
+    if(o->signalhandlers)
+    {
+        free(o->signalhandlers);
     }
 
     o->status &= (~xeventengine_status_on);
@@ -216,8 +240,6 @@ extern xeventgenerator * xcustomgeneratornew()
     return (xeventgenerator *) o;
 }
 
-
-
 static inline xevent * customeventhandle(xevent * o, xeventengine * engine)
 {
     switch((o->type & xevent_mask_types))
@@ -227,14 +249,53 @@ static inline xevent * customeventhandle(xevent * o, xeventengine * engine)
     return xnil;
 }
 
+static inline void internal_signal_handler(int no, siginfo_t * info, void * data)
+{
+
+}
+
+extern void xeventengine_plug_singal_handler(xeventengine * o, int signal, xeventhandler handler) {
+    if(0 < signal && signal < xsignalmax)
+    {
+        o->signalhandlers[signal] = handler;
+        struct sigaction action = { 0, };
+        action.sa_sigaction = internal_signal_handler;
+        action.sa_flags = SA_SIGINFO;
+        sigaction(signal, &action, NULL);
+    }
+}
+
+#include <signal.h>
+
+#define xevent_signal_type_interrupt    SIGINT
+
+static xevent * custom_interrupt_signal_handler(xevent * o, xeventengine * engine)
+{
+    printf("engine: %p\n", o->engine);
+    printf("source: %p\n", o->source);
+    printf("type: %d\n", o->type);
+//    printf(o->)
+    return xnil;
+}
+
 int main(int argc, char ** argv)
 {
     xeventengine engine = { 0, };
+
+    /**
+     * set thread local data
+     */
+
     engine.processor = xeventprocessor_main;
     /**
      * 이벤트 제네레이터를 생성할 때, 핸들러도 넣을 수 있도록 하자.
      * xeventengine_plug(xaddressof(engine), xcustomgenerarornew(), xcustomhandlernew())
      */
+
+    xeventengine_plug_singal_handler(xaddressof(engine), xevent_signal_type_interrupt, custom_interrupt_signal_handler);
+    // xeventengine_add_signalevent_handler();
+
+
     xeventengine_plug_generator(xaddressof(engine), xcustomgeneratornew());
     xeventengine_plug_handler(xaddressof(engine), customeventhandle);
 //    xeventengine_plug_handler()
