@@ -240,7 +240,6 @@ static xint32 __xsync_mutex_wait(xsync * p, xuint64 nanosecond)
             xassertion(ret != xsuccess, "fail to pthread_cond_wait (%d)", ret);
         }
     }
-    
 }
 
 static xint32 __xsync_mutex_wakeup(xsync *p, xint32 all)

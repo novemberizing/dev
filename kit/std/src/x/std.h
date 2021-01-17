@@ -149,6 +149,29 @@ extern xsync * xsynccondoff(xsync * o);
 #define xsyncwait(sync, nanosecond)     (sync ? sync->wait(sync, nanosecond) : xsuccess)
 #define xsyncwakeup(sync, all)          (sync ? sync->wakeup(sync, all) : xsuccess)
 
+
+#define xobj_type_thread                0x00000003U
+
+struct xthread;
+
+typedef struct xthread xthread;
+
+typedef void * (*xthreadfunc)(xthread *);
+
+struct xthread
+{
+    xuint32 flags;
+    xdestructor destruct;
+
+    xobj * param;
+    xthreadfunc func;
+};
+
+extern xthread * xthreadnew(xthreadfunc func, xobj * param);
+extern void * xthreadrem(void * p);
+extern xthread * xthreadon(xthread * o);
+extern xthread * xthreadoff(xthread * o);
+
 // /** THREAD */
 
 // #define xsynctype(o)                (o->flags & xsync_mask_types)
