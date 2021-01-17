@@ -1,3 +1,7 @@
 
 
 IMPLEMENT THREAD LOCAL STORAGE
+
+스레드가 생성되지 않았을 때, MAIN 에서 COND 가 동작하지 않는다. (컴파일 시에 -lpthread) 를 추가하지 않았다.
+
+

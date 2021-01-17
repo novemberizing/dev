@@ -4,30 +4,22 @@
  * @details
  * 
  * @version 0.0.1
- * 
- * 로그 라이브러리는 업그레이드 할 필요가 있습니다.
- * 
- * 컨셉:
- * 
- * - 로그 레벨
- * - 스레드별 로그
- * - 아답터 개념 도입
  */
 
 #include <unistd.h>
 
 #include "std.h"
 
-static int __fd =  xinvalid;
+static xint32 __fd = xinvalid;
 
 /**
- * @fn      int xlogfd(void)
- * @brief   로그 파일 디스크립터를 리턴합니다.
+ * @fn      extern xint32 xlogfd(void)
+ * @brief   로그 파일 디스크럽터를 리턴합니다.
  * @details
  * 
- * @return  | int | 로그 파일 디스크립터 |
+ * @return  | xint32 | 로그 파일 디스크립터 |
  */
-int xlogfd(void)
+extern xint32 xlogfd(void)
 {
     return __fd > xinvalid ? __fd : STDOUT_FILENO;
 }
