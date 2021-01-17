@@ -177,6 +177,23 @@ extern void * xthreadrem(void * p);
 extern xthread * xthreadon(xthread * o);
 extern xthread * xthreadoff(xthread * o, xobj * (*cb)(xobj *));
 
+/** THREAD LOCAL */
+
+#define xobj_type_threadlocal       0x00000004U
+
+struct xthreadlocal;
+
+typedef struct xthreadlocal xthreadlocal;
+
+struct xthreadlocal
+{
+    xuint32 flags;
+    xdestructor xdestruct;
+};
+
+extern xthreadlocal * xthreadlocalnew(void);
+extern void * xthreadlocalrem(void * p);
+
 // /** THREAD */
 
 // #define xsynctype(o)                (o->flags & xsync_mask_types)
