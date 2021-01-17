@@ -27,6 +27,11 @@ struct __internal_mutex
     pthread_cond_t * cond;
 };
 
+struct __internal_thread
+{
+
+};
+
 static void * __xsync_none_rem(void * p);
 static xint32 __xsync_none_lock(xsync * o);
 static xint32 __xsync_none_unlock(xsync * o);
@@ -161,6 +166,15 @@ extern xsync * xsynccondoff(xsync * o)
     
     xassertion(xtrue, "unsupported type (%d)", xsynctype(o));
 }
+
+extern xthread * xthreadnew(xthreadfunc func, xobj * param)
+{
+
+}
+
+extern void * xthreadrem(void * p);
+extern xthread * xthreadon(xthread * o);
+extern xthread * xthreadoff(xthread * o);
 
 /** INTERNAL */
 
