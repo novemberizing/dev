@@ -63,6 +63,8 @@ struct xobj
     xdestructor destruct;
 };
 
+extern void * xobjrem(void * p);
+
 #define xobj_type_primitive 0x00000001U
 
 struct xprimitive
@@ -152,11 +154,13 @@ extern xsync * xsynccondoff(xsync * o);
 
 #define xobj_type_thread                0x00000003U
 
+#define xthread_mask_cancel             0x00800000U
+
 struct xthread;
 
 typedef struct xthread xthread;
 
-typedef void * (*xthreadfunc)(xthread *);
+typedef xobj * (*xthreadfunc)(xthread *);
 
 struct xthread
 {
@@ -165,12 +169,13 @@ struct xthread
 
     xobj * param;
     xthreadfunc func;
+    xobj * result;
 };
 
 extern xthread * xthreadnew(xthreadfunc func, xobj * param);
 extern void * xthreadrem(void * p);
 extern xthread * xthreadon(xthread * o);
-extern xthread * xthreadoff(xthread * o);
+extern xthread * xthreadoff(xthread * o, xobj * (*cb)(xobj *));
 
 // /** THREAD */
 

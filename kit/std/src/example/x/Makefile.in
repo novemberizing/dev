@@ -87,7 +87,8 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 noinst_PROGRAMS = novemberizing-x-example-sync$(EXEEXT) \
-	novemberizing-x-example-std$(EXEEXT)
+	novemberizing-x-example-std$(EXEEXT) \
+	novemberizing-x-example-thread$(EXEEXT)
 subdir = src/example/x
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -109,6 +110,11 @@ novemberizing_x_example_sync_OBJECTS =  \
 	$(am_novemberizing_x_example_sync_OBJECTS)
 novemberizing_x_example_sync_DEPENDENCIES =  \
 	$(top_srcdir)/src/x/libnovemberizing.a
+am_novemberizing_x_example_thread_OBJECTS = thread.$(OBJEXT)
+novemberizing_x_example_thread_OBJECTS =  \
+	$(am_novemberizing_x_example_thread_OBJECTS)
+novemberizing_x_example_thread_DEPENDENCIES =  \
+	$(top_srcdir)/src/x/libnovemberizing.a
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -124,7 +130,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/std.Po ./$(DEPDIR)/sync.Po
+am__depfiles_remade = ./$(DEPDIR)/std.Po ./$(DEPDIR)/sync.Po \
+	./$(DEPDIR)/thread.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -139,9 +146,11 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(novemberizing_x_example_std_SOURCES) \
-	$(novemberizing_x_example_sync_SOURCES)
+	$(novemberizing_x_example_sync_SOURCES) \
+	$(novemberizing_x_example_thread_SOURCES)
 DIST_SOURCES = $(novemberizing_x_example_std_SOURCES) \
-	$(novemberizing_x_example_sync_SOURCES)
+	$(novemberizing_x_example_sync_SOURCES) \
+	$(novemberizing_x_example_thread_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -259,6 +268,8 @@ novemberizing_x_example_sync_SOURCES = sync.c
 novemberizing_x_example_sync_LDADD = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
 novemberizing_x_example_std_SOURCES = std.c
 novemberizing_x_example_std_LDADD = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
+novemberizing_x_example_thread_SOURCES = thread.c
+novemberizing_x_example_thread_LDADD = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
 all: all-am
 
 .SUFFIXES:
@@ -304,6 +315,10 @@ novemberizing-x-example-sync$(EXEEXT): $(novemberizing_x_example_sync_OBJECTS) $
 	@rm -f novemberizing-x-example-sync$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(novemberizing_x_example_sync_OBJECTS) $(novemberizing_x_example_sync_LDADD) $(LIBS)
 
+novemberizing-x-example-thread$(EXEEXT): $(novemberizing_x_example_thread_OBJECTS) $(novemberizing_x_example_thread_DEPENDENCIES) $(EXTRA_novemberizing_x_example_thread_DEPENDENCIES) 
+	@rm -f novemberizing-x-example-thread$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(novemberizing_x_example_thread_OBJECTS) $(novemberizing_x_example_thread_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -312,6 +327,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -459,6 +475,7 @@ clean-am: clean-generic clean-noinstPROGRAMS mostlyclean-am
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/sync.Po
+	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -506,6 +523,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/sync.Po
+	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

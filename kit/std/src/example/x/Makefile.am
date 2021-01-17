@@ -1,11 +1,15 @@
 
 AM_CFLAGS = -I$(top_srcdir)/src
 
-noinst_PROGRAMS = novemberizing-x-example-sync  \
-                  novemberizing-x-example-std
+noinst_PROGRAMS = novemberizing-x-example-sync   \
+                  novemberizing-x-example-std    \
+                  novemberizing-x-example-thread
 
-novemberizing_x_example_sync_SOURCES = sync.c
-novemberizing_x_example_sync_LDADD   = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
+novemberizing_x_example_sync_SOURCES   = sync.c
+novemberizing_x_example_sync_LDADD     = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
 
-novemberizing_x_example_std_SOURCES  = std.c
-novemberizing_x_example_std_LDADD    = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
+novemberizing_x_example_std_SOURCES    = std.c
+novemberizing_x_example_std_LDADD      = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
+
+novemberizing_x_example_thread_SOURCES = thread.c
+novemberizing_x_example_thread_LDADD   = $(top_srcdir)/src/x/libnovemberizing.a -lpthread

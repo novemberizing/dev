@@ -29,7 +29,14 @@ struct __internal_mutex
 
 struct __internal_thread
 {
+    xuint32 flags;
+    xdestructor destruct;
 
+    xobj * param;
+    xthreadfunc func;
+    xobj * result;
+
+    pthread_t * id;
 };
 
 static void * __xsync_none_rem(void * p);
@@ -37,6 +44,43 @@ static xint32 __xsync_none_lock(xsync * o);
 static xint32 __xsync_none_unlock(xsync * o);
 static xint32 __xsync_none_wait(xsync * o, xuint64 nanosecond);
 static xint32 __xsync_none_wakeup(xsync *o, xint32 all);
+
+static void * __xsync_mutex_rem(void * p);
+static xint32 __xsync_mutex_lock(xsync * o);
+static xint32 __xsync_mutex_unlock(xsync * o);
+static xint32 __xsync_mutex_wait(xsync * o, xuint64 nanosecond);
+static xint32 __xsync_mutex_wakeup(xsync *o, xint32 all);
+
+static void * __internal_thread_routine(void * p)
+{
+    struct __internal_thread * o = (struct __internal_thread *) p;
+
+    o->result = o->func((xthread *) o);
+
+    return xnil;
+}
+
+static void * __xthread_internal_rem(void * p)
+{
+    struct __internal_thread * o = (struct __internal_thread *) p;
+
+    if(o->id)
+    {
+        void * result = xnil;
+        o->flags |= xthread_mask_cancel;
+        int ret = pthread_join(*o->id, &result);
+        xassertion(ret != xsuccess, "fail to pthread_join (%d)", ret);
+
+        xobjrem(o->result);
+        free(o->id);
+    }
+
+    xobjrem(o->param);
+    free(o);
+    o = xnil;
+    
+    return o;
+}
 
 static inline xsync * __xsync_none_new()
 {
@@ -51,12 +95,6 @@ static inline xsync * __xsync_none_new()
 
     return o;
 }
-
-static void * __xsync_mutex_rem(void * p);
-static xint32 __xsync_mutex_lock(xsync * o);
-static xint32 __xsync_mutex_unlock(xsync * o);
-static xint32 __xsync_mutex_wait(xsync * o, xuint64 nanosecond);
-static xint32 __xsync_mutex_wakeup(xsync *o, xint32 all);
 
 static inline xsync * __xsync_mutex_new(void)
 {
@@ -169,12 +207,69 @@ extern xsync * xsynccondoff(xsync * o)
 
 extern xthread * xthreadnew(xthreadfunc func, xobj * param)
 {
+    xassertion(func == xnil, "invalid paramter");
 
+    struct __internal_thread * o = (struct __internal_thread *) calloc(sizeof(struct __internal_thread), 1);
+
+    o->flags = xobj_mask_allocated | xobj_type_thread;
+    o->destruct = __xthread_internal_rem;
+    o->func = func;
+    o->param = param;
+
+    return (xthread *) o;
 }
 
-extern void * xthreadrem(void * p);
-extern xthread * xthreadon(xthread * o);
-extern xthread * xthreadoff(xthread * o);
+extern void * xthreadrem(void * p)
+{
+    xcheck(p == xnil, "invalid parameter");
+
+    if(p)
+    {
+        xassertion(xobjtype(p) != xobj_type_thread, "invalid object");
+
+        p = __xthread_internal_rem(p);
+    }
+
+    return p;
+}
+
+extern xthread * xthreadon(xthread * p)
+{
+    struct __internal_thread * o = (struct __internal_thread *) p;
+    xcheck(o->id, "thread is already created");
+
+    if(o->id == xnil)
+    {
+        xcheck(o->result, "old result is exist");
+        o->result = xobjrem(o->result);
+
+        o->id = calloc(sizeof(pthread_t), 1);
+        int ret = pthread_create(o->id, xnil, __internal_thread_routine, o);
+        xassertion(ret != xsuccess, "fail to pthread_create (%d)", ret);
+    }
+    return (xthread *) o;
+}
+extern xthread * xthreadoff(xthread * p, xobj * (*cb)(xobj *))
+{
+    struct __internal_thread * o = (struct __internal_thread *) p;
+    xcheck(o->id == xnil, "thread is already destroyed");
+
+    if(o->id)
+    {
+        void * result = xnil;
+        int ret = pthread_join(*o->id, &result);
+        xassertion(ret != xsuccess, "fail to pthread_join (%d)", ret);
+        if(cb)
+        {
+            o->result = cb(o->result);
+        }
+        o->result = xobjrem(o->result);
+        free(o->id);
+        o->id = xnil;
+    }
+
+    return p;
+}
 
 /** INTERNAL */
 

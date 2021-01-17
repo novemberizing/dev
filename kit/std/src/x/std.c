@@ -70,6 +70,21 @@ extern xuint64 xthreadid(void)
     return pthread_self();
 }
 
+extern void * xobjrem(void * p)
+{
+    xobj * o = (xobj *) p;
+
+    if(o)
+    {
+        if(o->destruct)
+        {
+            p = o->destruct(p);
+        }
+    }
+
+    return p;
+}
+
 extern xprimitive * xprimitivenew(xval v)
 {
     xprimitive * o = (xprimitive *) calloc(sizeof(xprimitive), 1);
