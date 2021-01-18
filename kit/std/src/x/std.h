@@ -1,7 +1,7 @@
 /**
  * @file    x/std.h
  * @brief   표준 라이브러리 헤더
- * @details
+ * @details 어플리케이션을 구현하기 위한 최소한의 라이브러리만 구현하는 소스입니다.
  * 
  * @version 0.0.1
  * 

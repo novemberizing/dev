@@ -45,11 +45,29 @@ static void check_simple_thread(int total)
     __internal_threads = xnil;
 }
 
+xobj * simple_one_thread_routine(xthread * o)
+{
+    printf("hello world\n");
+    return xnil;
+}
+
+static void check_simple_one_thread(int total)
+{
+    for(int i = 0; i < total; i++)
+    {
+        xthread * o = xthreadon(xthreadnew(simple_one_thread_routine, xnil));
+
+        xthreadrem(o);
+    }
+}
+
 int main(int argc, char ** argv)
 {
     xrandomon();
 
     check_simple_thread(xrandomgen() % 64);
+
+    check_simple_one_thread(xrandomgen() % 64);
 
     return 0;
 }
