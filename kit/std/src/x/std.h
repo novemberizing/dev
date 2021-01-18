@@ -2,6 +2,7 @@
  * @file    x/std.h
  * @brief   표준 라이브러리 헤더
  * @details 어플리케이션을 구현하기 위한 최소한의 라이브러리만 구현하는 소스입니다.
+ *          
  * 
  * @version 0.0.1
  * 
@@ -191,8 +192,10 @@ struct xthreadlocal
     xdestructor xdestruct;
 };
 
-extern xthreadlocal * xthreadlocalnew(void);
+extern xthreadlocal * xthreadlocalnew(void (*destructor)(void *));
 extern void * xthreadlocalrem(void * p);
+extern void * xthreadlocalget(xthreadlocal * o);
+extern void xthreadlocalset(xthreadlocal * o, void * data);
 
 // /** THREAD */
 

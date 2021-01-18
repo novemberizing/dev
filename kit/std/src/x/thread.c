@@ -134,13 +134,14 @@ extern xthread * xthreadoff(xthread * p, xobj * (*cb)(xobj *))
     return p;
 }
 
-extern xthreadlocal * xthreadlocalnew(void)
+extern xthreadlocal * xthreadlocalnew(void (*destructor)(void *))
 {
     struct __internal_thread_local * o = (struct __internal_thread_local *) calloc(sizeof(struct __internal_thread_local), 1);
 
     o->flags = xobj_mask_allocated | xobj_type_threadlocal;
     o->xdestruct = __internal_thread_local_rem;
-    pthread_key_create(&o->key, xnil);
+    int ret = pthread_key_create(&o->key, destructor);
+    xassertion(ret != xsuccess, "fail to pthread_key_create (%d)", ret);
 
     return (xthreadlocal *) o;
 }
@@ -155,6 +156,32 @@ extern void * xthreadlocalrem(void * p)
         p = __internal_thread_local_rem(p);
     }
     return p;
+}
+
+extern void * xthreadlocalget(xthreadlocal * p)
+{
+    struct __internal_thread_local * o = (struct __internal_thread_local *) p;
+    xcheck(o == xnil, "null pointer");
+
+    if(o)
+    {
+        return pthread_getspecific(o->key);
+    }
+
+    return xnil;
+}
+
+extern void xthreadlocalset(xthreadlocal * p, void * data)
+{
+    struct __internal_thread_local * o = (struct __internal_thread_local *) p;
+    xcheck(o == xnil, "null pointer");
+
+    if(o)
+    {
+        // TODO: CHECK OLD DATA
+        int ret = pthread_setspecific(o->key, data);
+        xassertion(ret != xsuccess, "fail to pthread_setspecific (%d)", ret);
+    }
 }
 
 /** INTERNAL */
