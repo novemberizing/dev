@@ -89,7 +89,8 @@ POST_UNINSTALL = :
 noinst_PROGRAMS = novemberizing-x-example-sync$(EXEEXT) \
 	novemberizing-x-example-std$(EXEEXT) \
 	novemberizing-x-example-thread$(EXEEXT) \
-	novemberizing-x-example-threadlocal$(EXEEXT)
+	novemberizing-x-example-threadlocal$(EXEEXT) \
+	novemberizing-x-example-buffer$(EXEEXT)
 subdir = src/example/x
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -101,6 +102,11 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
+am_novemberizing_x_example_buffer_OBJECTS = buffer.$(OBJEXT)
+novemberizing_x_example_buffer_OBJECTS =  \
+	$(am_novemberizing_x_example_buffer_OBJECTS)
+novemberizing_x_example_buffer_DEPENDENCIES =  \
+	$(top_srcdir)/src/x/libnovemberizing.a
 am_novemberizing_x_example_std_OBJECTS = std.$(OBJEXT)
 novemberizing_x_example_std_OBJECTS =  \
 	$(am_novemberizing_x_example_std_OBJECTS)
@@ -137,8 +143,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/std.Po ./$(DEPDIR)/sync.Po \
-	./$(DEPDIR)/thread.Po ./$(DEPDIR)/threadlocal.Po
+am__depfiles_remade = ./$(DEPDIR)/buffer.Po ./$(DEPDIR)/std.Po \
+	./$(DEPDIR)/sync.Po ./$(DEPDIR)/thread.Po \
+	./$(DEPDIR)/threadlocal.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -152,11 +159,13 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(novemberizing_x_example_std_SOURCES) \
+SOURCES = $(novemberizing_x_example_buffer_SOURCES) \
+	$(novemberizing_x_example_std_SOURCES) \
 	$(novemberizing_x_example_sync_SOURCES) \
 	$(novemberizing_x_example_thread_SOURCES) \
 	$(novemberizing_x_example_threadlocal_SOURCES)
-DIST_SOURCES = $(novemberizing_x_example_std_SOURCES) \
+DIST_SOURCES = $(novemberizing_x_example_buffer_SOURCES) \
+	$(novemberizing_x_example_std_SOURCES) \
 	$(novemberizing_x_example_sync_SOURCES) \
 	$(novemberizing_x_example_thread_SOURCES) \
 	$(novemberizing_x_example_threadlocal_SOURCES)
@@ -281,6 +290,8 @@ novemberizing_x_example_thread_SOURCES = thread.c
 novemberizing_x_example_thread_LDADD = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
 novemberizing_x_example_threadlocal_SOURCES = threadlocal.c
 novemberizing_x_example_threadlocal_LDADD = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
+novemberizing_x_example_buffer_SOURCES = buffer.c
+novemberizing_x_example_buffer_LDADD = $(top_srcdir)/src/x/libnovemberizing.a -lpthread
 all: all-am
 
 .SUFFIXES:
@@ -318,6 +329,10 @@ $(am__aclocal_m4_deps):
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
+novemberizing-x-example-buffer$(EXEEXT): $(novemberizing_x_example_buffer_OBJECTS) $(novemberizing_x_example_buffer_DEPENDENCIES) $(EXTRA_novemberizing_x_example_buffer_DEPENDENCIES) 
+	@rm -f novemberizing-x-example-buffer$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(novemberizing_x_example_buffer_OBJECTS) $(novemberizing_x_example_buffer_LDADD) $(LIBS)
+
 novemberizing-x-example-std$(EXEEXT): $(novemberizing_x_example_std_OBJECTS) $(novemberizing_x_example_std_DEPENDENCIES) $(EXTRA_novemberizing_x_example_std_DEPENDENCIES) 
 	@rm -f novemberizing-x-example-std$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(novemberizing_x_example_std_OBJECTS) $(novemberizing_x_example_std_LDADD) $(LIBS)
@@ -340,6 +355,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
@@ -489,7 +505,8 @@ clean: clean-am
 clean-am: clean-generic clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/std.Po
+		-rm -f ./$(DEPDIR)/buffer.Po
+	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/sync.Po
 	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f ./$(DEPDIR)/threadlocal.Po
@@ -538,7 +555,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/std.Po
+		-rm -f ./$(DEPDIR)/buffer.Po
+	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/sync.Po
 	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f ./$(DEPDIR)/threadlocal.Po

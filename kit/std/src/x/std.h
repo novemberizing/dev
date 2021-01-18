@@ -45,6 +45,8 @@ union xval
     void *  ptr;
 };
 
+#define xaddressof(o)       (&o)
+
 typedef void *              (*xdestructor)(void *);
 typedef void                (*xvalcb)(xval);
 
@@ -152,7 +154,6 @@ extern xsync * xsynccondoff(xsync * o);
 #define xsyncwait(sync, nanosecond)     (sync ? sync->wait(sync, nanosecond) : xsuccess)
 #define xsyncwakeup(sync, all)          (sync ? sync->wakeup(sync, all) : xsuccess)
 
-
 #define xobj_type_thread                0x00000003U
 
 #define xthread_mask_cancel             0x00800000U
@@ -197,51 +198,51 @@ extern void * xthreadlocalrem(void * p);
 extern void * xthreadlocalget(xthreadlocal * o);
 extern void xthreadlocalset(xthreadlocal * o, void * data);
 
-// /** THREAD */
+/** BUFFER */
 
-// #define xsynctype(o)                (o->flags & xsync_mask_types)
+/**
+ * 버퍼는 업그레이드를 고민하자.
+ * 일단 간단하게 짜자.
+ * 모든 것을 커스터마이징 하는 것은 좋지 않다.
+ */
 
-// #define xsynclock(sync)             (sync ? sync->lock(sync) : xsuccess)
-// #define xsyncunlock(sync)           (sync ? sync->unlock(sync) : xsuccess)
-// #define xsyncwait(sync, nanosecond) (sync ? sync->wait(sync, nanosecond) : xsuccess)
-// #define xsyncwakeup(sync, all)      (sync ? sync->wakeup(sync, all) : xsuccess)
+#define xobj_type_buffer            0x00000005U
 
-// extern xuint64 xthreadid(void);
+struct xbuffer;
 
-// extern xsync * xsyncnew(xuint32 type);
-// extern void * xsyncrem(void * p);
+typedef struct xbuffer xbuffer;
 
-// extern xsync * xsyncon(xsync * p);
-// extern xsync * xsyncoff(xsync * p);
-// extern xsync * xcondon(xsync * p);
-// extern xsync * xcondoff(xsync * p);
+struct xbuffer
+{
+    xuint32 flags;
+    xdestructor destruct;
 
-// #define xobj_type_thread            0x00000003U
+    xbyte * data;
 
-// #define xthread_mask_status         0x00FF0000U
+    xuint64 capacity;
+    xuint64 size;
+    xuint64 position;
+};
 
-// #define xthread_status_cancel       0x00800000U
+/**
+ * TODO: 버퍼가 존재하지 않으면 0 이 아닌 MAX_UINT64 를 출력하자.
+ * XINVALID 가 정상적으로 동작할까?
+ */
 
-// struct xthread;
+#define xbufferfront(buffer)        ((buffer && buffer->data) ? buffer->data + buffer->position : xnil)
+#define xbufferback(buffer)         ((buffer && buffer->data) ? buffer->data + buffer->size : xnil)
+#define xbuffersize(buffer)         (buffer ? buffer->size : xinvalid)
+#define xbuffercapacity(buffer)     (buffer ? buffer->capacity : xinvalid)
+#define xbufferposition(buffer)     (buffer ? buffer->position : xinvalid)
 
-// typedef struct xthread xthread;
+#define xbufferinit(capacity)       { xobj_type_buffer, xbufferrem, malloc(capacity), capacity, 0, 0 }
 
-// typedef void * (*xthreadfunc)(xthread *);
+extern xbuffer * xbuffernew(xuint64 capacity);
+extern void * xbufferrem(void  * p);
 
-// struct xthread
-// {
-//     xuint32 flags;
-//     xdestructor destruct;
-
-//     xval * param;
-
-//     xthreadfunc func;
-// };
-
-// extern xthread * xthreadnew(xthreadfunc func, xval * param);
-// extern void * xthreadrem(void * p);
-
-// extern xthread * xthreadon(xthread * p);
-// extern xthread * xthreadoff(xthread * p, xvalcb cb);
+/**
+ * 딱히 마음에 드는 함수 이름이 없어서
+ * RECAPACITY 같은 경우 나중에 구현한다.
+ */
 
 #endif // __NOVEMBERIZING_X__STD__H__
