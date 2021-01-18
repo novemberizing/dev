@@ -235,7 +235,7 @@ struct xbuffer
 #define xbuffercapacity(buffer)     (buffer ? buffer->capacity : xinvalid)
 #define xbufferposition(buffer)     (buffer ? buffer->position : xinvalid)
 
-#define xbufferinit(capacity)       { xobj_type_buffer, xbufferrem, malloc(capacity), capacity, 0, 0 }
+#define xbufferinit(capacity)       (xbuffer) { xobj_type_buffer, xbufferrem, malloc(capacity), capacity, 0, 0 }
 
 extern xbuffer * xbuffernew(xuint64 capacity);
 extern void * xbufferrem(void  * p);
@@ -244,5 +244,45 @@ extern void * xbufferrem(void  * p);
  * 딱히 마음에 드는 함수 이름이 없어서
  * RECAPACITY 같은 경우 나중에 구현한다.
  */
+
+/** DATA STRUCTURE */
+
+// #define xobj_type_buffer            0x00000005U
+#define xobj_type_list              0x00000006U
+
+struct xlist;
+struct xlistnode;
+
+typedef struct xlist xlist;
+typedef struct xlistnode xlistnode;
+
+struct xlistnode
+{
+    xlistnode * prev;
+    xlistnode * next;
+    xval        value;
+};
+
+struct xlist
+{
+    xuint64     flags;
+    xdestructor destruct;
+
+    xlistnode * head;
+    xlistnode * tail;
+    xuint64     size;
+};
+
+#define xlistinit()     (xlist) { xobj_type_list, xlistrem, xnil, xnil, 0 }
+
+extern xlist * xlistnew(void);
+extern void * xlistrem(void * p);
+
+extern void xlistclear(xlist * o, xvalcb cb);
+extern void xlistpush(xlist * o, xval v);
+extern void xlistpop(xlist * o, xvalcb cb);
+
+
+#define xlistsize(list)    (list ? list->size : xinvalid)
 
 #endif // __NOVEMBERIZING_X__STD__H__

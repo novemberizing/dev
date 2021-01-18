@@ -8,4 +8,5 @@ libnovemberizing_a_SOURCES = std.c    \
                              sync.c   \
                              thread.c \
                              signal.c \
-                             buffer.c
+                             buffer.c \
+                             list.c
