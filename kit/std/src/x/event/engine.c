@@ -97,7 +97,7 @@ extern xint32 xeventenginerun(xeventengine * o)
 
         // TODO: PLUG EVENT GENERATOR
 
-        while(o->status & xeventengine_status_cancel != xeventengine_status_cancel)
+        while((o->status & xeventengine_status_cancel) != xeventengine_status_cancel)
         {
             for(xlistnode * node = xlistfront(xaddressof(o->generators)); node != xnil; node = xlistnodenext(node))
             {

@@ -60,6 +60,8 @@ struct xeventengine
 
 extern xeventengine * xeventenginenew(void);
 
+#define xeventengine_internal_func(engine, func)  (engine->internal = func)
+
 extern xint32 xeventenginerun(xeventengine * o);
 
 #define xeventenginecancel(o)   (o->status |= xeventengine_status_cancel)
