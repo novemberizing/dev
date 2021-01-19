@@ -225,15 +225,16 @@ struct xbuffer
 };
 
 /**
- * TODO: 버퍼가 존재하지 않으면 0 이 아닌 MAX_UINT64 를 출력하자.
+ * TODO: 버퍼가 존재하지 않으면 0 이 아닌 MAX_UINT64 를 출력하자. 역시 0 이다.
+ * 
  * XINVALID 가 정상적으로 동작할까?
  */
 
 #define xbufferfront(buffer)        ((buffer && buffer->data) ? buffer->data + buffer->position : xnil)
 #define xbufferback(buffer)         ((buffer && buffer->data) ? buffer->data + buffer->size : xnil)
-#define xbuffersize(buffer)         (buffer ? buffer->size : xinvalid)
-#define xbuffercapacity(buffer)     (buffer ? buffer->capacity : xinvalid)
-#define xbufferposition(buffer)     (buffer ? buffer->position : xinvalid)
+#define xbuffersize(buffer)         (buffer ? buffer->size : 0)
+#define xbuffercapacity(buffer)     (buffer ? buffer->capacity : 0)
+#define xbufferposition(buffer)     (buffer ? buffer->position : 0)
 
 #define xbufferinit(capacity)       (xbuffer) { xobj_type_buffer, xbufferrem, malloc(capacity), capacity, 0, 0 }
 
@@ -271,9 +272,15 @@ struct xlist
     xlistnode * head;
     xlistnode * tail;
     xuint64     size;
+    xsync *     sync;
 };
 
-#define xlistinit()     (xlist) { xobj_type_list, xlistrem, xnil, xnil, 0 }
+#define xlistinit()         (xlist) { xobj_type_list, xlistrem, xnil, xnil, 0 }
+#define xlistfront(list)    (list ? list->head : xnil)
+
+#define xlistsize(list)     (list ? list->size : 0)
+
+#define xlistnodenext(node) (node ? node->next : xnil)
 
 extern xlist * xlistnew(void);
 extern void * xlistrem(void * p);
@@ -283,6 +290,6 @@ extern void xlistpush(xlist * o, xval v);
 extern void xlistpop(xlist * o, xvalcb cb);
 
 
-#define xlistsize(list)    (list ? list->size : xinvalid)
+
 
 #endif // __NOVEMBERIZING_X__STD__H__

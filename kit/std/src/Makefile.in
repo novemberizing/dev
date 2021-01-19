@@ -297,7 +297,9 @@ top_srcdir = @top_srcdir@
 SUBDIRS = x       \
           example
 
-nobase_include_HEADERS = x/std.h
+nobase_include_HEADERS = x/std.h    \
+                         x/event.h
+
 all: all-recursive
 
 .SUFFIXES:
