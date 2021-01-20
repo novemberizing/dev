@@ -139,7 +139,7 @@ libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_DEPENDENCIES = event/libnovemberizing-event.a
 am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) log.$(OBJEXT) \
 	sync.$(OBJEXT) thread.$(OBJEXT) signal.$(OBJEXT) \
-	buffer.$(OBJEXT) list.$(OBJEXT)
+	buffer.$(OBJEXT) list.$(OBJEXT) net.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -157,8 +157,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/buffer.Po ./$(DEPDIR)/list.Po \
-	./$(DEPDIR)/log.Po ./$(DEPDIR)/signal.Po ./$(DEPDIR)/std.Po \
-	./$(DEPDIR)/sync.Po ./$(DEPDIR)/thread.Po
+	./$(DEPDIR)/log.Po ./$(DEPDIR)/net.Po ./$(DEPDIR)/signal.Po \
+	./$(DEPDIR)/std.Po ./$(DEPDIR)/sync.Po ./$(DEPDIR)/thread.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -378,7 +378,8 @@ libnovemberizing_a_SOURCES = std.c    \
                              thread.c \
                              signal.c \
                              buffer.c \
-                             list.c
+                             list.c   \
+                             net.c
 
 libnovemberizing_a_LIBADD = event/libnovemberizing-event.a
 all: all-recursive
@@ -460,6 +461,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
@@ -702,6 +704,7 @@ distclean: distclean-recursive
 		-rm -f ./$(DEPDIR)/buffer.Po
 	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/log.Po
+	-rm -f ./$(DEPDIR)/net.Po
 	-rm -f ./$(DEPDIR)/signal.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/sync.Po
@@ -754,6 +757,7 @@ maintainer-clean: maintainer-clean-recursive
 		-rm -f ./$(DEPDIR)/buffer.Po
 	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/log.Po
+	-rm -f ./$(DEPDIR)/net.Po
 	-rm -f ./$(DEPDIR)/signal.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/sync.Po

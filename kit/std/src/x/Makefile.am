@@ -12,6 +12,7 @@ libnovemberizing_a_SOURCES = std.c    \
                              thread.c \
                              signal.c \
                              buffer.c \
-                             list.c
+                             list.c   \
+                             net.c
 
 libnovemberizing_a_LIBADD  = event/libnovemberizing-event.a

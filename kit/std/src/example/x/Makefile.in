@@ -94,6 +94,7 @@ noinst_PROGRAMS = novemberizing-x-example-sync$(EXEEXT) \
 	novemberizing-x-example-threadlocal$(EXEEXT) \
 	novemberizing-x-example-buffer$(EXEEXT) \
 	novemberizing-x-example-list$(EXEEXT) \
+	novemberizing-x-example-net$(EXEEXT) \
 	novemberizing-x-example-event$(EXEEXT)
 subdir = src/example/x
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -129,6 +130,12 @@ am_novemberizing_x_example_list_OBJECTS = list.$(OBJEXT)
 novemberizing_x_example_list_OBJECTS =  \
 	$(am_novemberizing_x_example_list_OBJECTS)
 novemberizing_x_example_list_DEPENDENCIES =  \
+	$(top_srcdir)/src/x/event/libnovemberizing-event.a \
+	$(top_srcdir)/src/x/libnovemberizing.a
+am_novemberizing_x_example_net_OBJECTS = net.$(OBJEXT)
+novemberizing_x_example_net_OBJECTS =  \
+	$(am_novemberizing_x_example_net_OBJECTS)
+novemberizing_x_example_net_DEPENDENCIES =  \
 	$(top_srcdir)/src/x/event/libnovemberizing-event.a \
 	$(top_srcdir)/src/x/libnovemberizing.a
 am_novemberizing_x_example_std_OBJECTS = std.$(OBJEXT)
@@ -172,8 +179,9 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/buffer.Po ./$(DEPDIR)/event.Po \
-	./$(DEPDIR)/list.Po ./$(DEPDIR)/std.Po ./$(DEPDIR)/sync.Po \
-	./$(DEPDIR)/thread.Po ./$(DEPDIR)/threadlocal.Po
+	./$(DEPDIR)/list.Po ./$(DEPDIR)/net.Po ./$(DEPDIR)/std.Po \
+	./$(DEPDIR)/sync.Po ./$(DEPDIR)/thread.Po \
+	./$(DEPDIR)/threadlocal.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -196,6 +204,7 @@ am__v_CCLD_1 =
 SOURCES = $(novemberizing_x_example_buffer_SOURCES) \
 	$(novemberizing_x_example_event_SOURCES) \
 	$(novemberizing_x_example_list_SOURCES) \
+	$(novemberizing_x_example_net_SOURCES) \
 	$(novemberizing_x_example_std_SOURCES) \
 	$(novemberizing_x_example_sync_SOURCES) \
 	$(novemberizing_x_example_thread_SOURCES) \
@@ -203,6 +212,7 @@ SOURCES = $(novemberizing_x_example_buffer_SOURCES) \
 DIST_SOURCES = $(novemberizing_x_example_buffer_SOURCES) \
 	$(novemberizing_x_example_event_SOURCES) \
 	$(novemberizing_x_example_list_SOURCES) \
+	$(novemberizing_x_example_net_SOURCES) \
 	$(novemberizing_x_example_std_SOURCES) \
 	$(novemberizing_x_example_sync_SOURCES) \
 	$(novemberizing_x_example_thread_SOURCES) \
@@ -364,6 +374,8 @@ novemberizing_x_example_list_SOURCES = list.c
 novemberizing_x_example_list_LDADD = $(top_srcdir)/src/x/event/libnovemberizing-event.a $(top_srcdir)/src/x/libnovemberizing.a -lpthread
 novemberizing_x_example_event_SOURCES = event.c
 novemberizing_x_example_event_LDADD = $(top_srcdir)/src/x/event/libnovemberizing-event.a $(top_srcdir)/src/x/libnovemberizing.a -lpthread
+novemberizing_x_example_net_SOURCES = net.c
+novemberizing_x_example_net_LDADD = $(top_srcdir)/src/x/event/libnovemberizing-event.a $(top_srcdir)/src/x/libnovemberizing.a -lpthread
 all: all-am
 
 .SUFFIXES:
@@ -419,6 +431,10 @@ novemberizing-x-example-list$(EXEEXT): $(novemberizing_x_example_list_OBJECTS) $
 	@rm -f novemberizing-x-example-list$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(novemberizing_x_example_list_OBJECTS) $(novemberizing_x_example_list_LDADD) $(LIBS)
 
+novemberizing-x-example-net$(EXEEXT): $(novemberizing_x_example_net_OBJECTS) $(novemberizing_x_example_net_DEPENDENCIES) $(EXTRA_novemberizing_x_example_net_DEPENDENCIES) 
+	@rm -f novemberizing-x-example-net$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(novemberizing_x_example_net_OBJECTS) $(novemberizing_x_example_net_LDADD) $(LIBS)
+
 novemberizing-x-example-std$(EXEEXT): $(novemberizing_x_example_std_OBJECTS) $(novemberizing_x_example_std_DEPENDENCIES) $(EXTRA_novemberizing_x_example_std_DEPENDENCIES) 
 	@rm -f novemberizing-x-example-std$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(novemberizing_x_example_std_OBJECTS) $(novemberizing_x_example_std_LDADD) $(LIBS)
@@ -444,6 +460,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
@@ -610,6 +627,7 @@ distclean: distclean-am
 		-rm -f ./$(DEPDIR)/buffer.Po
 	-rm -f ./$(DEPDIR)/event.Po
 	-rm -f ./$(DEPDIR)/list.Po
+	-rm -f ./$(DEPDIR)/net.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/sync.Po
 	-rm -f ./$(DEPDIR)/thread.Po
@@ -662,6 +680,7 @@ maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/buffer.Po
 	-rm -f ./$(DEPDIR)/event.Po
 	-rm -f ./$(DEPDIR)/list.Po
+	-rm -f ./$(DEPDIR)/net.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/sync.Po
 	-rm -f ./$(DEPDIR)/thread.Po

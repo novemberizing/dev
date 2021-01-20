@@ -9,6 +9,7 @@ noinst_PROGRAMS = novemberizing-x-example-sync          \
                   novemberizing-x-example-threadlocal   \
                   novemberizing-x-example-buffer        \
                   novemberizing-x-example-list          \
+                  novemberizing-x-example-net           \
                   novemberizing-x-example-event
 
 novemberizing_x_example_sync_SOURCES        = sync.c
@@ -32,3 +33,5 @@ novemberizing_x_example_list_LDADD          = $(top_srcdir)/src/x/event/libnovem
 novemberizing_x_example_event_SOURCES       = event.c
 novemberizing_x_example_event_LDADD         = $(top_srcdir)/src/x/event/libnovemberizing-event.a $(top_srcdir)/src/x/libnovemberizing.a -lpthread
 
+novemberizing_x_example_net_SOURCES         = net.c
+novemberizing_x_example_net_LDADD           = $(top_srcdir)/src/x/event/libnovemberizing-event.a $(top_srcdir)/src/x/libnovemberizing.a -lpthread

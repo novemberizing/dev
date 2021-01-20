@@ -109,6 +109,10 @@ static void __xeventengine_internal_signal_handler(int no, siginfo_t * info, voi
     }
 }
 
+/**
+ * TODO: 사용자가 변경하지 못하도록 하자.
+ * 
+ */
 extern xthreadlocal * xeventenginethreadlocal(void)
 {
     return __threadlocal;
