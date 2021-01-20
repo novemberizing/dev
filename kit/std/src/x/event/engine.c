@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "../event.h"
+
+#define xsignalmax  _NSIG       /**!< only for signal (linux) */
 
 static inline xevent * __xevent_internal_process_io(xevent * event, xeventengine * o)
 {
@@ -85,6 +88,11 @@ static inline void __xeventengine_main_consume(xeventengine * o)
     xsyncunlock(o->queue.sync);
 }
 
+static void __xeventengine_internal_signal_handler(int no, siginfo_t * info, void * data)
+{
+    printf("signal %d\n", no);
+}
+
 extern xint32 xeventenginerun(xeventengine * o)
 {
     xcheck(o == xnil, "null pointer");
@@ -134,6 +142,67 @@ extern xeventengine * xeventenginenew(void)
     o->processors = xlistinit();
     o->queue = xlistinit();
     o->status = xeventengine_allocated;
+    o->signals = calloc(sizeof(xeventsignalhandler), xsignalmax);
 
     return o;
+}
+
+extern void xeventengine_signal_handler_del(xeventengine * o, xint32 no)
+{
+    xcheck(o == xnil, "null pointer");
+
+    if(o && o->signals[no])
+    {
+        o->signals[no] = xnil;
+
+        struct sigaction action = { 0, };
+
+        action.sa_handler = SIG_DFL;
+
+        if(sigaction(no, &action, xnil) != xsuccess)
+        {
+            xassertion(xtrue, "fail to sigaction (%d)", errno);
+        }
+    }
+}
+
+extern void xeventengine_signal_handler_set(xeventengine * o, xint32 no, xeventsignalhandler handler)
+{
+    xcheck(o == xnil, "null pointer");
+
+    if(o)
+    {
+        xassertion(xsignalmax <= no, "not supported signal");
+        xcheck(o->signals[no] != xnil, "replace signal hanadler");
+
+        if(o->signals[no])
+        {
+            o->signals[no] = handler;
+            if(o->signals[no] == xnil)
+            {
+                struct sigaction action = { 0, };
+
+                action.sa_handler = SIG_DFL;
+
+                if(sigaction(no, &action, xnil) != xsuccess)
+                {
+                    xassertion(xtrue, "fail to sigaction (%d)", errno);
+                }
+            }
+        }
+        else if(handler)
+        {
+            o->signals[no] = handler;
+
+            struct sigaction action = { 0, };
+
+            action.sa_flags = SA_NODEFER | SA_SIGINFO;
+            action.sa_sigaction = __xeventengine_internal_signal_handler;
+
+            if(sigaction(no, &action, xnil) != xsuccess)
+            {
+                xassertion(xtrue, "fail to sigaction (%d)", errno);
+            }
+        }
+    }
 }

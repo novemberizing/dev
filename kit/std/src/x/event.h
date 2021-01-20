@@ -11,6 +11,8 @@ typedef struct xevent xevent;
 typedef struct xeventgenerator xeventgenerator;
 typedef struct xeventengine xeventengine;
 
+typedef void (*xeventsignalhandler)(void);
+
 #define xevent_mask_categories                  0xFF000000U
 #define xevent_mask_types                       0x0000FFFFU
 
@@ -54,6 +56,7 @@ struct xeventengine
     xlist queue;
     xlist processors;
     xevent * (*handler)(xevent *, xeventengine *);
+    xeventsignalhandler * signals;
 };
 
 #define xeventengineinit()  (xeventengine) { 0, xlistinit(), xnil, xlistinit(), xlistinit(), xnil }
@@ -61,6 +64,9 @@ struct xeventengine
 extern xeventengine * xeventenginenew(void);
 
 #define xeventengine_internal_func(engine, func)  (engine->internal = func)
+
+extern void xeventengine_signal_handler_set(xeventengine * o, xint32 no, xeventsignalhandler handler);
+extern void xeventengine_signal_handler_del(xeventengine * o, xint32 no);
 
 extern xint32 xeventenginerun(xeventengine * o);
 
