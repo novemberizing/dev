@@ -4,14 +4,16 @@
 #include <x/std.h>
 
 struct xevent;
+struct xeventobj;
 struct xeventgenerator;
 struct xeventengine;
 
 typedef struct xevent xevent;
+typedef struct xeventobj xeventobj;
 typedef struct xeventgenerator xeventgenerator;
 typedef struct xeventengine xeventengine;
 
-typedef void (*xeventsignalhandler)(void);
+typedef void (*xeventsignalhandler)(xint32, xint32, xeventobj *, void *, xeventgenerator *, xeventengine *);
 
 #define xevent_mask_categories                  0xFF000000U
 #define xevent_mask_types                       0x0000FFFFU
@@ -59,7 +61,16 @@ struct xeventengine
     xeventsignalhandler * signals;
 };
 
+struct xeventobj
+{
+
+};
+
 #define xeventengineinit()  (xeventengine) { 0, xlistinit(), xnil, xlistinit(), xlistinit(), xnil }
+
+extern void xeventengineon(void);
+
+extern xthreadlocal * xeventenginethreadlocal(void);
 
 extern xeventengine * xeventenginenew(void);
 

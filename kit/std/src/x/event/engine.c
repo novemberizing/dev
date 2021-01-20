@@ -7,6 +7,8 @@
 
 #define xsignalmax  _NSIG       /**!< only for signal (linux) */
 
+static xthreadlocal * __threadlocal = xnil;
+
 static inline xevent * __xevent_internal_process_io(xevent * event, xeventengine * o)
 {
     return xnil;
@@ -90,18 +92,55 @@ static inline void __xeventengine_main_consume(xeventengine * o)
 
 static void __xeventengine_internal_signal_handler(int no, siginfo_t * info, void * data)
 {
+    xcheck(__threadlocal == xnil, "thread local not created");
+    
     printf("signal %d\n", no);
+    // HOW TO DETECT 
+    if(__threadlocal)
+    {
+        xeventengine * o = (xeventengine *) xthreadlocalget(__threadlocal);
+        xassertion(o == xnil, "engine is registered in thread local");
+
+        xeventsignalhandler handler = o->signals[no];
+        xcheck(handler == xnil, "already removed signal(%d) handler", no);
+
+        if(handler)
+        {
+            handler(xevent_category_signal, no, xnil, info->si_value.sival_ptr, xnil, o);
+        }
+    }
+}
+
+extern xthreadlocal * xeventenginethreadlocal(void)
+{
+    return __threadlocal;
+}
+
+extern void xeventengineon(void)
+{
+    if(__threadlocal == xnil)
+    {
+        xrandomon();
+
+        __threadlocal = xthreadlocalnew(xnil);
+    }
 }
 
 extern xint32 xeventenginerun(xeventengine * o)
 {
     xcheck(o == xnil, "null pointer");
+    
+    xassertion(__threadlocal == xnil, "thread local not created");
 
     if(o)
     {
+        xcheck(xtrue, "%p", o);
+        
         xassertion(xeventenginestatus(o) != xeventengine_status_void, "engine is already running");
-
+        xassertion(xthreadlocalget(__threadlocal), "already running");
         o->status |= xeventengine_status_on;
+
+        xthreadlocalset(__threadlocal, o);
 
         // TODO: PLUG EVENT GENERATOR
 
@@ -121,6 +160,17 @@ extern xint32 xeventenginerun(xeventengine * o)
             }
         }
         // TODO: 모든 이벤트를 종료합니다.
+
+        // 모든 시그널 이벤트 핸들러 제거
+        for(xint32 i = 0; i < xsignalmax; i++)
+        {
+            if(o->signals[i])
+            {
+                xeventengine_signal_handler_del(o, i);
+            }
+        }
+        // 현재 등록된 스레드 로컬 엔진 제거
+        xthreadlocalset(__threadlocal, xnil);
         o->status &= (~xeventengine_status_on);
 
         if(xeventengineallocated(o))
