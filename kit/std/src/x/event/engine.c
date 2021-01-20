@@ -94,8 +94,6 @@ static void __xeventengine_internal_signal_handler(int no, siginfo_t * info, voi
 {
     xcheck(__threadlocal == xnil, "thread local not created");
     
-    printf("signal %d\n", no);
-    // HOW TO DETECT 
     if(__threadlocal)
     {
         xeventengine * o = (xeventengine *) xthreadlocalget(__threadlocal);
@@ -135,7 +133,7 @@ extern xint32 xeventenginerun(xeventengine * o)
     if(o)
     {
         xcheck(xtrue, "%p", o);
-        
+
         xassertion(xeventenginestatus(o) != xeventengine_status_void, "engine is already running");
         xassertion(xthreadlocalget(__threadlocal), "already running");
         o->status |= xeventengine_status_on;
