@@ -37,6 +37,10 @@ typedef union xval          xval;
 typedef struct xobj         xobj;
 typedef struct xprimitive   xprimitive;
 
+extern void * xdup(const void * data, xuint64 len);
+extern void * xfree(void * o);
+extern void * xcopy(void * destination, const void * source, xuint64 sourcelen, xint32 reallocate);
+
 union xval
 {
     xint32  i32;

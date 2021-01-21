@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <string.h>
+#include <errno.h>
 
 #include "std.h"
 
@@ -111,4 +113,53 @@ extern void * xprimitiverem(void * p)
     }
 
     return p;
+}
+
+extern void * xfree(void * o)
+{
+    if(o)
+    {
+        free(o);
+    }
+    return xnil;
+}
+
+extern void * xdup(const void * data, xuint64 len)
+{
+    if(data && len)
+    {
+        void * o = malloc(len);
+        xassertion(o == xnil, "fail to malloc (%d)", errno);
+        memcpy(o, data, len);
+        return o;
+    }
+
+    xassertion(data == xnil && len > 0, "invalid parametete");
+
+    return xnil;
+}
+
+extern void * xcopy(void * destination, const void * source, xuint64 sourcelen, xint32 reallocate)
+{
+    if(sourcelen > 0)
+    {
+        xassertion(source == xnil, "invalid parameter");
+
+        destination = reallocate ? (destination ? realloc(destination, sourcelen) : malloc(sourcelen)) : destination;
+        xassertion(destination == xnil, "fail to realloc (%d)", errno);
+        memcpy(destination, source, sourcelen);
+    }
+    else
+    {
+        if(destination)
+        {
+            free(destination);
+            destination = xnil;
+        }
+    }
+    return destination;
+
+    // destination = reallocate ? realloc(destination, sourcelen) : destination;
+
+    // return destination;
 }
