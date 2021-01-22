@@ -173,3 +173,12 @@ extern xint32 xsocket_nonblock_off(xsocket * o)
     }
     return xfail;
 }
+
+extern xuint32 xsocketwait(xsocket * o, xuint32 mask, xuint64 unisecond)
+{
+    if(o)
+    {
+        return xdescriptorwait(xaddressof(o->descriptor), mask, unisecond);
+    }
+    return xfail;
+}

@@ -21,10 +21,16 @@ union xdescriptor
 
 #define xdescriptorinit()               (xdescriptor) { .f = 0 }
 
+#define xdescriptor_event_read          0x00000001U
+#define xdescriptor_event_write         0x00000002U
+#define xdescriptor_event_except        0x00000004U
+
 extern xint32 xdescriptoralive(const xdescriptor * o);
 
 extern xint32 xdescriptor_nonblock_on(xdescriptor * o);
 extern xint32 xdescriptor_nonblock_off(xdescriptor * o);
+
+extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 unisecond);
 
 extern xint32 xdescriptorclose(xdescriptor * o);
 
@@ -32,6 +38,10 @@ extern xint32 xdescriptorclose(xdescriptor * o);
 
 #define xsocket_masks                   0x00FF0000U
 #define xsocket_mask_nonblock           0x00010000U
+
+#define xsocket_event_read              xdescriptor_event_read
+#define xsocket_event_write             xdescriptor_event_write
+#define xsocket_event_except            xdescriptor_event_except
 
 struct xsocket
 {
@@ -61,6 +71,7 @@ extern xint32 xsocket_nonblock_off(xsocket * o);
 // extern xint32 xsocket_nonblock_on()
 extern xsocket * xsocketnew(int domain, int type, int protocol);
 
+extern xuint32 xsocketwait(xsocket * o, xuint32 mask, xuint64 unisecond);
 
 extern xsocket * xsocketmaskadd(xsocket * o, xuint32 mask);
 
@@ -89,14 +100,20 @@ struct xclient
     xuint64 addrlen;
 };
 
+#define xclient_event_read          xsocket_event_read
+#define xclient_event_write         xsocket_event_write
+#define xclient_event_except        xsocket_event_except
+#define xclient_event_connect       0x00000008U
 // TODO: UPDATE
-#define xclient_status_connecting    0x00000001U
-#define xclient_status_connected     0x00000002U
+#define xclient_status_connecting   0x00000001U
+#define xclient_status_connected    0x00000002U
 
 #define xclientinit(domain, type, protocol)                         (xclient) { xobj_type_client, xclientrem, xdescriptorinit(), domain, type, protocol, xnil, 0 }
 extern xclient * xclientnew(int domain, int type, int protocol);
 
 #define xclientmaskadd(client, mask)    (xclient *) xsocketmaskadd((xsocket *) client, mask)
+
+#define xclientwait(client, mask, unisecond)       xsocketwait((xsocket *) client, mask, unisecond)
 
 extern xint32 xclientconnect(xclient * o, void * addr, xuint64 addrlen);
 extern xint32 xclientreconnect(xclient * o);

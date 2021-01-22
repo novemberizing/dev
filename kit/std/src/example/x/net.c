@@ -113,6 +113,8 @@ int main(int argc, char ** argv)
         addrlen = sizeof(struct sockaddr_in);
         ret = xclientconnect(client, xaddressof(addr), addrlen);
 
+        xclientwait(client, xclient_status_connected, 1);
+
         xcheck(ret != xsuccess, "working nonblock connect");
         printf("connect => %d\n", ret);
         xclient_nonblock_on(client);
