@@ -109,7 +109,7 @@ extern xint64 xsocketread(xsocket * o, void * buffer, xuint64 len)
             xcheck(len == 0, "invalid parameter");
             if(len > 0)
             {
-                xint64 n = write(o->descriptor.f, buffer, len);
+                xint64 n = read(o->descriptor.f, buffer, len);
                 if(n > 0)
                 {
                     return n;

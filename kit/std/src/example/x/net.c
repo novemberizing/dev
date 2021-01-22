@@ -26,6 +26,10 @@ int main(int argc, char ** argv)
 
     xsocketclose(xaddressof(socket));
 
+    /**
+     * simple echo server
+     * ncat -l 2000 -k -c 'xargs -n1 echo'
+     */
     xclient * client = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     struct sockaddr_in addr;
     addr.sin_family = PF_INET;
@@ -33,17 +37,12 @@ int main(int argc, char ** argv)
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     socklen_t addrlen = sizeof(struct sockaddr_in);
     xclientconnect(client, xaddressof(addr), addrlen);
-    xclientsend(client, "hello\n", strlen("hello\n"));
-    char buffer[7];
-    xclientrecv(client, buffer, 6);
-    buffer[6] = 0;
-    printf("%s\n", buffer);
+    xclientsend(client, "hello\n", 6);
+    char buffer[8];
+    int ret = xclientrecv(client, buffer, 5);
+    buffer[5] = 0;
+    printf("[recv:%d] %s\n", ret, buffer);
     xclientrem(client);
-
-
-    //        int connect(int sockfd, const struct sockaddr *addr,
-    //                socklen_t addrlen);
-    // xclient client = xclientinit(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     return 0;
 }

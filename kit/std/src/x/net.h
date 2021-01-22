@@ -74,8 +74,8 @@ extern xclient * xclientnew(int domain, int type, int protocol);
 extern xint32 xclientconnect(xclient * o, void * addr, xuint64 addrlen);
 extern xint32 xclientreconnect(xclient * o);
 extern xint32 xclientclose(xclient * o);
-#define xclientsend(o, data, len)    xsocketwrite((xsocket *) o, data, len);
-#define xclientrecv(o, buffer, len)  xsocketread((xsocket *) o, buffer, len);
+#define xclientsend(o, data, len)       xsocketwrite((xsocket *) o, data, len)
+#define xclientrecv(o, buffer, len)     xsocketread((xsocket *) o, buffer, len)
 extern void * xclientrem(void * p);
 
 struct xsession
