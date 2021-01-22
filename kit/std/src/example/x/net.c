@@ -44,5 +44,104 @@ int main(int argc, char ** argv)
     printf("[recv:%d] %s\n", ret, buffer);
     xclientrem(client);
 
+    // SET NONBLOCKING
+    buffer[0] = 0;
+    client = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    addr.sin_family = PF_INET;
+    addr.sin_port = htons(2000);
+    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    addrlen = sizeof(struct sockaddr_in);
+    xclientconnect(client, xaddressof(addr), addrlen);
+    xclient_nonblock_on(client);
+    xclientsend(client, "hello\n", 6);
+    ret = xclientrecv(client, buffer, 5);
+    buffer[5] = 0;
+    printf("[recv:%d] %s\n", ret, buffer);
+    xclientrem(client);
+
+    // SET NONBLOCKING & OFF
+    buffer[0] = 0;
+    client = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    addr.sin_family = PF_INET;
+    addr.sin_port = htons(2000);
+    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    addrlen = sizeof(struct sockaddr_in);
+    xclientconnect(client, xaddressof(addr), addrlen);
+    xclient_nonblock_on(client);
+    xclient_nonblock_off(client);
+    xclientsend(client, "hello\n", 6);
+    ret = xclientrecv(client, buffer, 5);
+    buffer[5] = 0;
+    printf("[recv:%d] %s\n", ret, buffer);
+    xclientrem(client);
+
+    // SET NONBLOCKING CONNECT
+    for(int i = 0; i < xrandomgen() % 2048; i++)
+    {
+        printf("nonblock connect\n");
+        buffer[0] = 0;
+        client = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        xclientmaskadd(client, xsocket_mask_nonblock);
+        addr.sin_family = PF_INET;
+        addr.sin_port = htons(2000);
+        addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+        addrlen = sizeof(struct sockaddr_in);
+        ret = xclientconnect(client, xaddressof(addr), addrlen);
+        xcheck(ret != xsuccess, "working nonblock connect");
+        printf("connect => %d\n", ret);
+        xclient_nonblock_on(client);
+        // NONBLOCLING CONNECT 상태에서 WRITE 가 가능하다.
+        ret = xclientsend(client, "hello\n", 6);
+        xclient_nonblock_off(client);
+        printf("send => %d\n", ret);
+        ret = xclientrecv(client, buffer, 5);
+        buffer[5] = 0;
+        printf("[recv:%d] %s\n", ret, buffer);
+        xclientrem(client);
+    }
+
+    // SET NONBLOCKING CONNECT
+    for(int i = 0; i < xrandomgen() % 2048; i++)
+    {
+        printf("nonblock connect\n");
+        buffer[0] = 0;
+        client = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        xclientmaskadd(client, xsocket_mask_nonblock);
+        addr.sin_family = PF_INET;
+        addr.sin_port = htons(2000);
+        addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+        addrlen = sizeof(struct sockaddr_in);
+        ret = xclientconnect(client, xaddressof(addr), addrlen);
+
+        xcheck(ret != xsuccess, "working nonblock connect");
+        printf("connect => %d\n", ret);
+        xclient_nonblock_on(client);
+        // NONBLOCLING CONNECT 상태에서 WRITE 가 가능하다.
+        ret = xclientsend(client, "hello\n", 6);
+        xclient_nonblock_off(client);
+        printf("send => %d\n", ret);
+        ret = xclientrecv(client, buffer, 5);
+        buffer[5] = 0;
+        printf("[recv:%d] %s\n", ret, buffer);
+        xclientrem(client);
+    }
+
+
+    // NEED TO TEST
+    // xclient * client = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    // xclientmaskadd(client, xsocket_mask_nonblock);
+    // struct sockaddr_in addr;
+    // addr.sin_family = PF_INET;
+    // addr.sin_port = htons(2000);
+    // addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // socklen_t addrlen = sizeof(struct sockaddr_in);
+    // xclientconnect(client, xaddressof(addr), addrlen);
+    // xclientsend(client, "hello\n", 6);
+    // char buffer[8];
+    // int ret = xclientrecv(client, buffer, 5);
+    // buffer[5] = 0;
+    // printf("[recv:%d] %s\n", ret, buffer);
+    // xclientrem(client);
+
     return 0;
 }

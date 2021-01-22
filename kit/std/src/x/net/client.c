@@ -60,13 +60,31 @@ extern xint32 xclientconnect(xclient * o, void * addr, xuint64 addrlen)
                 o->addr = xcopy(o->addr, addr, addrlen, o->addrlen < addrlen);
                 o->addrlen = addrlen;
 
+                if(o->flags & xsocket_mask_nonblock)
+                {
+                    ret = xdescriptor_nonblock_on(xaddressof(o->descriptor));
+                    xassertion(ret != xsuccess, "fail to nonblocking");
+                }
+
                 ret = connect(o->descriptor.f, (struct sockaddr *) o->addr, o->addrlen);
                 
                 if(ret != xsuccess)
                 {
+                    int err = errno;
+                    if(o->flags & xsocket_mask_nonblock)
+                    {
+                        if(err == EINPROGRESS)
+                        {
+                            o->status |= xclient_status_connecting;
+                            xcheck(xtrue, "implement nonblocking connect");
+                            return xsuccess;
+                        }
+                    }
+                    printf("errno => %d\n", err);
                     xsocketclose(o);
                     return xfail;
                 }
+                o->status |= xclient_status_connected;
                 return xsuccess;
             }
             else
@@ -93,6 +111,11 @@ extern xint32 xclientreconnect(xclient * o)
             int ret = xsocketopen((xsocket *) o);
             if(ret == xsuccess)
             {
+                if(o->flags & xsocket_mask_nonblock)
+                {
+                    ret = xdescriptor_nonblock_on(xaddressof(o->descriptor));
+                    xassertion(ret != xsuccess, "fail to nonblocking");
+                }
                 ret = connect(o->descriptor.f, (struct sockaddr *) o->addr, o->addrlen);
                 
                 if(ret != xsuccess)

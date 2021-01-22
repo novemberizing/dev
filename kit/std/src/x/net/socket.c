@@ -134,3 +134,42 @@ extern xint64 xsocketread(xsocket * o, void * buffer, xuint64 len)
     }
     return xfail;
 }
+
+extern xsocket * xsocketmaskadd(xsocket * o, xuint32 mask)
+{
+    xcheck(o == xnil, "null pointer");
+    if(o)
+    {
+        xassertion(mask & (~xsocket_masks), "invalid socket mask");
+
+        o->flags |= mask;
+        if(xsocketalive(o))
+        {
+            switch(mask)
+            {
+                case xsocket_mask_nonblock: xassertion(xsocket_nonblock_on(o)!=xsuccess, "fail to nonblocking"); break;
+            }
+        }
+    }
+    return o;
+}
+
+extern xint32 xsocket_nonblock_on(xsocket * o)
+{
+    if(o)
+    {
+        o->flags |= xsocket_mask_nonblock;
+        return xdescriptor_nonblock_on(xaddressof(o->descriptor));
+    }
+    return xfail;
+}
+
+extern xint32 xsocket_nonblock_off(xsocket * o)
+{
+    if(o)
+    {
+        o->flags &= (~xsocket_mask_nonblock);
+        return xdescriptor_nonblock_off(xaddressof(o->descriptor));
+    }
+    return xfail;
+}
