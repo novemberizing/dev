@@ -6,5 +6,6 @@
 
 Makefile
 .deps
+.libs
 *.o
 *.a

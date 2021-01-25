@@ -74,54 +74,77 @@ extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 unisecond)
     {
         if(o->f > 0)
         {
-            fd_set readfds;
-            fd_set writefds;
-            fd_set exceptionfds;
-            struct timeval timeval = { unisecond / 1000000 , unisecond % 1000000 };
+            xuint32 result = xdescriptor_event_void;
+            struct timeval basis;
+            gettimeofday(&basis, xnil); // CHECK FAIL
 
-            FD_ZERO(&readfds);
-            FD_ZERO(&writefds);
-            FD_ZERO(&exceptionfds);
+            while(result != mask)
+            {
+                // printf("-------------------\n");
+                fd_set readfds;
+                fd_set writefds;
+                fd_set exceptionfds;
+                struct timeval timeval = { 0, 1 };
 
-            if(mask & xdescriptor_event_read)
-            {
-                FD_SET(o->f, &readfds);
-            }
-            if(mask & xdescriptor_event_write)
-            {
-                FD_SET(o->f, &writefds);
-            }
-            if(mask & xdescriptor_event_except)
-            {
+                FD_ZERO(&readfds);
+                FD_ZERO(&writefds);
+                FD_ZERO(&exceptionfds);
+
+                if(mask & xdescriptor_event_read)
+                {
+                    printf("read event set\n");
+                    FD_SET(o->f, &readfds);
+                }
+                if(mask & xdescriptor_event_write)
+                {
+                    printf("write event set\n");
+                    FD_SET(o->f, &writefds);
+                }
                 FD_SET(o->f, &exceptionfds);
-            }
 
-            int ret = select(1, &readfds, &writefds, &exceptionfds, &timeval);
+                int ret = select(o->f + 1, &readfds, &writefds, &exceptionfds, &timeval);
 
-            if(ret > 0)
-            {
-                if(!FD_ISSET(o->f, &exceptionfds))
+                if(ret >= 0)
                 {
-                    mask &= (~xdescriptor_event_except);
+                    if(FD_ISSET(o->f, &exceptionfds))
+                    {
+                        return xdescriptor_event_except;
+                    }
+                    if(FD_ISSET(o->f, &readfds))
+                    {
+                        printf("readfds\n");
+                        result |= xdescriptor_event_read;
+                    }
+                    if(FD_ISSET(o->f, &writefds))
+                    {
+                        printf("writefds\n");
+                        result |= xdescriptor_event_write;
+                    }
+                    // xcheck(xtrue, "implement timeout");
+                    if(result != mask)
+                    {
+                        struct timeval current;
+                        struct timeval diff;
+                        gettimeofday(&current, xnil);   // TODO: ERROR HANDLING
+                        timersub(&current, &basis, &diff);
+                        xuint64 r = xtimeunisecond(diff.tv_sec, diff.tv_usec);
+                        // printf("unisecond (%lu) : response (%lu)\n", unisecond, r);
+                        if(xtimeunisecond(diff.tv_sec, diff.tv_usec) < unisecond)
+                        {
+                            // printf("retry\n");
+                            continue;
+                        }
+                        return xdescriptor_event_timeout;
+                    }
+                    printf("----------------- 2 -\n");
                 }
-                if(!FD_ISSET(o->f, &readfds))
+                else
                 {
-                    mask &= (~xdescriptor_event_read);
+                    xassertion(xtrue, "fail to select (%d)", errno);
+                    return xdescriptor_event_except;
                 }
-                if(!FD_ISSET(o->f, &writefds))
-                {
-                    mask &= (~xdescriptor_event_write);
-                }
-                return mask;
             }
-            else if(ret == 0)
-            {
-                xcheck(xtrue, "check this logic");
-            }
-            else
-            {
-                xassertion(xtrue, "fail to select (%d)", errno);
-            }
+            return result;
         }
         else
         {
@@ -132,5 +155,5 @@ extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 unisecond)
     {
         xcheck(xtrue, "null pointer");
     }
-    return xfail;
+    return xdescriptor_event_except;
 }

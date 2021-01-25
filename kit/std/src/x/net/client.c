@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 
 #include "../net.h"
 
@@ -76,11 +77,10 @@ extern xint32 xclientconnect(xclient * o, void * addr, xuint64 addrlen)
                         if(err == EINPROGRESS)
                         {
                             o->status |= xclient_status_connecting;
-                            xcheck(xtrue, "implement nonblocking connect");
                             return xsuccess;
                         }
                     }
-                    printf("errno => %d\n", err);
+                    xcheck(xtrue, "fail to connect (%d)", err);
                     xsocketclose(o);
                     return xfail;
                 }
@@ -135,7 +135,132 @@ extern xint32 xclientreconnect(xclient * o)
     return xfail;
 }
 
-extern xint32 xclientclose(xclient * o)
+extern xuint32 xclientwait(xclient * o, xuint32 mask, xuint64 unisecond)
 {
-    return xsocketclose(o);
+    xcheck(o == xnil, "null pointer");
+    if(o)
+    {
+        xcheck(xsocketalive(o) == xfalse, "client is not alive");
+        if(xsocketalive(o))
+        {
+            if(mask == xclient_event_connect)
+            {
+                struct timeval basis;
+                gettimeofday(&basis, xnil); // CHECK FAIL
+
+                while(xtrue)
+                {
+                    fd_set readfds;
+                    fd_set writefds;
+                    fd_set exceptfds;
+
+                    FD_ZERO(&readfds);
+                    FD_ZERO(&writefds);
+                    FD_ZERO(&exceptfds);
+
+                    FD_SET(o->descriptor.f, &readfds);
+                    FD_SET(o->descriptor.f, &writefds);
+                    FD_SET(o->descriptor.f, &exceptfds);
+
+                    struct timeval timeval = { 0, 1 };
+                    printf("count\n");
+
+                    int ret = select(1, &readfds, &writefds, &exceptfds, &timeval);
+
+                    if(ret >= 0)
+                    {
+                        if(FD_ISSET(o->descriptor.f, &exceptfds))
+                        {
+                            int err = 0;
+                            socklen_t len = sizeof(int);
+                            // check fail to getsockopt
+                            getsockopt(o->descriptor.f, SOL_SOCKET, SO_ERROR, &err, &len);
+                            printf("getsockopt => %d\n", err);
+                            // check this logic
+                            if(err == EINPROGRESS)
+                            {
+                                struct timeval current;
+                                struct timeval diff;
+                                gettimeofday(&current, xnil);   // TODO: ERROR HANDLING
+                                timersub(&current, &basis, &diff);
+                                if(xtimeunisecond(diff.tv_sec, diff.tv_usec) < unisecond)
+                                {
+                                    continue;
+                                }
+                                return xclient_event_timeout;
+                            }
+                            else if(err == EALREADY || err == EISCONN)
+                            {
+                                return xclient_event_connect;
+                            }
+                            else
+                            {
+                                xcheck(xtrue, "fail to connect (%d)", err);
+                                return xclient_event_except;
+                            }
+                            return xclient_event_except;
+                        }
+                        /**
+                         * https://www.gnu.org/software/libc/manual/html_node/Connecting.html
+                         * 
+                         * EINPROGRESS
+                         * 
+                         * The socket socket is nonblocking and the connection could
+                         * not be established immediately. You can determine when the
+                         * connection is completely established with select;
+                         * see Waiting for I/O. Another connect call on the same socket,
+                         * before the connection is completely established, will
+                         * fail with EALREADY.
+                         */
+                        ret = connect(o->descriptor.f, (struct sockaddr *) o->addr, o->addrlen);
+                        if(ret != xsuccess)
+                        {
+                            int err = errno;
+                            if(err == EINPROGRESS)
+                            {
+                                struct timeval current;
+                                struct timeval diff;
+                                gettimeofday(&current, xnil);   // TODO: ERROR HANDLING
+                                timersub(&current, &basis, &diff);
+                                if(xtimeunisecond(diff.tv_sec, diff.tv_usec) < unisecond)
+                                {
+                                    continue;
+                                }
+                                return xclient_event_timeout;
+                            }
+                            else if(err == EALREADY || err == EISCONN)
+                            {
+                                return xclient_event_connect;
+                            }
+                            else
+                            {
+                                xcheck(xtrue, "fail to connect (%d)", err);
+                                return xclient_event_except;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        xassertion(xtrue, "fail to select (%d)", errno);
+                        return xclient_event_except;
+                    }
+                }
+                return xclient_event_connect;
+            }
+            else if(mask == xclient_event_write)
+            {
+                return xdescriptorwait(xaddressof(o->descriptor), mask, unisecond);
+            }
+            else if(mask == xclient_event_read)
+            {
+                return xdescriptorwait(xaddressof(o->descriptor), mask, unisecond);
+            }
+            else
+            {
+                xassertion(xtrue, "unsupported event");
+                return xclient_event_except;
+            }
+        }
+    }
+    return xclient_event_except;
 }

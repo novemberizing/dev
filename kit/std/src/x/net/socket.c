@@ -90,6 +90,8 @@ extern xint64 xsocketwrite(xsocket * o, const xbyte * data, xuint64 len)
                         return xsuccess;
                     }
                     xcheck(xtrue, "fail to write (%d)", errno);
+                    xsocketclose(o);
+                    return xfail;
                 }
             }
             return xsuccess;
@@ -127,6 +129,8 @@ extern xint64 xsocketread(xsocket * o, void * buffer, xuint64 len)
                         return xsuccess;
                     }
                     xcheck(xtrue, "fail to write (%d)", errno);
+                    xsocketclose(o);
+                    return xfail;
                 }
             }
             return xsuccess;

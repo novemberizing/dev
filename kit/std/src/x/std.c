@@ -163,3 +163,9 @@ extern void * xcopy(void * destination, const void * source, xuint64 sourcelen, 
 
     // return destination;
 }
+
+extern xuint64 xtimeunisecond(xuint64 second, xuint64 unisecond)
+{
+    // CHECKING OVERFLOW
+    return second * 1000000 + unisecond;
+}
