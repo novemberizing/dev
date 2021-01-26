@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -5,19 +7,22 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <signal.h>
+#include <time.h>
+#include <poll.h>
 
 #include "../net.h"
 
 extern xint32 xdescriptoralive(const xdescriptor * o)
 {
-    return o ? o->f > 0 : xfalse;
+    return o ? o->f >= 0 : xfalse;
 }
 
 extern xint32 xdescriptor_nonblock_on(xdescriptor * o)
 {
     if(o)
     {
-        if(o->f > 0)
+        if(o->f >= 0)
         {
             int flags = fcntl(o->f, F_GETFL, 0);
             xassertion(flags == xfail, "fail to fcntrl (%d)", errno);
@@ -34,7 +39,7 @@ extern xint32 xdescriptor_nonblock_off(xdescriptor * o)
 {
     if(o)
     {
-        if(o->f > 0)
+        if(o->f >= 0)
         {
             int flags = fcntl(o->f, F_GETFL, 0);
             xassertion(flags == xfail, "fail to fcntrl (%d)", errno);
@@ -53,94 +58,133 @@ extern xint32 xdescriptorclose(xdescriptor * o)
     xcheck(o == xnil, "null pointer");
     if(o)
     {
-        xcheck((o->f > 0) == xfalse, "socket not opened");
+        xcheck((o->f >= 0) == xfalse, "socket not opened");
 
-        if(o->f > 0)
+        if(o->f >= 0)
         {
             if(close(o->f) != xsuccess)
             {
                 xassertion(xtrue, "fail to close (%d)", errno);
             }
-            o->f = 0;
+            o->f = xinvalid;
         }
         return xsuccess;
     }
     return xfail;
 }
 
-extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 unisecond)
+extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 nanosecond)
 {
     if(o)
     {
-        if(o->f > 0)
+        if(o->f >= 0)
         {
-            xuint32 result = xdescriptor_event_void;
-            struct timeval basis;
-            gettimeofday(&basis, xnil); // CHECK FAIL
-
-            while(result != mask)
+            struct pollfd fds = { xinvalid, 0, 0 };
+            fds.fd = o->f;
+            if(mask & xdescriptor_event_read)
             {
-                // printf("-------------------\n");
-                fd_set readfds;
-                fd_set writefds;
-                fd_set exceptionfds;
-                struct timeval timeval = { 0, 1 };
-
-                FD_ZERO(&readfds);
-                FD_ZERO(&writefds);
-                FD_ZERO(&exceptionfds);
-
-                if(mask & xdescriptor_event_read)
+                fds.events |= POLLIN;
+            }
+            if(mask & xdescriptor_event_write)
+            {
+                fds.events |= POLLOUT;
+            }
+            if(mask & xdescriptor_event_error)
+            {
+                fds.events |= POLLERR;
+            }
+            if(mask & xdescriptor_event_pri)
+            {
+                fds.events |= POLLPRI;
+            }
+            if(mask & xdescriptor_event_readhup)
+            {
+                fds.events |= POLLRDHUP;
+            }
+            if(mask & xdescriptor_event_hup)
+            {
+                fds.events |= POLLHUP;
+            }
+            if(mask & xdescriptor_event_invalid)
+            {
+                fds.events |= POLLNVAL;
+            }
+            if(mask & xdescriptor_event_readband)
+            {
+                fds.events |= POLLRDBAND;
+            }
+            if(mask & xdescriptor_event_writeband)
+            {
+                fds.events |= POLLWRBAND;
+            }
+            int result = xdescriptor_event_void;
+            struct timespec start = { 0, 0};
+            struct timespec current = { 0, 0 };
+            struct timespec diff = { 0, 0};
+            clock_gettime(CLOCK_REALTIME, &start);  // TODO: CHECK FAIL
+            struct timespec timespec = { 0, 1000 };
+            while((result & mask) != mask)
+            {
+                int nfds = ppoll(&fds, 1, &timespec, xnil);
+                if(nfds >= 0)
                 {
-                    printf("read event set\n");
-                    FD_SET(o->f, &readfds);
-                }
-                if(mask & xdescriptor_event_write)
-                {
-                    printf("write event set\n");
-                    FD_SET(o->f, &writefds);
-                }
-                FD_SET(o->f, &exceptionfds);
-
-                int ret = select(o->f + 1, &readfds, &writefds, &exceptionfds, &timeval);
-
-                if(ret >= 0)
-                {
-                    if(FD_ISSET(o->f, &exceptionfds))
+                    if(fds.revents & POLLIN)
                     {
-                        return xdescriptor_event_except;
-                    }
-                    if(FD_ISSET(o->f, &readfds))
-                    {
-                        printf("readfds\n");
                         result |= xdescriptor_event_read;
                     }
-                    if(FD_ISSET(o->f, &writefds))
+                    if(fds.revents & POLLOUT)
                     {
-                        printf("writefds\n");
                         result |= xdescriptor_event_write;
                     }
-                    // xcheck(xtrue, "implement timeout");
-                    if(result != mask)
+                    if(fds.revents & POLLPRI)
                     {
-                        struct timeval current;
-                        struct timeval diff;
-                        gettimeofday(&current, xnil);   // TODO: ERROR HANDLING
-                        timersub(&current, &basis, &diff);
-                        xuint64 r = xtimeunisecond(diff.tv_sec, diff.tv_usec);
-                        // printf("unisecond (%lu) : response (%lu)\n", unisecond, r);
-                        if(xtimeunisecond(diff.tv_sec, diff.tv_usec) < unisecond)
-                        {
-                            // printf("retry\n");
-                            continue;
-                        }
-                        return xdescriptor_event_timeout;
+                        result |= xdescriptor_event_pri;
                     }
-                    printf("----------------- 2 -\n");
+                    if(fds.revents & POLLERR)
+                    {
+                        result |= xdescriptor_event_error;
+                    }
+                    if(fds.revents & POLLRDHUP)
+                    {
+                        result |= xdescriptor_event_readhup;
+                    }
+                    if(fds.revents & POLLHUP)
+                    {
+                        result |= xdescriptor_event_hup;
+                    }
+                    if(fds.revents & POLLRDBAND)
+                    {
+                        result |= xdescriptor_event_readband;
+                    }
+                    if(fds.revents & POLLWRBAND)
+                    {
+                        result |= xdescriptor_event_writeband;
+                    }
+                    if(fds.revents & POLLNVAL)
+                    {
+                        result |= xdescriptor_event_invalid;
+                    }
+                    clock_gettime(CLOCK_REALTIME, &current);
+                    diff.tv_sec = current.tv_sec - start.tv_sec;
+                    diff.tv_nsec = current.tv_nsec - start.tv_nsec;
+                    if(diff.tv_nsec < 0)
+                    {
+                        diff.tv_sec = diff.tv_sec - 1;
+                        diff.tv_nsec = 1000000000 + diff.tv_nsec;
+                    }
+                    // check overflow
+                    if((result & mask) != mask)
+                    {
+                        if(nanosecond < xtimenanosecond(diff.tv_sec, diff.tv_nsec))
+                        {
+                            result |= xdescriptor_event_timeout;
+                            return result;
+                        }
+                    }
                 }
                 else
                 {
-                    xassertion(xtrue, "fail to select (%d)", errno);
+                    xassertion(xtrue, "fail to ppoll (%d)", errno);
                     return xdescriptor_event_except;
                 }
             }

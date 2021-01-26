@@ -169,3 +169,8 @@ extern xuint64 xtimeunisecond(xuint64 second, xuint64 unisecond)
     // CHECKING OVERFLOW
     return second * 1000000 + unisecond;
 }
+
+extern xuint64 xtimenanosecond(xuint64 second, xuint64 nanosecond)
+{
+    return second * 1000000000 + nanosecond;
+}

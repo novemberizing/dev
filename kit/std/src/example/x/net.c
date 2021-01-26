@@ -117,7 +117,7 @@ int main(int argc, char ** argv)
 
         if(client->status & xclient_status_connecting)
         {
-            xuint32 status = xclientwait(client, xclient_event_connect, 1000000);
+            xuint32 status = xclientwait(client, xclient_event_connect, 1000000000);
             xcheck((status & xclient_event_connect) != xclient_event_connect, "not connect (%08x)", status);
             if((status & xclient_event_connect) != xclient_event_connect)
             {
@@ -130,7 +130,7 @@ int main(int argc, char ** argv)
         ret = xclientsend(client, "hello\n", 6);
         // xclient_nonblock_off(client);
         printf("send => %d\n", ret);
-        xuint32 status = xclientwait(client, xclient_event_read, 1000000);
+        xuint32 status = xclientwait(client, xclient_event_read, 1000000000);
         printf("status (0x%08x)\n", status);
         ret = xclientrecv(client, buffer, 5);
         if(ret > 0)

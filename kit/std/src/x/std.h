@@ -42,6 +42,7 @@ extern void * xfree(void * o);
 extern void * xcopy(void * destination, const void * source, xuint64 sourcelen, xint32 reallocate);
 
 extern xuint64 xtimeunisecond(xuint64 second, xuint64 unisecond);
+extern xuint64 xtimenanosecond(xuint64 second, xuint64 nanosecond);
 
 union xval
 {
