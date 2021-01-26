@@ -12,6 +12,8 @@ struct xserver;
 typedef union xdescriptor xdescriptor;
 typedef struct xsocket xsocket;
 typedef struct xclient xclient;
+typedef struct xserver xserver;
+typedef struct xsession xsession;
 
 union xdescriptor
 {
@@ -153,14 +155,111 @@ extern xint32 xclientreconnect(xclient * o);
 #define xclientrecv(o, buffer, len)     xsocketread((xsocket *) o, buffer, len)
 extern void * xclientrem(void * p);
 
+#define xobj_type_session           (xobj_type_socket | 0x00000002U)
+
+#define xsession_event_void         xsocket_event_void
+#define xsession_event_read         xsocket_event_read
+#define xsession_event_write        xsocket_event_write
+#define xsession_event_error        xsocket_event_error
+#define xsession_event_pri          xsocket_event_pri
+#define xsession_event_readhup      xsocket_event_readhup
+#define xsession_event_hup          xsocket_event_hup
+#define xsession_event_invalid      xsocket_event_invalid
+#define xsession_event_readband     xsocket_event_readband
+#define xsession_event_writeband    xsocket_event_writeband
+#define xsession_event_except       xsocket_event_except
+#define xsession_event_timeout      xsocket_event_timeout
+
+// TODO: UPDATE
+#define xsession_status_link        0x00000001U
+
 struct xsession
 {
-    xsocket socket;
+    xuint32 flags;
+    xdestructor destruct;
+
+    xdescriptor descriptor;
+
+    int domain;
+    int type;
+    int protocol;
+
+    xuint32 status;
+
+    void * addr;
+    xuint64 addrlen;
+
+    xserver * parent;
+
+    xsession * prev;
+    xsession * next;
+
+    xsync * sync;
 };
+
+typedef xsession * (*xsessionfactory)(void);
+
+#define xobj_type_server            (xobj_type_socket | 0x00000003U)
+
+#define xserver_event_void          xsocket_event_void
+#define xserver_event_read          xsocket_event_read
+#define xserver_event_write         xsocket_event_write
+#define xserver_event_error         xsocket_event_error
+#define xserver_event_pri           xsocket_event_pri
+#define xserver_event_readhup       xsocket_event_readhup
+#define xserver_event_hup           xsocket_event_hup
+#define xserver_event_invalid       xsocket_event_invalid
+#define xserver_event_readband      xsocket_event_readband
+#define xserver_event_writeband     xsocket_event_writeband
+#define xserver_event_except        xsocket_event_except
+#define xserver_event_timeout       xsocket_event_timeout
+
+#define xserver_event_accept        xserver_event_read
 
 struct xserver
 {
-    xsocket socket;
+    xuint32 flags;
+    xdestructor destruct;
+
+    xdescriptor descriptor;
+
+    int domain;
+    int type;
+    int protocol;
+
+    xuint32 status;
+
+    void * addr;
+    xuint64 addrlen;
+
+    xint32 backlog;
+    xsessionfactory factory;
+
+    xsession * head;
+    xsession * tail;
+
+    xuint64 alives;
+
+    xsync * sync;
 };
+
+#define xserverinit(domain, type, protocol)                         (xserver) { xobj_type_server, xserverrem, xdescriptorinit(), domain, type, protocol, xnil, 0 }
+extern xserver * xservernew(int domain, int type, int protocol);
+
+#define xservermaskadd(client, mask)    (xserver *) xsocketmaskadd((xserver *) client, mask)
+
+extern xuint32 xserverwait(xserver * o, xuint32 mask, xuint64 nanosecond);
+extern xint32 xserverlisten(xserver * o, void * addr, xuint64 addrlen);
+extern xint32 xserverrelisten(xserver * o);
+
+// extern xint32 xclientclose(xclient * o);
+
+#define xserverclose(o)                 xsocketclose(o)
+#define xserver_nonblock_on(o)          xsocket_nonblock_on((xsocket *) o)
+#define xserver_nonblock_off(o)         xsocket_nonblock_off((xsocket *) o)
+
+extern void * xserverrem(void * p);
+
+extern xsession * xserveraccept(xserver * o);
 
 #endif // __NOVEMBERIZING_X__NET__H__

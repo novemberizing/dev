@@ -110,7 +110,8 @@ am__v_AR_1 =
 libnovemberizing_net_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_net_a_LIBADD =
 am_libnovemberizing_net_a_OBJECTS = descriptor.$(OBJEXT) \
-	socket.$(OBJEXT) client.$(OBJEXT)
+	socket.$(OBJEXT) client.$(OBJEXT) server.$(OBJEXT) \
+	session.$(OBJEXT)
 libnovemberizing_net_a_OBJECTS = $(am_libnovemberizing_net_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -128,6 +129,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/client.Po ./$(DEPDIR)/descriptor.Po \
+	./$(DEPDIR)/server.Po ./$(DEPDIR)/session.Po \
 	./$(DEPDIR)/socket.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -300,7 +302,9 @@ AM_CFLAGS = -I$(top_srcdir)/src
 noinst_LIBRARIES = libnovemberizing-net.a
 libnovemberizing_net_a_SOURCES = descriptor.c \
                                  socket.c     \
-                                 client.c
+                                 client.c     \
+                                 server.c     \
+                                 session.c
 
 all: all-am
 
@@ -352,6 +356,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptor.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/session.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -514,6 +520,8 @@ clean-am: clean-generic clean-libtool clean-noinstLIBRARIES \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/client.Po
 	-rm -f ./$(DEPDIR)/descriptor.Po
+	-rm -f ./$(DEPDIR)/server.Po
+	-rm -f ./$(DEPDIR)/session.Po
 	-rm -f ./$(DEPDIR)/socket.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -562,6 +570,8 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/client.Po
 	-rm -f ./$(DEPDIR)/descriptor.Po
+	-rm -f ./$(DEPDIR)/server.Po
+	-rm -f ./$(DEPDIR)/session.Po
 	-rm -f ./$(DEPDIR)/socket.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

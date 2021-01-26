@@ -128,6 +128,10 @@ extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 nanosecond
                 int nfds = ppoll(&fds, 1, &timespec, xnil);
                 if(nfds >= 0)
                 {
+                    /**
+                     * TODO: 마스크 처리하는데 시간이 많이 걸린다.
+                     * 어떻게 하면 STD 라이브러리 헤더 없이 ....
+                     */
                     if(fds.revents & POLLIN)
                     {
                         result |= xdescriptor_event_read;
