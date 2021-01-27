@@ -13,7 +13,7 @@ int main(int argc, char ** argv)
     printf("net\n");
     xdescriptor descriptor = xdescriptorinit();
 
-    printf("%d\n", descriptor.f);
+    printf("%d\n", descriptor.value.f);
     printf("%d\n", xdescriptoralive(xaddressof(descriptor)));
 
     xsocket socket = xsocketinit(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -141,22 +141,23 @@ int main(int argc, char ** argv)
         xclientrem(client);
     }
 
+    // SERVER
+    {
+        xserver * server = xservernew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    // NEED TO TEST
-    // xclient * client = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    // xclientmaskadd(client, xsocket_mask_nonblock);
-    // struct sockaddr_in addr;
-    // addr.sin_family = PF_INET;
-    // addr.sin_port = htons(2000);
-    // addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    // socklen_t addrlen = sizeof(struct sockaddr_in);
-    // xclientconnect(client, xaddressof(addr), addrlen);
-    // xclientsend(client, "hello\n", 6);
-    // char buffer[8];
-    // int ret = xclientrecv(client, buffer, 5);
-    // buffer[5] = 0;
-    // printf("[recv:%d] %s\n", ret, buffer);
-    // xclientrem(client);
+        struct sockaddr_in addr;
+        addr.sin_family = PF_INET;
+        addr.sin_addr.s_addr = 0;
+        addr.sin_port = htons(3371);
+        socklen_t addrlen = sizeof(struct sockaddr_in);
+
+        int ret = xserverlisten(server, &addr, addrlen);
+        xassertion(ret != xsuccess, "fail to server listen");
+        xcheck(xtrue, "server listen");
+
+        xserverrem(server);
+    }
+
 
     return 0;
 }

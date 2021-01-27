@@ -74,7 +74,7 @@ extern xint32 xclientconnect(xclient * o, void * addr, xuint64 addrlen)
                     xassertion(ret != xsuccess, "fail to nonblocking");
                 }
 
-                ret = connect(o->descriptor.f, (struct sockaddr *) o->addr, o->addrlen);
+                ret = connect(o->descriptor.value.f, (struct sockaddr *) o->addr, o->addrlen);
                 
                 if(ret != xsuccess)
                 {
@@ -123,7 +123,7 @@ extern xint32 xclientreconnect(xclient * o)
                     ret = xdescriptor_nonblock_on(xaddressof(o->descriptor));
                     xassertion(ret != xsuccess, "fail to nonblocking");
                 }
-                ret = connect(o->descriptor.f, (struct sockaddr *) o->addr, o->addrlen);
+                ret = connect(o->descriptor.value.f, (struct sockaddr *) o->addr, o->addrlen);
                 
                 if(ret != xsuccess)
                 {
@@ -154,7 +154,7 @@ extern xuint32 xclientwait(xclient * o, xuint32 mask, xuint64 nanosecond)
             if(mask & xclient_event_connect)
             {
                 struct pollfd fds = { xinvalid, (POLLIN | POLLOUT), 0 };
-                fds.fd = o->descriptor.f;
+                fds.fd = o->descriptor.value.f;
                 if(mask & xdescriptor_event_error)
                 {
                     fds.events |= POLLERR;
@@ -230,7 +230,7 @@ extern xuint32 xclientwait(xclient * o, xuint32 mask, xuint64 nanosecond)
                         {
                             result |= xdescriptor_event_invalid;
                         }
-                        int ret = connect(o->descriptor.f, (struct sockaddr *) o->addr, o->addrlen);
+                        int ret = connect(o->descriptor.value.f, (struct sockaddr *) o->addr, o->addrlen);
                         if(ret == xsuccess)
                         {
                             result |= xclient_event_connect;

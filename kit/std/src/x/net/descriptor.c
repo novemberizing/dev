@@ -15,19 +15,19 @@
 
 extern xint32 xdescriptoralive(const xdescriptor * o)
 {
-    return o ? o->f >= 0 : xfalse;
+    return o ? o->value.f >= 0 : xfalse;
 }
 
 extern xint32 xdescriptor_nonblock_on(xdescriptor * o)
 {
     if(o)
     {
-        if(o->f >= 0)
+        if(o->value.f >= 0)
         {
-            int flags = fcntl(o->f, F_GETFL, 0);
+            int flags = fcntl(o->value.f, F_GETFL, 0);
             xassertion(flags == xfail, "fail to fcntrl (%d)", errno);
             flags |= O_NONBLOCK;
-            int ret = fcntl(o->f, F_SETFL, flags);
+            int ret = fcntl(o->value.f, F_SETFL, flags);
             xassertion(ret == xfail, "fail to fcntl (%d)", errno);
             return ret;
         }
@@ -39,12 +39,12 @@ extern xint32 xdescriptor_nonblock_off(xdescriptor * o)
 {
     if(o)
     {
-        if(o->f >= 0)
+        if(o->value.f >= 0)
         {
-            int flags = fcntl(o->f, F_GETFL, 0);
+            int flags = fcntl(o->value.f, F_GETFL, 0);
             xassertion(flags == xfail, "fail to fcntrl (%d)", errno);
             flags &= (~O_NONBLOCK);
-            int ret = fcntl(o->f, F_SETFL, flags);
+            int ret = fcntl(o->value.f, F_SETFL, flags);
             xassertion(ret == xfail, "fail to fcntl (%d)", errno);
             return ret;
         }
@@ -58,15 +58,15 @@ extern xint32 xdescriptorclose(xdescriptor * o)
     xcheck(o == xnil, "null pointer");
     if(o)
     {
-        xcheck((o->f >= 0) == xfalse, "socket not opened");
+        xcheck((o->value.f >= 0) == xfalse, "socket not opened");
 
-        if(o->f >= 0)
+        if(o->value.f >= 0)
         {
-            if(close(o->f) != xsuccess)
+            if(close(o->value.f) != xsuccess)
             {
                 xassertion(xtrue, "fail to close (%d)", errno);
             }
-            o->f = xinvalid;
+            o->value.f = xinvalid;
         }
         return xsuccess;
     }
@@ -77,10 +77,10 @@ extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 nanosecond
 {
     if(o)
     {
-        if(o->f >= 0)
+        if(o->value.f >= 0)
         {
             struct pollfd fds = { xinvalid, 0, 0 };
-            fds.fd = o->f;
+            fds.fd = o->value.f;
             if(mask & xdescriptor_event_read)
             {
                 fds.events |= POLLIN;

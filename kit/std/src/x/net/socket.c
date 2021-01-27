@@ -16,9 +16,9 @@ extern xint32 xsocketopen(xsocket * o)
         xcheck(xsocketalive(o), "socket is alive");
         if(xsocketalive(o) == xfalse)
         {
-            o->descriptor.f = socket(o->domain, o->type, o->protocoal);
+            o->descriptor.value.f = socket(o->domain, o->type, o->protocoal);
             
-            xassertion(o->descriptor.f < 0, "fail to socket (%d)", errno);
+            xassertion(o->descriptor.value.f < 0, "fail to socket (%d)", errno);
         }
         return xsuccess;
     }
@@ -73,7 +73,7 @@ extern xint64 xsocketwrite(xsocket * o, const xbyte * data, xuint64 len)
             xcheck(len == 0, "invalid parameter");
             if(len > 0)
             {
-                xint64 n = write(o->descriptor.f, data, len);
+                xint64 n = write(o->descriptor.value.f, data, len);
                 if(n > 0)
                 {
                     return n;
@@ -111,7 +111,7 @@ extern xint64 xsocketread(xsocket * o, void * buffer, xuint64 len)
             xcheck(len == 0, "invalid parameter");
             if(len > 0)
             {
-                xint64 n = read(o->descriptor.f, buffer, len);
+                xint64 n = read(o->descriptor.value.f, buffer, len);
                 if(n > 0)
                 {
                     return n;

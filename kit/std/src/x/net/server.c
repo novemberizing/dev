@@ -40,6 +40,8 @@ extern xserver * xservernew(int domain, int type, int protocol)
     o->protocol = protocol;
 
     o->backlog = SOMAXCONN;
+    o->factory = xsessionnew;
+    o->release = xsessionrem;
 
     return o;
 }
@@ -62,10 +64,10 @@ extern xint32 xserverlisten(xserver * o, void * addr, xuint64 addrlen)
             int ret = xsocketopen((xsocket *) o);
             if(ret == xsuccess)
             {
-                ret = bind(o->descriptor.f, (struct sockaddr *) o->addr, o->addrlen);
+                ret = bind(o->descriptor.value.f, (struct sockaddr *) o->addr, o->addrlen);
                 if(ret == xsuccess)
                 {
-                    ret = listen(o->descriptor.f, o->backlog);
+                    ret = listen(o->descriptor.value.f, o->backlog);
                     if(ret == xsuccess)
                     {
                         if(o->flags & xsocket_mask_nonblock)
@@ -106,10 +108,10 @@ extern xint32 xserverrelisten(xserver * o)
             int ret = xsocketopen((xsocket *) o);
             if(ret == xsuccess)
             {
-                ret = bind(o->descriptor.f, (struct sockaddr *) o->addr, o->addrlen);
+                ret = bind(o->descriptor.value.f, (struct sockaddr *) o->addr, o->addrlen);
                 if(ret == xsuccess)
                 {
-                    ret = listen(o->descriptor.f, o->backlog);
+                    ret = listen(o->descriptor.value.f, o->backlog);
                     if(ret == xsuccess)
                     {
                         if(o->flags & xsocket_mask_nonblock)
@@ -173,7 +175,7 @@ extern xsession * xserveraccept(xserver * o)
         {
             socklen_t addrlen = __xinternal_addrlen_get(o->protocol);
             struct sockaddr * addr = (struct sockaddr *) calloc(addrlen, 1) ;
-            int fd = accept(o->descriptor.f, addr, &addrlen);
+            int fd = accept(o->descriptor.value.f, addr, &addrlen);
             if(fd >= 0)
             {
                 xsession * session = o->factory();
@@ -182,12 +184,12 @@ extern xsession * xserveraccept(xserver * o)
                 session->addrlen = addrlen;
                 session->protocol = o->protocol;
                 session->domain = o->domain;
-                session->descriptor.f = fd;
+                session->descriptor.value.f = fd;
                 session->parent = o;
                 session->status = xsession_status_link;
                 session->type = o->type;
 
-                xsynclock(o->sync);
+                xsynclock(o->descriptor.sync);
                 session->prev = o->tail;
                 if(session->prev)
                 {
@@ -199,7 +201,7 @@ extern xsession * xserveraccept(xserver * o)
                 }
                 o->tail = session;
                 o->alives = o->alives + 1;
-                xsyncunlock(o->sync);
+                xsyncunlock(o->descriptor.sync);
                 // TODO: EVENT HANDLING ... 
                 return session;
             }
@@ -211,4 +213,11 @@ extern xsession * xserveraccept(xserver * o)
         }
     }
     return xnil;
+}
+
+extern xsession * xserver_default_session_factory(void)
+{
+    xsession * o = xsessionnew();
+
+    return o;
 }

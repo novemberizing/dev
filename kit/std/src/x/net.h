@@ -3,25 +3,53 @@
 
 #include <x/std.h>
 
-union xdescriptor;
+struct xdescriptor;
 struct xsocket;
 struct xsession;
 struct xclient;
 struct xserver;
+struct xdescriptorlist;
+struct xpoll;
 
-typedef union xdescriptor xdescriptor;
+typedef struct xdescriptorlist xdescriptorlist;
+typedef struct xdescriptor xdescriptor;
 typedef struct xsocket xsocket;
 typedef struct xclient xclient;
 typedef struct xserver xserver;
 typedef struct xsession xsession;
+typedef struct xpoll xpoll;
 
-union xdescriptor
+struct xdescriptor
 {
-    int    f;       /**!< file descriptor */
-    void * h;       /**!< handle descriptor */
+    union
+    {
+        int    f;       /**!< file descriptor */
+        void * h;       /**!< handle descriptor */
+    } value;
+    xdescriptor * prev; /**!< ... */
+    xdescriptor * next; /**!< ... */
+    xdescriptorlist * parent;
+    xuint32 interest;
+    xuint32 masked;
+    xsync * sync;
 };
 
-#define xdescriptorinit()               (xdescriptor) { .f = xinvalid }
+/**
+ * 
+ */
+struct xdescriptorlist
+{
+    xuint32 flags;
+    xdestructor destruct;
+
+    xdescriptor * head;
+    xdescriptor * tail;
+    xuint64 descriptors;
+
+    xsync * sync;
+};
+
+#define xdescriptorinit()               (xdescriptor) { { .f = xinvalid }, xnil, xnil, xnil, xdescriptor_event_void, xdescriptor_event_void, xnil }
 
 #define xdescriptor_event_void          0x00000000U
 #define xdescriptor_event_read          0x00000001U
@@ -46,6 +74,7 @@ extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 nanosecond
 extern xint32 xdescriptorclose(xdescriptor * o);
 
 #define xobj_type_socket                0x00000100U
+#define xobj_type_io_facility           0x00000200U
 
 #define xsocket_masks                   0x00FF0000U
 #define xsocket_mask_nonblock           0x00010000U
@@ -194,10 +223,15 @@ struct xsession
     xsession * prev;
     xsession * next;
 
-    xsync * sync;
+//    xsync * sync;
 };
 
+extern xsession * xsessionnew(void);
+extern void * xsessionrem(void * p);
+
 typedef xsession * (*xsessionfactory)(void);
+typedef void * (*xsessionrelease)(void *);
+
 
 #define xobj_type_server            (xobj_type_socket | 0x00000003U)
 
@@ -234,16 +268,17 @@ struct xserver
 
     xint32 backlog;
     xsessionfactory factory;
+    xsessionrelease release;
 
     xsession * head;
     xsession * tail;
 
     xuint64 alives;
 
-    xsync * sync;
+//    xsync * sync;
 };
 
-#define xserverinit(domain, type, protocol)                         (xserver) { xobj_type_server, xserverrem, xdescriptorinit(), domain, type, protocol, xnil, 0 }
+#define xserverinit(domain, type, protocol)                         (xserver) { xobj_type_server, xserverrem, xdescriptorinit(), domain, type, protocol, xnil, 0, xdefaultmaxconn(), xsessionnew, xsessionrem, xnil, xnil, 0, xnil }
 extern xserver * xservernew(int domain, int type, int protocol);
 
 #define xservermaskadd(client, mask)    (xserver *) xsocketmaskadd((xserver *) client, mask)
@@ -261,5 +296,24 @@ extern xint32 xserverrelisten(xserver * o);
 extern void * xserverrem(void * p);
 
 extern xsession * xserveraccept(xserver * o);
+
+#define xobj_type_poll                  (xobj_type_io_facility | 0x00000001U)
+
+struct xpoll
+{
+    xuint32 flags;
+    xdestructor destruct;
+
+    xdescriptor * head;
+    xdescriptor * tail;
+    xuint64 descriptors;
+
+    xsync * sync;
+};
+
+#define xpollinit()         (xpoll) { xobj_type_poll, xpollrem, xnil, xnil, 0, xnil }
+extern xpoll * xpollnew(void);
+extern void * xpollrem(void * p);
+// extern void xpolladd(xdescriptor )
 
 #endif // __NOVEMBERIZING_X__NET__H__

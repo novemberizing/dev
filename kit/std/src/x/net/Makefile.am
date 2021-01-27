@@ -7,4 +7,5 @@ libnovemberizing_net_a_SOURCES = descriptor.c \
                                  socket.c     \
                                  client.c     \
                                  server.c     \
-                                 session.c
+                                 session.c    \
+                                 poll.c
