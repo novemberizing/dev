@@ -13,237 +13,488 @@
 
 #include "../net.h"
 
+static inline xuint32 __xpoll_convert_mask_to_pollmask(xuint32 mask)
+{
+    xuint32 result = 0;
+    if(mask & xdescriptor_status_in)
+    {
+        result |= POLLIN;
+    }
+    if(mask & xdescriptor_status_out)
+    {
+        result |= POLLOUT;
+    }
+    if(mask & xdescriptor_status_exception)
+    {
+        result |= (POLLPRI | POLLRDHUP | POLLERR | POLLHUP | POLLNVAL);
+    }
+    else
+    {
+        if(mask & xdescriptor_status_read_hangup)
+        {
+            result |= POLLRDHUP;
+        }
+        if(mask & xdescriptor_status_pri)
+        {
+            result |= POLLPRI;
+        }
+        if(mask & xdescriptor_status_hangup)
+        {
+            result |= POLLHUP;
+        }
+        if(mask & xdescriptor_status_error)
+        {
+            result |= POLLERR;
+        }
+        if(mask & xdescriptor_status_invalid)
+        {
+            result |= POLLNVAL;
+        }
+    }
+    return result;
+}
 
+/**
+ * @fn      extern xint32 xdescriptorclose(xdescriptor * o)
+ * @brief   
+ * @details
+ * 
+ * 
+ */
+extern xint32 xdescriptorclose(xdescriptor * o)
+{
+    if(o)
+    {
+        if(o->handle.f >= 0)
+        {
+            int ret = close(o->handle.f);
 
-// /**
-//  * @fn  
-//  * @brief   
-//  */
-// extern xdescriptor * xdescriptornew(xuint32 type, xdestructor destructor, xuint64 size)
-// {
-//     xassertion(size <= sizeof(xdescriptor), "invalid size");
-//     xdescriptor * o = (xdescriptor *) calloc(size, 1);
-//     xassertion(o == xnil, "fail to calloc (%d)", errno);
+            if(ret == xsuccess)
+            {
+                o->status |= xdescriptor_status_close;
+                o->status &= (~(xdescriptor_status_open | xdescriptor_status_in | xdescriptor_status_out));
 
-//     // TODO: CHECK TYPE VALIDATION
-//     o->flags = (xobj_mask_allocated | xobj_type_net | type);
-//     o->destruct = destructor;
+                xdescriptoreventpub(o, xdescriptor_event_close, o->parent, xvalgen(0));
 
-//     o->value.f = xinvalid;
+                o->status = xdescriptor_event_void;
+            }
+            else
+            {
+                xassertion(xtrue, "fail to close (%d) - check this", errno);
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "not alive");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+    return xsuccess;
+}
 
-//     return o;
-// }
+extern xint32 xdescriptoralive(xdescriptor * o)
+{
+    return (o && o->handle.f >=0);
+}
 
-// extern void * xdescriptorrem(void * p)
-// {
-//     xdescriptor * o = (xdescriptor *) p;
-//     xcheck(o == xnil, "null pointer");
-//     if(o)
-//     {
-//         xsynclock(o->sync);
-//         if(o->parent)
-//         {
-//             xsynclock(o->parent->sync);
-//             xdescriptor * prev = o->prev;
-//             xdescriptor * next = o->next;
-//             if(prev)
-//             {
-//                 prev->next = next;
-//             }
-//             else
-//             {
-//                 o->parent->head = next;
-//             }
-//             if(next)
-//             {
-//                 next->prev = prev;
-//             }
-//             else
-//             {
-//                 o->parent->tail = prev;
-//             }
-//             o->parent->total = o->parent->total - 1;
-//             xsyncunlock(o->parent->sync);
-//             o->parent = xnil;
-//         }
-//         o->sync = xobjrem(o->sync);
-//         if(xdescriptoralive(o))
-//         {
-//             xdescriptorclose(o);
-//         }
-//         xsyncunlock(o->sync);
-//         if(xobjallocated(o))
-//         {
-//             free(o);
-//             o = xnil;
-//         }
-//     }
-//     return o;
-// }
+extern xint64 xdescriptorread(xdescriptor * o, void * buffer, xuint64 size)
+{
+    if(o)
+    {
+        if(o->handle.f >= 0)
+        {
+            xcheck((o->status & xdescriptor_status_in) == xdescriptor_status_void, "not avail descriptor in");
+            if(buffer && size)
+            {
+                xint64 n = read(o->handle.f, buffer, size);
+                if(n > 0)
+                {
+                    o->status |= xdescriptor_status_in;
+                    xdescriptoreventpub(o, xdescriptor_event_in, o->parent, xvalgen(n));
+                    return n;
+                }
+                else if(n == 0)
+                {
+                    xcheck(xtrue, "read return zero (may be closed)");
+                    o->status |= xdescriptor_event_exception;
+                    // TODO: CHECK CLOSE ??????????
+                    xdescriptoreventpub(o, xdescriptor_event_exception, o->parent, xvalgen(0));
+                    return xfail;
+                }
+                else
+                {
+                    int err = errno;
+                    if(err == EAGAIN)
+                    {
+                        o->status &= (~xdescriptor_status_in);
+                        return 0;
+                    }
+                    else
+                    {
+                        xcheck(xtrue, "fail to read (%d)", err);
+                        o->status |= xdescriptor_event_exception;
+                        xdescriptoreventpub(o, xdescriptor_event_exception, o->parent, xvalgen(err));
+                        return xfail;
+                    }
+                }
+            }
+            else
+            {
+                xcheck(xtrue, "buffer not exist");
+                return xsuccess;
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "not alive descriptor");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+    return xfail;
+}
 
-// extern xint32 xdescriptorclose(xdescriptor * o)
-// {
-//     xcheck(o == xnil, "null pointer");
+extern xint64 xdescriptorwrite(xdescriptor * o, const void * data, xuint64 length)
+{
+    if(o)
+    {
+        if(o->handle.f >= 0)
+        {
+            if(data && length)
+            {
+                xcheck((o->status & xdescriptor_status_out) == xdescriptor_status_void, "descriptor not avail write");
+                xint64 n = write(o->handle.f, data, length);
+                if(n > 0)
+                {
+                    o->status |= xdescriptor_status_out;
+                    xdescriptoreventpub(o, xdescriptor_event_out, o->parent, xvalgen(n));
+                    return n;
+                }
+                else if(n == 0)
+                {
+                    // PRINT ALL 
+                    xcheck(xtrue, "check this logic");
+                    return xsuccess;
+                }
+                else
+                {
+                    int err = errno;
+                    if(err == EAGAIN)
+                    {
+                        o->status &= (~xdescriptor_status_out);
+                        return xsuccess;
+                    }
+                    else
+                    {
+                        xcheck(xtrue, "fail to write (%d)", err);
+                        o->status |= xdescriptor_event_exception;
+                        xdescriptoreventpub(o, xdescriptor_event_exception, o->parent, xvalgen(err));
+                        return xfail;
+                    }
+                }
+            }
+            else
+            {
+                xcheck(xtrue, "no available data");
+                return xsuccess;
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "not alive descriptor");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+    return xfail;
+}
 
-//     if(o)
-//     {
-//         if(xdescriptoralive(o))
-//         {
-//             int ret = close(o->value.f);
-//             xassertion(ret != xsuccess, "fail to close (%d)", errno);
+extern xint32 xdescriptornonblock_on(xdescriptor * o)
+{
+    if(o)
+    {
+        if(o->handle.f >= 0)
+        {
+            int flags = fcntl(o->handle.f, F_GETFL, 0);
 
-//             xcheck(xtrue, "implement callback notify");
+            xassertion(flags == xfail, "fail to fcntl (%d)", errno);
 
-//             o->value.f = xinvalid;
-//             o->status  = xdescriptor_status_close;
+            flags |= O_NONBLOCK;
 
-//             xdescriptorpub(o, xdescriptor_event_close);
+            int ret = fcntl(o->handle.f, F_SETFL, flags);
 
-//             o->status  = xdescriptor_status_void;
+            xassertion(ret == xfail, "fail to fcntl (%d)", errno);
 
-//             return xsuccess;
-//         }
-//         else
-//         {
-//             xcheck(xtrue, "already close");
-//         }
-//     }
+            return xsuccess;
+        }
+        else
+        {
+            xcheck(xtrue, "not alive descriptor");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+    return xfail;
+}
 
-//     return xsuccess;
-// }
+extern xint32 xdescriptornonblock_off(xdescriptor * o)
+{
+    if(o)
+    {
+        if(o->handle.f >= 0)
+        {
+            int flags = fcntl(o->handle.f, F_GETFL, 0);
 
-// extern xint32 xdescriptoralive(xdescriptor * o)
-// {
-//     xcheck(o == xnil, "null pointer");
+            xassertion(flags == xfail, "fail to fcntl (%d)", errno);
 
-//     return (o && o->value.f >= 0);
-// }
+            flags &= (~O_NONBLOCK);
 
-// extern xint64 xdescriptorread(xdescriptor * o, xbyte * buffer, xuint64 size)
-// {
-//     xassertion(buffer == xnil || size == 0, "invalid parameter");
+            int ret = fcntl(o->handle.f, F_SETFL, flags);
 
-//     if(o)
-//     {
-//         if(xdescriptoralive(o))
-//         {
-//             xint64 n = read(o->value.f, buffer, size);
-//             if(n > 0)
-//             {
-//                 return n;
-//             }
-//             else if(n == 0)
-//             {
-//                 xcheck(xtrue, "check this logic");
-//             }
-//             else
-//             {
-//                 int err = errno;
-//                 if(err == EAGAIN)
-//                 {
-//                     return 0;
-//                 }
-//                 xcheck(xtrue, "fail to read (%d)", err);
-//             }
-//         }
-//         else
-//         {
-//             xcheck(xtrue, "not alive");
-//         }
-//     }
-//     else
-//     {
-//         xcheck(xtrue, "null pointer");
-//     }
+            xassertion(ret == xfail, "fail to fcntl (%d)", errno);
 
-//     return xfail;
-// }
+            return xsuccess;
+        }
+        else
+        {
+            xcheck(xtrue, "not alive descriptor");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+    return xfail;
+}
 
-// extern xint64 xdescriptorwrite(xdescriptor * o, const xbyte * data, xuint64 len)
-// {
-//     if(o)
-//     {
-//         if(xdescriptoralive(o))
-//         {
-//             if(data && len > 0)
-//             {
-//                 xint64 n = write(o->value.f, data, len);
-//                 if(n > 0)
-//                 {
-//                     return n;
-//                 }
-//                 else if(n == 0)
-//                 {
-//                     xcheck(xtrue, "check this logic");
-//                     return 0;
-//                 }
-//                 else
-//                 {
-//                     int err = errno;
-//                     if(err == EAGAIN)
-//                     {
-//                         return 0;
-//                     }
-//                     xcheck(xtrue, "fail to read (%d)", err);
-//                 }
-//             }
-//             else
-//             {
-//                 return 0;
-//             }
-//         }
-//         else
-//         {
-//             xcheck(xtrue, "not alive");
-//         }
-//     }
-//     else
-//     {
-//         xcheck(xtrue, "null pointer");
-//     }
+extern xdescriptorio * xdescriptorionew(xuint32 type, xdestructor destructor, xuint64 memorysize)
+{
+    // TODO: TYPE CHECK
+    xassertion(memorysize < sizeof(xdescriptorio) || destructor == xnil, "invalid parameter");
 
-//     return xfail;
-// }
+    xdescriptorio * o = (xdescriptorio *) calloc(memorysize, 1);
+    xassertion(o == xnil, "fail to calloc (%d)", errno);
 
+    o->flags = (xobj_mask_allocated | type);
+    o->destruct = destructor;
 
-// // extern xint32 xdescriptoralive(const xdescriptor * o)
-// // {
-// //     return o ? o->value.f >= 0 : xfalse;
-// // }
+    return o;
+}
 
-// // extern xint32 xdescriptor_nonblock_on(xdescriptor * o)
-// // {
-// //     if(o)
-// //     {
-// //         if(o->value.f >= 0)
-// //         {
-// //             int flags = fcntl(o->value.f, F_GETFL, 0);
-// //             xassertion(flags == xfail, "fail to fcntrl (%d)", errno);
-// //             flags |= O_NONBLOCK;
-// //             int ret = fcntl(o->value.f, F_SETFL, flags);
-// //             xassertion(ret == xfail, "fail to fcntl (%d)", errno);
-// //             return ret;
-// //         }
-// //     }
-// //     return xfail;
-// // }
+extern void xdescriptorioadd(xdescriptorio * o, xdescriptor * descriptor)
+{
+    if(o && descriptor)
+    {
+        xsynclock(descriptor->sync);
+        if(descriptor->io == xnil)
+        {
+            xsynclock(o->sync);
+            descriptor->io = o;
+            descriptor->prev = o->tail;
+            o->tail = descriptor;
+            if(descriptor->prev)
+            {
+                descriptor->prev->next = descriptor;
+            }
+            else
+            {
+                o->head = descriptor;
+            }
+            o->total = o->total + 1;
+            xsyncunlock(o->sync);
+        }
+        else
+        {
+            xcheck(xtrue, "parent io facility is exist");
+        }
+        xsyncunlock(descriptor->sync);
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+}
 
-// // extern xint32 xdescriptor_nonblock_off(xdescriptor * o)
-// // {
-// //     if(o)
-// //     {
-// //         if(o->value.f >= 0)
-// //         {
-// //             int flags = fcntl(o->value.f, F_GETFL, 0);
-// //             xassertion(flags == xfail, "fail to fcntrl (%d)", errno);
-// //             flags &= (~O_NONBLOCK);
-// //             int ret = fcntl(o->value.f, F_SETFL, flags);
-// //             xassertion(ret == xfail, "fail to fcntl (%d)", errno);
-// //             return ret;
-// //         }
-// //     }
-// //     return xfail;
-// // }
+extern void xdescriptoriodel(xdescriptorio * o, xdescriptor * descriptor)
+{
+    if(o && descriptor)
+    {
+        xsynclock(descriptor->sync);
+        xcheck(o != descriptor->io, "invalid io facility");
+        if(descriptor->io)
+        {
+            o = descriptor->io;
+            xsynclock(o->sync);
+            xdescriptor * prev = descriptor->prev;
+            xdescriptor * next = descriptor->next;
+            if(prev)
+            {
+                prev->next = next;
+            }
+            else
+            {
+                o->head = next;
+            }
+            if(next)
+            {
+                next->prev = prev;
+            }
+            else
+            {
+                o->tail = prev;
+            }
+            o->total = o->total - 1;
+            descriptor->io = xnil;
+            descriptor->prev = xnil;
+            descriptor->next = xnil;
+            xsyncunlock(o->sync);
+        }
+        else
+        {
+            xcheck(xtrue, "descriptor's io facility is not exist");
+        }
+        xsyncunlock(descriptor->sync);
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+}
+
+extern void xdescriptorioclear(xdescriptorio * o)
+{
+    if(o)
+    {
+        xsynclock(o->sync);
+        while(o->head)
+        {
+            xdescriptor * descriptor = o->head;
+            o->head = o->head->next;
+            descriptor->next = xnil;
+            descriptor->io = xnil;
+            o->total = o->total - 1;
+            if(o->head)
+            {
+                o->head->prev = xnil;
+            }
+            else
+            {
+                o->tail = xnil;
+            }
+        }
+        xsyncunlock(o->sync);
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+}
+
+extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 second, xuint64 nanosecond)
+{
+    if(o)
+    {
+        if(o->handle.f >= 0)
+        {
+            if(mask)
+            {
+                struct pollfd data;
+                data.fd      = o->handle.f;
+                data.events  = __xpoll_convert_mask_to_pollmask(mask);
+                data.revents = 0;
+
+                xtime start  = xtimeget();
+                xtime end    = xtimeset(start.second + second, start.nanosecond + nanosecond);
+
+                xuint32 result = xdescriptor_event_void;
+
+                while((result & mask) != mask)
+                {
+                    data.revents = 0;
+                    struct timespec timeout = { 0, 1000 };      // 1 unisecond
+                    int nfds = ppoll(&data, 1, &timeout, xnil); // TODO: SIGNAL HANDLING
+                    if(nfds >= 0)
+                    {
+                        if(data.revents & POLLIN)
+                        {
+                            result |= xdescriptor_event_in;
+                        }
+                        if(data.revents & POLLOUT)
+                        {
+                            result |= xdescriptor_event_out;
+                        }
+                        if(data.revents & POLLPRI)
+                        {
+                            result |= (xdescriptor_event_pri | xdescriptor_event_exception);
+                        }
+                        if(data.revents & POLLRDHUP)
+                        {
+                            result |= (xdescriptor_event_read_hangup | xdescriptor_event_exception);
+                        }
+                        if(data.revents & POLLERR)
+                        {
+                            result |= (xdescriptor_event_error | xdescriptor_event_exception);
+                        }
+                        if(data.revents & POLLHUP)
+                        {
+                            result |= (xdescriptor_event_hangup | xdescriptor_event_exception);
+                        }
+                        if(data.revents & POLLNVAL)
+                        {
+                            result |= (xdescriptor_event_invalid | xdescriptor_event_exception);
+                        }
+                        if(result & xdescriptor_event_exception)
+                        {
+                            // TODO: CHECK OTHER EXCEPTION ...
+                            return result;
+                        }
+                        else
+                        {
+                            if((result & mask) != mask && (second > 0 || nanosecond > 0))
+                            {
+                                xtime current = xtimeget();
+                                if(xtimecmp(&current, &end) >= 0)
+                                {
+                                    result |= xdescriptor_event_timeout;
+                                    return result;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        xassertion(xtrue, "fail to poll (%d)", errno);
+                    }
+                }
+                return result;
+            }
+            else
+            {
+                xcheck(xtrue, "no event mask");
+                return xdescriptor_event_void;
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "not alive descriptor");
+            return xdescriptor_event_exception;
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+        return xdescriptor_event_exception;
+    }
+}
 
 
 // // extern xint32 xdescriptorclose(xdescriptor * o)

@@ -8,6 +8,158 @@
 
 #include "../net.h"
 
+static inline int __xsocket_internal_convert_shutdown_method(xuint32 how)
+{
+    if((how & xdescriptor_event_close) == xdescriptor_event_close)
+    {
+        return SHUT_RDWR;
+    }
+    else if(how & xdescriptor_event_close_read)
+    {
+        return SHUT_RD;
+    }
+    else if(how & xdescriptor_event_close_write)
+    {
+        return SHUT_WR;
+    }
+    else
+    {
+        xassertion(xtrue, "invalid parameter");
+        return 0;
+    }
+}
+
+static xint64 __xsocket_internal_descriptor_event_on(xdescriptor * descriptor, xuint32 mask, void * p, xval data)
+{
+    xassertion(descriptor == xnil || p == xnil, "null pointer");
+    xsocket * sock = (xsocket *) p;
+
+    xcheck(sock->on == xnil, "no event handler");
+
+    return sock->on ? sock->on((xeventobj *) p, mask, xnil, data) : xfail;
+}
+
+extern xsocket * xsocketnew(xuint32 type, xdestructor destructor, xeventobjon handler, xuint64 size)
+{
+    xassertion(size < sizeof(xsocket), "invalid paramter");
+
+    xsocket * o = (xsocket *) calloc(size, 1);
+    xassertion(o == xnil, "fail to calloc (%d)", errno);
+    // TODO: TYPE CHECK
+    o->flags    = (xobj_mask_allocated | type);
+    o->destruct = destructor;
+    o->on       = handler;
+    
+    o->descriptor.handle.f = xinvalid;
+    o->descriptor.parent   = o;
+    o->descriptor.on       = __xsocket_internal_descriptor_event_on;
+
+    return o;
+}
+
+extern void * xsocketrem(void * p)
+{
+    xsocket * o = (xsocket *) p;
+
+    if(o)
+    {
+        if(xobjtype(o) == xobj_type_event_socket)
+        {
+            xsynclock(o->sync);
+            xeventobj * parent = o->parent;
+            if(parent)
+            {
+                xsynclock(parent->sync);
+                xeventobj * prev = o->prev;
+                xeventobj * next = o->next;
+                if(prev)
+                {
+                    prev->next = next;
+                }
+                else
+                {
+                    parent->head = next;
+                }
+                if(next)
+                {
+                    next->prev = prev;
+                }
+                else
+                {
+                    parent->tail = prev;
+                }
+                parent->total = parent->total - 1;
+                xsyncunlock(parent->sync);
+                o->prev = xnil;
+                o->next = xnil;
+                o->parent = xnil;
+            }
+            xsyncunlock(o->sync);
+        }
+        else
+        {
+            o = (xsocket *) o->destruct(o);
+        }
+    }
+    return o;
+}
+
+extern xint32 xsocketshutdown(xsocket * o, xuint32 how)
+{
+    if(o)
+    {
+        if(o->descriptor.handle.f >= 0)
+        {
+            int ret = shutdown(o->descriptor.handle.f, __xsocket_internal_convert_shutdown_method(how));
+            if(ret == xsuccess)
+            {
+                if((how & xdescriptor_event_close) != xdescriptor_event_close)
+                {
+                    if(how & xdescriptor_event_close_read)
+                    {
+                        if((o->descriptor.status & xdescriptor_status_close_read) == xdescriptor_status_void)
+                        {
+                            o->descriptor.status |= xdescriptor_status_close_read;
+                            o->descriptor.status &= (~xdescriptor_status_in);
+                            xdescriptoreventpub(xaddressof(o->descriptor), xdescriptor_event_close_read, o, xvalgen(0));
+                        }
+                    }
+                    if(how & xdescriptor_event_close_write)
+                    {
+                        if((o->descriptor.status & xdescriptor_status_close_write) == xdescriptor_status_void)
+                        {
+                            o->descriptor.status |= xdescriptor_status_close_write;
+                            o->descriptor.status &= (~xdescriptor_status_out);
+                            xdescriptoreventpub(xaddressof(o->descriptor), xdescriptor_event_close_write, o, xvalgen(0));
+                        }
+                    }
+                }
+                if((o->descriptor.status & xdescriptor_status_close) == xdescriptor_status_close)
+                {
+                    o->descriptor.status |= xdescriptor_status_close;
+                    o->descriptor.status &= (~(xdescriptor_status_open | xdescriptor_status_in | xdescriptor_status_out));
+                    xdescriptoreventpub(xaddressof(o->descriptor), xdescriptor_event_close, o, xvalgen(0));
+                    o->descriptor.status = xdescriptor_status_void;
+                }
+                return xsuccess;
+            }
+            else
+            {
+                xcheck(xtrue, "fail to shutdown (%d)", errno);
+                return xfail;
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "not alive socket");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+    return xsuccess;
+}
 
 
 // static xint32 __xsocket_internal_shutdown_method_convert(xint32 how)

@@ -15,6 +15,7 @@
 
 union xval;
 struct xobj;
+struct xtime;
 struct xprimitive;
 
 #define xsuccess            (0)
@@ -36,6 +37,7 @@ typedef unsigned char       xbyte;
 typedef union xval          xval;
 typedef struct xobj         xobj;
 typedef struct xprimitive   xprimitive;
+typedef struct xtime        xtime;
 
 extern void * xdup(const void * data, xuint64 len);
 extern void * xfree(void * o);
@@ -51,6 +53,17 @@ union xval
     xuint64 u64;
     void *  ptr;
 };
+
+struct xtime
+{
+    xint64 second;
+    xint64 nanosecond;
+};
+
+extern xtime xtimeget(void);
+extern xtime xtimeset(xint64 second, xint64 nanosecond);
+extern int xtimecmp(const xtime * x, const xtime * y);
+
 
 #define xaddressof(o)       (&o)
 
