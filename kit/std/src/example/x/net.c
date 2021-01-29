@@ -49,9 +49,168 @@ static void example_net_socket(void)
     }
 }
 
+static void example_net_client(void)
+{
+    // 로컬에서 클라이언트를 생성합니다.
+    xclient local = xclientinit(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+    xclientrem(&local);
+    // 동적할당으로 클라이언트를 생성합니다.
+    xclient * o = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+    o = xclientrem(o);
+
+    // 클라이언트를 오픈 하고 특정 주소를 할당합니다.
+    if(o == xnil)
+    {
+        int ret = xsuccess;
+        struct sockaddr_in addr;
+        addr.sin_family = PF_INET;
+        addr.sin_addr.s_addr = 0;
+        addr.sin_port = htons(3371);
+        // 소켓을 오픈한 후에 바인드합니다.
+        o = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+        ret = xclientopen(o);
+        xassertion(ret != xsuccess, "fail to xclientopen");
+        ret = xclientbind(o, &addr, sizeof(struct sockaddr_in));
+        xassertion(ret != xsuccess, "fail to xclientbind");
+        o = xclientrem(o);
+        // 소켓을 바인드할 때 오픈합니다.
+        o = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+        ret = xclientbind(o, &addr, sizeof(struct sockaddr_in));
+        // 바인드 실패하면 오픈 상태입니다. 명시적으로 소켓을 닫아주어야 합니다.
+        if(ret != xsuccess)
+        {
+            xclientclose(o);
+        }
+        xassertion(ret != xsuccess, "fail to xclientbind");
+        o = xclientrem(o);
+    }
+
+    /**
+     * simple echo server
+     * ncat -l 2000 -k -c 'xargs -n1 echo'
+     */
+    // 클라이언트 접속
+    char data[1024];
+    char buffer[1024];
+    for(xint32 i = 0; i < 32; i++)
+    {
+        int ret = xsuccess;
+        struct sockaddr_in addr;
+        addr.sin_family = PF_INET;
+        addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+        addr.sin_port = htons(2000);
+        // 소켓을 오픈한 후에 바인드합니다.
+        o = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+        ret = xclientopen(o);
+        xassertion(ret != xsuccess, "fail to xclientopen");
+        ret = xclientconnect(o, &addr, sizeof(struct sockaddr_in));
+        o = xclientrem(o);
+        // 소켓을 바인드할 때 오픈합니다.
+        o = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+        ret = xclientconnect(o, &addr, sizeof(struct sockaddr_in));
+        // 바인드 실패하면 오픈 상태입니다. 명시적으로 소켓을 닫아주어야 합니다.
+        if(ret != xsuccess)
+        {
+            if(xclientalive(o))
+            {
+                xclientclose(o);
+            }
+        }
+        o = xclientrem(o);
+
+        // 접속 후에 논블록 설정을 합니다.
+        o = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+        ret = xclientconnect(o, &addr, sizeof(struct sockaddr_in));
+        xclientnonblock_on(o);
+        xint64 n = xclientread(o, buffer, 1024);
+        if(n == 0)
+        {
+            printf("again\n");
+        }
+        // 바인드 실패하면 오픈 상태입니다. 명시적으로 소켓을 닫아주어야 합니다.
+        if(ret != xsuccess)
+        {
+            if(xclientalive(o))
+            {
+                xclientclose(o);
+            }
+        }
+        o = xclientrem(o);
+
+        // 비동기 접속을 수행하는 예제입니다.
+        o = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+        xclientset_nonblock_on(o);
+        ret = xclientconnect(o, &addr, sizeof(struct sockaddr_in));
+        // 바인드 실패하면 오픈 상태입니다. 명시적으로 소켓을 닫아주어야 합니다.
+        if(ret != xsuccess)
+        {
+            if(xclientalive(o))
+            {
+                xclientclose(o);
+            }
+        }
+        else
+        {
+            if(o->descriptor.status & xclient_status_connecting)
+            {
+                printf("client connecting\n");
+            }
+            xuint32 result = xclientwait(o, xclient_event_connected, 1, 0);
+            if(result & xclient_event_connected)
+            {
+                printf("client connected\n");
+                result = xclientwait(o, xdescriptor_event_in, 1, 0);
+                printf("result 0x%08x\n", result);
+                if(result & xdescriptor_event_timeout)
+                {
+                    printf("timeout\n");
+                }
+                int len = snprintf(data, 1024, "helloworld%d\n", i);
+                xint64 n = xclientwrite(o, data, len);
+                if(n >= 0)
+                {
+                    printf("send => %ld\n", n);
+                    result = xclientwait(o, xdescriptor_event_in, 5, 0);
+                    printf("result 0x%08x\n", result);
+                    if(result & xdescriptor_event_timeout)
+                    {
+                        printf("timeout\n");
+                    }
+                    n = xclientread(o, buffer, 1023);
+                    if(n >= 0)
+                    {
+                        buffer[n] = 0;
+                        printf("recv[%ld] %s", n, buffer);
+                    }
+                    else
+                    {
+                        printf("fail to socket read => close status (%d)\n", o->descriptor.handle.f);
+                    }
+                }
+                else
+                {
+                    printf("fail to socket write => close status (%d)\n", o->descriptor.handle.f);
+                }
+            }
+            else if(result & xdescriptor_event_timeout)
+            {
+                printf("timeout\n");
+            }
+            else if(result & xdescriptor_event_exception)
+            {
+                printf("exception\n");
+                xclientclose(o);
+            }
+        }
+        xassertion(ret != xsuccess, "fail to xclientconnect");
+        o = xclientrem(o);
+    }
+}
+
 int main(int argc, char ** argv)
 {
     example_net_socket();
+    example_net_client();
     return 0;
     // printf("net\n");
     // xdescriptor descriptor = xdescriptorinit();
@@ -69,10 +228,7 @@ int main(int argc, char ** argv)
 
     // xsocketclose(xaddressof(socket));
 
-    // /**
-    //  * simple echo server
-    //  * ncat -l 2000 -k -c 'xargs -n1 echo'
-    //  */
+
     // xclient * client = xclientnew(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     // struct sockaddr_in addr;
     // addr.sin_family = PF_INET;

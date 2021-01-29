@@ -62,7 +62,7 @@ struct xtime
 
 extern xtime xtimeget(void);
 extern xtime xtimeset(xint64 second, xint64 nanosecond);
-extern int xtimecmp(const xtime * x, const xtime * y);
+extern xint64 xtimecmp(const xtime * x, const xtime * y);
 
 
 #define xaddressof(o)       (&o)

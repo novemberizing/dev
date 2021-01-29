@@ -42,13 +42,14 @@ extern xtime xtimeset(xint64 second, xint64 nanosecond)
     return o;
 }
 
-extern int xtimecmp(const xtime * x, const xtime * y)
+extern xint64 xtimecmp(const xtime * x, const xtime * y)
 {
     xassertion(x == xnil || y == xnil, "invalid parameter");
 
-    if(x->second == y->second)
+    if(x->second != y->second)
     {
         return x->second - y->second;
     }
+
     return x->nanosecond - y->nanosecond;
 }

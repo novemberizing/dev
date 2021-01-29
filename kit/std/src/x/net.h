@@ -44,6 +44,9 @@ struct xevent
 
 /* DESCRIPTOR **********************************************/
 
+#define xdescriptor_mask_void               (0x00000000U)
+#define xdescriptor_mask_nonblock           (0x00000001U)
+
 #define xdescriptor_event_void              (0x00000000U)
 #define xdescriptor_event_in                (0x00000001U)
 #define xdescriptor_event_out               (0x00000002U)
@@ -62,6 +65,9 @@ struct xevent
 
 #define xsocket_event_bind                  (0x00001000U)
 
+#define xclient_event_connected             (0x00002000U)
+#define xclient_event_connecting            (0x00004000U)
+
 #define xdescriptor_status_void             xdescriptor_event_void
 #define xdescriptor_status_in               xdescriptor_event_in
 #define xdescriptor_status_out              xdescriptor_event_out
@@ -79,6 +85,9 @@ struct xevent
 #define xdescriptor_status_close            xdescriptor_event_close
 
 #define xsocket_status_bind                 xsocket_event_bind
+
+#define xclient_status_connected            xclient_event_connected
+#define xclient_status_connecting           xclient_event_connecting
 
 union xdescriptorhandle;
 struct xdescriptor;
@@ -107,6 +116,7 @@ struct xdescriptor
     xsync *            sync;
 
     xuint32            status;
+    xuint32            mask;
 
     xdescriptoreventon on;
 
@@ -120,6 +130,7 @@ struct xdescriptor
     xnil,                                                              \
     xnil,                                                              \
     xdescriptor_event_void,                                            \
+    0,                                                                 \
     xnil,                                                              \
     xnil }
 
@@ -139,6 +150,9 @@ extern xint64 xdescriptorread(xdescriptor * o, void * buffer, xuint64 size);
 extern xint64 xdescriptorwrite(xdescriptor * o, const void * data, xuint64 length);
 
 extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 second, xuint64 nanosecond);
+
+extern void xdescriptorset_nonblock_on(xdescriptor * o);
+extern void xdescriptorset_nonblock_off(xdescriptor * o);
 
 /**
  * interface
@@ -244,7 +258,80 @@ extern xint32 xsocketbind(xsocket * o, void * addr, xuint64 addrlen);
 #define xsocketread(socket, buffer, size)               (socket ? xdescriptorread(xaddressof(socket->descriptor), buffer, size) : xfail)
 #define xsocketwrite(socket, data, length)              (socket ? xdescriptorwrite(xaddressof(socket->descriptor), data, length) : xfail)
 #define xsocketwait(socket, mask, second, nanosecond)   (socket ? xdescriptorwait(xaddressof(socket->descriptor), mask, second, nanosecond) : xfail)
+#define xsocketset_nonblock_on(socket)                  (socket ? xdescriptorset_nonblock_on(xaddressof(socket->descriptor)) : xfail)
+#define xsocketset_nonblock_off(socket)                 (socket ? xdescriptorset_nonblock_off(xaddressof(socket->descriptor)) : xfail)
 
+struct xclient
+{
+    xuint32     flags;
+    xdestructor destruct;
+
+    xeventobj * parent;
+    xeventobj * prev;
+    xeventobj * next;
+
+    xsync *     sync;
+
+    xeventobjon on;
+
+    xeventobj * head;
+    xeventobj * tail;
+    xuint64     total;
+
+    xdescriptor descriptor;
+
+    int         domain;
+    int         type;
+    int         protocol;
+
+    void *      addr;
+    xuint64     addrlen;
+
+    xbuffer *   readbuf;
+    xbuffer *   writebuf;
+};
+
+#define xclientinit(domain, type, protocol, handler) (xclient) { \
+    xobj_type_event_client,                                      \
+    xclientrem,                                                  \
+    xnil,                                                        \
+    xnil,                                                        \
+    xnil,                                                        \
+    xnil,                                                        \
+    handler,                                                     \
+    xnil,                                                        \
+    xnil,                                                        \
+    0,                                                           \
+    xdescriptorinit(),                                           \
+    domain,                                                      \
+    type,                                                        \
+    protocol,                                                    \
+    xnil,                                                        \
+    0,                                                           \
+    xnil,                                                        \
+    xnil }
+
+extern xclient * xclientnew(int domain, int type, int protocol, xeventobjon handler);
+extern void * xclientrem(void * p);
+extern xint32 xclientconnect(xclient * o, void * addr, xuint64 addrlen);
+extern xint32 xclientreconnect(xclient * o);
+extern xuint32 xclientwait(xclient * o, xuint32 mask, xuint64 second, xuint64 nanosecond);
+
+#define xclientshutdown(client, how)                    (client ? xsocketshutdown((xsocket *) client, how) : xsuccess)
+#define xclientopen(client)                             (client ? xsocketopen((xsocket *) client) : xfail)
+#define xclientbind(client, addr, addrlen)              (client ? xsocketbind((xsocket *) client, addr, addrlen) : xfail)
+
+#define xclienteventpub()
+
+#define xclientnonblock_on(client)                      (client ? xdescriptornonblock_on(xaddressof(client->descriptor)) : xfail)
+#define xclientnonblock_off(client)                     (client ? xdescriptornonblock_off(xaddressof(client->descriptor)) : xfail)
+#define xclientclose(client)                            (client ? xdescriptorclose(xaddressof(client->descriptor)) : xfail)
+#define xclientalive(client)                            (client ? xdescriptoralive(xaddressof(client->descriptor)) : xfalse)
+#define xclientread(client, buffer, size)               (client ? xdescriptorread(xaddressof(client->descriptor), buffer, size) : xfail)
+#define xclientwrite(client, data, length)              (client ? xdescriptorwrite(xaddressof(client->descriptor), data, length) : xfail)
+// #define xclientwait(client, mask, second, nanosecond)   (client ? xdescriptorwait(xaddressof(client->descriptor), mask, second, nanosecond) : xfail)
+#define xclientset_nonblock_on(client)                  (client ? xdescriptorset_nonblock_on(xaddressof(client->descriptor)) : xfail)
+#define xclientset_nonblock_off(client)                 (client ? xdescriptorset_nonblock_off(xaddressof(client->descriptor)) : xfail)
 
 // /** EVENT **********************************************/
 // struct xevent;

@@ -108,7 +108,7 @@ extern xint64 xdescriptorread(xdescriptor * o, void * buffer, xuint64 size)
     {
         if(o->handle.f >= 0)
         {
-            xcheck((o->status & xdescriptor_status_in) == xdescriptor_status_void, "not avail descriptor in");
+            // xcheck((o->status & xdescriptor_status_in) == xdescriptor_status_void, "not avail descriptor in");
             if(buffer && size)
             {
                 xint64 n = read(o->handle.f, buffer, size);
@@ -169,7 +169,7 @@ extern xint64 xdescriptorwrite(xdescriptor * o, const void * data, xuint64 lengt
         {
             if(data && length)
             {
-                xcheck((o->status & xdescriptor_status_out) == xdescriptor_status_void, "descriptor not avail write");
+                // xcheck((o->status & xdescriptor_status_out) == xdescriptor_status_void, "descriptor not avail write");
                 xint64 n = write(o->handle.f, data, length);
                 if(n > 0)
                 {
@@ -498,6 +498,44 @@ extern xuint32 xdescriptorwait(xdescriptor * o, xuint32 mask, xuint64 second, xu
     }
 }
 
+
+extern void xdescriptorset_nonblock_on(xdescriptor * o)
+{
+    if(o)
+    {
+        if((o->mask & xdescriptor_mask_nonblock) == xdescriptor_mask_void)
+        {
+            o->mask |= xdescriptor_mask_nonblock;
+            if(o->handle.f >= 0)
+            {
+                xdescriptornonblock_on(o);
+            }
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+}
+
+extern void xdescriptorset_nonblock_off(xdescriptor * o)
+{
+    if(o)
+    {
+        if(o->mask & xdescriptor_mask_nonblock)
+        {
+            o->mask &= (~xdescriptor_mask_nonblock);
+            if(o->handle.f >= 0)
+            {
+                xdescriptornonblock_off(o);
+            }
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+}
 
 // // extern xint32 xdescriptorclose(xdescriptor * o)
 // // {

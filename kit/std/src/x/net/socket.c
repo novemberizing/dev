@@ -183,6 +183,10 @@ extern xint32 xsocketopen(xsocket * o)
             if(o->descriptor.handle.f >= 0)
             {
                 o->descriptor.status |= xdescriptor_status_open;
+                if(o->descriptor.mask & xdescriptor_mask_nonblock)
+                {
+                    xdescriptornonblock_on(xaddressof(o->descriptor));
+                }
                 xdescriptoreventpub(xaddressof(o->descriptor), xdescriptor_event_open, o, xvalgen(0));
                 return xsuccess;
             }
@@ -232,6 +236,7 @@ extern xint32 xsocketbind(xsocket * o, void * addr, xuint64 addrlen)
                 else
                 {
                     xcheck(xtrue, "fail to bind (%d)", errno);
+                    // EADDRINUSE
                     // NOT SOCKET CLOSE ... CHECK THIS ...
                 }
             }
