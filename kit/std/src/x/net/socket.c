@@ -32,27 +32,29 @@ static inline int __xsocket_internal_convert_shutdown_method(xuint32 how)
 static xint64 __xsocket_internal_descriptor_event_on(xdescriptor * descriptor, xuint32 mask, void * p, xval data)
 {
     xassertion(descriptor == xnil || p == xnil, "null pointer");
-    xsocket * sock = (xsocket *) p;
+    xsocket * socket = (xsocket *) p;
 
-    xcheck(sock->on == xnil, "no event handler");
+    xcheck(socket->on == xnil && socket->parent, "no event handler");
 
-    return sock->on ? sock->on((xeventobj *) p, mask, xnil, data) : xfail;
+    return socket->on ? socket->on((xeventobj *) p, mask, xnil, data) : xfail;
 }
 
-extern xsocket * xsocketnew(xuint32 type, xdestructor destructor, xeventobjon handler, xuint64 size)
+extern xsocket * xsocketnew(int domain, int type, int protocol, xeventobjon handler)
 {
-    xassertion(size < sizeof(xsocket), "invalid paramter");
-
-    xsocket * o = (xsocket *) calloc(size, 1);
+    xsocket * o = (xsocket *) calloc(sizeof(xsocket), 1);
     xassertion(o == xnil, "fail to calloc (%d)", errno);
-    // TODO: TYPE CHECK
-    o->flags    = (xobj_mask_allocated | type);
-    o->destruct = destructor;
-    o->on       = handler;
+
+    o->flags               = (xobj_mask_allocated | xobj_type_event_socket);
+    o->destruct            = xsocketrem;
+    o->on                  = handler;
     
     o->descriptor.handle.f = xinvalid;
     o->descriptor.parent   = o;
     o->descriptor.on       = __xsocket_internal_descriptor_event_on;
+
+    o->domain              = domain;
+    o->type                = type;
+    o->protocol            = protocol;
 
     return o;
 }
@@ -63,42 +65,47 @@ extern void * xsocketrem(void * p)
 
     if(o)
     {
-        if(xobjtype(o) == xobj_type_event_socket)
+        xassertion(xobjtype(o) != xobj_type_event_socket, "invalid object");
+
+        xsynclock(o->sync);
+        xeventobj * parent = o->parent;
+        if(parent)
         {
-            xsynclock(o->sync);
-            xeventobj * parent = o->parent;
-            if(parent)
+            xsynclock(parent->sync);
+            xeventobj * prev = o->prev;
+            xeventobj * next = o->next;
+            if(prev)
             {
-                xsynclock(parent->sync);
-                xeventobj * prev = o->prev;
-                xeventobj * next = o->next;
-                if(prev)
-                {
-                    prev->next = next;
-                }
-                else
-                {
-                    parent->head = next;
-                }
-                if(next)
-                {
-                    next->prev = prev;
-                }
-                else
-                {
-                    parent->tail = prev;
-                }
-                parent->total = parent->total - 1;
-                xsyncunlock(parent->sync);
-                o->prev = xnil;
-                o->next = xnil;
-                o->parent = xnil;
+                prev->next = next;
             }
-            xsyncunlock(o->sync);
+            else
+            {
+                parent->head = next;
+            }
+            if(next)
+            {
+                next->prev = prev;
+            }
+            else
+            {
+                parent->tail = prev;
+            }
+            parent->total = parent->total - 1;
+            xsyncunlock(parent->sync);
+            o->prev = xnil;
+            o->next = xnil;
+            o->parent = xnil;
         }
-        else
+        if(xsocketalive(o))
         {
-            o = (xsocket *) o->destruct(o);
+            xsocketshutdown(o, xdescriptor_event_close);
+        }
+        xsyncunlock(o->sync);
+        o->sync = xobjrem(o->sync);
+        if(xobjallocated(o))
+        {
+            free(o);
+            o = xnil;
         }
     }
     return o;
@@ -136,16 +143,21 @@ extern xint32 xsocketshutdown(xsocket * o, xuint32 how)
                 }
                 if((o->descriptor.status & xdescriptor_status_close) == xdescriptor_status_close)
                 {
-                    o->descriptor.status |= xdescriptor_status_close;
-                    o->descriptor.status &= (~(xdescriptor_status_open | xdescriptor_status_in | xdescriptor_status_out));
-                    xdescriptoreventpub(xaddressof(o->descriptor), xdescriptor_event_close, o, xvalgen(0));
-                    o->descriptor.status = xdescriptor_status_void;
+                    xsocketclose(o);
                 }
                 return xsuccess;
             }
             else
             {
-                xcheck(xtrue, "fail to shutdown (%d)", errno);
+                int err = errno;
+                if(err == ENOTCONN)
+                {
+                    xsocketclose(o);
+                }
+                else
+                {
+                    xcheck(xtrue, "fail to shutdown (%d)", err);
+                }
                 return xfail;
             }
         }
@@ -161,6 +173,85 @@ extern xint32 xsocketshutdown(xsocket * o, xuint32 how)
     return xsuccess;
 }
 
+extern xint32 xsocketopen(xsocket * o)
+{
+    if(o)
+    {
+        if(xsocketalive(o) == xfalse)
+        {
+            o->descriptor.handle.f = socket(o->domain, o->type, o->protocol);
+            if(o->descriptor.handle.f >= 0)
+            {
+                o->descriptor.status |= xdescriptor_status_open;
+                xdescriptoreventpub(xaddressof(o->descriptor), xdescriptor_event_open, o, xvalgen(0));
+                return xsuccess;
+            }
+            else
+            {
+                xcheck(xtrue, "fail to socket (%d)", errno);
+                return xfail;
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "already open");
+            return xsuccess;
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+    return xfail;
+}
+
+extern xint32 xsocketbind(xsocket * o, void * addr, xuint64 addrlen)
+{
+    if(o)
+    {
+        if(addr && addrlen)
+        {
+            if(xsocketalive(o) == xfalse)
+            {
+                xint32 ret = xsocketopen(o);
+                if(ret != xsuccess)
+                {
+                    xcheck(xtrue, "fail to xsocketopen");
+                    return xfail;
+                }
+            }
+            if((o->descriptor.status & xsocket_status_bind) == xdescriptor_status_void)
+            {
+                int ret = bind(o->descriptor.handle.f, (struct sockaddr *) addr, addrlen);
+                if(ret == xsuccess)
+                {
+                    o->descriptor.status |= xsocket_status_bind;
+                    xdescriptoreventpub(xaddressof(o->descriptor), xsocket_event_bind, o, xvalgen(0));
+                    return xsuccess;
+                }
+                else
+                {
+                    xcheck(xtrue, "fail to bind (%d)", errno);
+                    // NOT SOCKET CLOSE ... CHECK THIS ...
+                }
+            }
+            else
+            {
+                xcheck(xtrue, "already bind socket");
+                return xsuccess;
+            }
+        }
+        else
+        {
+            xassertion(xtrue, "invalid parameter (address)");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "null pointer");
+    }
+    return xfail;
+}
 
 // static xint32 __xsocket_internal_shutdown_method_convert(xint32 how)
 // {

@@ -8,8 +8,50 @@
 
 #include <x/net.h>
 
+static void example_net_socket(void)
+{
+    // 로컬에 소켓을 생성합니다.
+    xsocket local = xsocketinit(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+    xsocketrem(xaddressof(local));
+    // 동적할당으로 소켓을 생성합니다.
+    xsocket * o = xsocketnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+    o = xsocketrem(o);
+    // 소켓을 오픈합니다.
+    o = xsocketnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+    int ret = xsocketopen(o);
+    xassertion(ret != xsuccess, "fail to xsocketopen");
+    o = xsocketrem(o);
+    // 소켓을 오픈 하고 특정 주소를 할당합니다.
+    if(o == xnil)
+    {
+        int ret = xsuccess;
+        struct sockaddr_in addr;
+        addr.sin_family = PF_INET;
+        addr.sin_addr.s_addr = 0;
+        addr.sin_port = htons(3371);
+        // 소켓을 오픈한 후에 바인드합니다.
+        o = xsocketnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+        ret = xsocketopen(o);
+        xassertion(ret != xsuccess, "fail to xsocketopen");
+        ret = xsocketbind(o, &addr, sizeof(struct sockaddr_in));
+        xassertion(ret != xsuccess, "fail to xsocketbind");
+        o = xsocketrem(o);
+        // 소켓을 바인드할 때 오픈합니다.
+        o = xsocketnew(AF_INET, SOCK_STREAM, IPPROTO_TCP, xnil);
+        ret = xsocketbind(o, &addr, sizeof(struct sockaddr_in));
+        // 바인드 실패하면 오픈 상태입니다. 명시적으로 소켓을 닫아주어야 합니다.
+        if(ret != xsuccess)
+        {
+            xsocketclose(o);
+        }
+        xassertion(ret != xsuccess, "fail to xsocketbind");
+        o = xsocketrem(o);
+    }
+}
+
 int main(int argc, char ** argv)
 {
+    example_net_socket();
     return 0;
     // printf("net\n");
     // xdescriptor descriptor = xdescriptorinit();

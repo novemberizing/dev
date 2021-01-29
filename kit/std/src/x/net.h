@@ -60,6 +60,8 @@ struct xevent
 #define xdescriptor_event_close_write       (0x00000800U)
 #define xdescriptor_event_close             (xdescriptor_event_close_read | xdescriptor_event_close_write)
 
+#define xsocket_event_bind                  (0x00001000U)
+
 #define xdescriptor_status_void             xdescriptor_event_void
 #define xdescriptor_status_in               xdescriptor_event_in
 #define xdescriptor_status_out              xdescriptor_event_out
@@ -75,6 +77,8 @@ struct xevent
 #define xdescriptor_status_close_read       xdescriptor_event_close_read
 #define xdescriptor_status_close_write      xdescriptor_event_close_write
 #define xdescriptor_status_close            xdescriptor_event_close
+
+#define xsocket_status_bind                 xsocket_event_bind
 
 union xdescriptorhandle;
 struct xdescriptor;
@@ -203,24 +207,33 @@ struct xsocket
     xuint64     total;
 
     xdescriptor descriptor;
+
+    int         domain;
+    int         type;
+    int         protocol;
 };
 
-#define xsocketinit(handler) (xsocket) { \
-    xobj_type_event_socket,              \
-    xsocketrem,                          \
-    xnil,                                \
-    xnil,                                \
-    xnil,                                \
-    xnil,                                \
-    handler,                             \
-    xnil,                                \
-    xnil,                                \
-    0,                                   \
-    xdescriptorinit() }
+#define xsocketinit(domain, type, protocol, handler) (xsocket) { \
+    xobj_type_event_socket,                                      \
+    xsocketrem,                                                  \
+    xnil,                                                        \
+    xnil,                                                        \
+    xnil,                                                        \
+    xnil,                                                        \
+    handler,                                                     \
+    xnil,                                                        \
+    xnil,                                                        \
+    0,                                                           \
+    xdescriptorinit(),                                           \
+    domain,                                                      \
+    type,                                                        \
+    protocol }
 
-extern xsocket * xsocketnew(xuint32 type, xdestructor destrct, xeventobjon handler, xuint64 size);
+extern xsocket * xsocketnew(int domain, int type, int protocol, xeventobjon handler);
 extern void * xsocketrem(void * p);
 extern xint32 xsocketshutdown(xsocket * o, xuint32 how);
+extern xint32 xsocketopen(xsocket * o);
+extern xint32 xsocketbind(xsocket * o, void * addr, xuint64 addrlen);
 
 #define xsocketeventpub()
 

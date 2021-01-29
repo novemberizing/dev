@@ -77,6 +77,8 @@ extern xint32 xdescriptorclose(xdescriptor * o)
                 xdescriptoreventpub(o, xdescriptor_event_close, o->parent, xvalgen(0));
 
                 o->status = xdescriptor_event_void;
+
+                o->handle.f = xinvalid;
             }
             else
             {
