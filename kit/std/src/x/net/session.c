@@ -1,20 +1,105 @@
-// #define _GNU_SOURCE
+#define _GNU_SOURCE
 
-// #include <stdlib.h>
-// #include <stdio.h>
-// #include <errno.h>
-// #include <sys/types.h>
-// #include <sys/socket.h>
-// #include <time.h>
-// #include <sys/time.h>
-// #include <signal.h>
-// #include <poll.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <time.h>
+#include <sys/time.h>
+#include <signal.h>
+#include <poll.h>
 
-// #include "../net.h"
+#include "../net.h"
+
+static xint64 __xsession_internal_descriptor_event_on(xdescriptor * descriptor, xuint32 mask, void * p, xval data)
+{
+    xassertion(descriptor == xnil || p == xnil, "null pointer");
+    xsession * session = (xsession *) p;
+
+    xcheck(session->on == xnil && session->parent, "no event handler");
+
+    return session->on ? session->on((xeventobj *) p, mask, xnil, data) : xfail;
+}
+
+extern xsession * xsessionnew(void)
+{
+    xsession * o = (xsession *) calloc(sizeof(xsession), 1);
+    xassertion(o == xnil, "fail to calloc (%d)", errno);
+
+    if(o)
+    {
+        o->flags    = (xobj_mask_allocated | xobj_type_event_session);
+        o->destruct = xsessionrem;
+
+        o->descriptor.handle.f = xinvalid;
+        o->descriptor.parent   = o;
+        o->descriptor.on       = __xsession_internal_descriptor_event_on;
+    }
+
+    return o;
+}
+
+extern void * xsessionrem(void * p)
+{
+    xsession * o = (xsession *) p;
+
+    if(o)
+    {
+        xsynclock(o->sync);
+        xeventobj * parent = o->parent;
+        if(parent)
+        {
+            xsynclock(parent->sync);
+            xeventobj * prev = o->prev;
+            xeventobj * next = o->next;
+            if(prev)
+            {
+                prev->next = next;
+            }
+            else
+            {
+                parent->head = next;
+            }
+            if(next)
+            {
+                next->prev = prev;
+            }
+            else
+            {
+                parent->tail = prev;
+            }
+            parent->total = parent->total - 1;
+            xsyncunlock(parent->sync);
+            o->parent = xnil;
+            o->prev = xnil;
+            o->next = xnil;
+        }
+        if(xsocketalive(o))
+        {
+            xclientshutdown(o, xdescriptor_event_close);
+        }
+        o->readbuf = xobjrem(o->readbuf);
+        o->writebuf = xobjrem(o->writebuf);
+        // check need to clear children
+        xsyncunlock(o->sync);
+        o->sync = xobjrem(o->sync);
+
+        if(xobjallocated(o))
+        {
+            free(o);
+            o = xnil;
+        }
+    }
+
+    return o;
+}
+
 
 // extern xsession * xsessionnew(void)
 // {
 //     xsession * o = (xsession *) calloc(sizeof(xsession), 1);
+
 
 //     o->flags      = (xobj_mask_allocated | xobj_type_session);
 //     o->destruct   = xsessionrem;

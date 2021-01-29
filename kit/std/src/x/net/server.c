@@ -1,16 +1,109 @@
-// #define _GNU_SOURCE
+#define _GNU_SOURCE
 
-// #include <stdlib.h>
-// #include <stdio.h>
-// #include <errno.h>
-// #include <sys/types.h>
-// #include <sys/socket.h>
-// #include <time.h>
-// #include <sys/time.h>
-// #include <signal.h>
-// #include <poll.h>
-// #include <netinet/in.h>
-// #include <arpa/inet.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <time.h>
+#include <sys/time.h>
+#include <signal.h>
+#include <poll.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#include "../net.h"
+
+extern xserver * xservernew(int domain, int type, int protocol, xeventobjon handler)
+{
+    xserver * o = (xserver *) calloc(sizeof(xserver), o);
+    xassertion(o == xnil, "fail to calloc (%d)", errno);
+
+    o->flags               = (xobj_mask_allocated | xobj_type_event_server);
+    o->destruct            = xserverrem;
+    o->on                  = handler;
+
+    o->descriptor.handle.f = xinvalid;
+    o->descriptor.parent   = o;
+    o->descriptor.on       = __xclient_internal_descriptor_event_on;
+
+    o->domain              = domain;
+    o->type                = type;
+    o->protocol            = protocol;
+
+    return o;
+}
+
+extern void * xserverrem(void * p)
+{
+    xserver * o = (xserver *) p;
+
+    if(o)
+    {
+        xassertion(xobjtype(o) != xobj_type_event_server, "invalid object");
+
+        xsynclock(o->sync);
+        xeventobj * parent = o->parent;
+        if(parent)
+        {
+            xsynclock(parent->sync);
+            xeventobj * prev = o->prev;
+            xeventobj * next = o->next;
+            if(prev)
+            {
+                prev->next = next;
+            }
+            else
+            {
+                parent->head = next;
+            }
+            if(next)
+            {
+                next->prev = prev;
+            }
+            else
+            {
+                parent->tail = prev;
+            }
+            parent->total = parent->total - 1;
+            xsyncunlock(parent->sync);
+            o->prev = xnil;
+            o->next = xnil;
+            o->parent = xnil;
+        }
+        if(xsocketalive(o))
+        {
+            xclientshutdown(o, xdescriptor_event_close);
+        }
+        o->addr = xfree(o->addr);
+        o->addrlen = 0;
+        // check need to clear children
+        while(o->head)
+        {
+            xeventobj * next = o->head->next;
+            // xsynclock(o->head->sync); 락이 필요 없는 이유는 ... 빠지지 않으니까 ?
+            if(next)
+            {
+                next->prev = xnil;
+            }
+            else
+            {
+                o->tail = xnil;
+            }
+            o->total = o->total - 1;
+            // xsyncunlock(o->head->sync);
+            o->head = next;
+        }
+        xsyncunlock(o->sync);
+        o->sync = xobjrem(o->sync);
+        if(xobjallocated(o))
+        {
+            free(o);
+            o = xnil;
+        }
+    }
+    return o;
+}
 
 
 // #include "../net.h"

@@ -128,6 +128,7 @@ extern void * xclientrem(void * p)
         o->writebuf = xobjrem(o->writebuf);
         o->addr = xfree(o->addr);
         o->addrlen = 0;
+        // check need to clear children
         xsyncunlock(o->sync);
         o->sync = xobjrem(o->sync);
         if(xobjallocated(o))

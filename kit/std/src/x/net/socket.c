@@ -68,6 +68,8 @@ extern void * xsocketrem(void * p)
         xassertion(xobjtype(o) != xobj_type_event_socket, "invalid object");
 
         xsynclock(o->sync);
+
+        // atomic get and set ...
         xeventobj * parent = o->parent;
         if(parent)
         {
@@ -92,10 +94,11 @@ extern void * xsocketrem(void * p)
             }
             parent->total = parent->total - 1;
             xsyncunlock(parent->sync);
+            o->parent = xnil;
             o->prev = xnil;
             o->next = xnil;
-            o->parent = xnil;
         }
+        // check need to clear children
         if(xsocketalive(o))
         {
             xsocketshutdown(o, xdescriptor_event_close);

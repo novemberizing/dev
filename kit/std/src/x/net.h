@@ -333,6 +333,123 @@ extern xuint32 xclientwait(xclient * o, xuint32 mask, xuint64 second, xuint64 na
 #define xclientset_nonblock_on(client)                  (client ? xdescriptorset_nonblock_on(xaddressof(client->descriptor)) : xfail)
 #define xclientset_nonblock_off(client)                 (client ? xdescriptorset_nonblock_off(xaddressof(client->descriptor)) : xfail)
 
+struct xsession
+{
+    xuint32     flags;
+    xdestructor destruct;
+
+    xeventobj * parent;
+    xeventobj * prev;
+    xeventobj * next;
+
+    xsync *     sync;
+
+    xeventobjon on;
+
+    xeventobj * head;
+    xeventobj * tail;
+    xuint64     total;
+
+    xdescriptor descriptor;
+
+    int         domain;
+    int         type;
+    int         protocol;
+
+    xbuffer *   readbuf;
+    xbuffer *   writebuf;
+};
+
+#define xsessioninit() (xsession) {     \
+    xobj_type_event_session,            \
+    xsessionrem,                        \
+    xnil,                               \
+    xnil,                               \
+    xnil,                               \
+    xnil,                               \
+    xnil,                               \
+    xnil,                               \
+    xnil,                               \
+    0,                                  \
+    xdescriptorinit(),                  \
+    0,                                  \
+    0,                                  \
+    0,                                  \
+    xnil,                               \
+    xnil }
+
+extern xsession * xsessionnew(void);
+extern void * xsessionrem(void * p);
+
+#define xsessionshutdown(session, how)                  (session ? xsocketshutdown((xsocket *) session, how) : xsuccess)
+#define xsessionopen(session)                           (session ? xsocketopen((xsocket *) session) : xfail)
+#define xsessionbind(session, addr, addrlen)            (session ? xsocketbind((xsocket *) session, addr, addrlen) : xfail)
+
+#define xsessioneventpub()
+
+#define xsessionnonblock_on(session)                    (session ? xdescriptornonblock_on(xaddressof(session->descriptor)) : xfail)
+#define xsessionnonblock_off(session)                   (session ? xdescriptornonblock_off(xaddressof(session->descriptor)) : xfail)
+#define xsessionclose(session)                          (session ? xdescriptorclose(xaddressof(session->descriptor)) : xfail)
+#define xsessionalive(session)                          (session ? xdescriptoralive(xaddressof(session->descriptor)) : xfalse)
+#define xsessionread(session, buffer, size)             (session ? xdescriptorread(xaddressof(session->descriptor), buffer, size) : xfail)
+#define xsessionwrite(session, data, length)            (session ? xdescriptorwrite(xaddressof(session->descriptor), data, length) : xfail)
+#define xsessionwait(session, mask, second, nanosecond) (session ? xdescriptorwait(xaddressof(session->descriptor), mask, second, nanosecond) : xfail)
+#define xsessionset_nonblock_on(session)                (session ? xdescriptorset_nonblock_on(xaddressof(session->descriptor)) : xfail)
+#define xsessionset_nonblock_off(session)               (session ? xdescriptorset_nonblock_off(xaddressof(session->descriptor)) : xfail)
+
+struct xserver
+{
+    xuint32     flags;
+    xdestructor destruct;
+
+    xeventobj * parent;
+    xeventobj * prev;
+    xeventobj * next;
+
+    xsync *     sync;
+
+    xeventobjon on;
+
+    xeventobj * head;
+    xeventobj * tail;
+    xuint64     total;
+
+    xdescriptor descriptor;
+
+    int         domain;
+    int         type;
+    int         protocol;
+
+    void *      addr;
+    xuint64     addrlen;
+};
+
+#define xserverinit(domain, type, protocol, handler) (xserver) {    \
+    xobj_type_event_server,                                         \
+    xserverrem,                                                     \
+    xnil,                                                           \
+    xnil,                                                           \
+    xnil,                                                           \
+    xnil,                                                           \
+    handler,                                                        \
+    xnil,                                                           \
+    xnil,                                                           \
+    0,                                                              \
+    xdescriptorinit(),                                              \
+    domain,                                                         \
+    type,                                                           \
+    protocol,                                                       \
+    xnil,                                                           \
+    0 }
+
+extern xserver * xservernew(int domain, int type, int protocol, xeventobjon handler);
+extern void * xserverrem(void * p);
+
+
+
+
+
+
 // /** EVENT **********************************************/
 // struct xevent;
 // struct xeventobj;
