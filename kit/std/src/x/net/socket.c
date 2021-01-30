@@ -165,6 +165,50 @@ extern xint32 xsocketshutdown(xsocket * socket, xuint32 how)
     return xsuccess;
 }
 
+extern xint32 xsocketbind(xsocket * socket, void * addr, xuint64 addrlen)
+{
+    if(socket)
+    {
+        if(xsocketalive(socket) == xfalse)
+        {
+            int ret = xsocketopen(socket);
+            if(ret != xsuccess)
+            {
+                xcheck(xtrue, "fail to xsocketopen");
+                return xfail;
+            }
+        }
+        if((socket->status & xdescriptor_status_bind) == xdescriptor_status_void)
+        {
+            int ret = bind(socket->handle.f, (struct sockaddr *) addr, addrlen);
+
+            if(ret == xsuccess)
+            {
+                socket->status |= xdescriptor_status_bind;
+                xsocketeventpub(socket, xdescriptor_event_bind, xnil, xvalgen(0));
+                return xsuccess;
+            }
+            else
+            {
+                xcheck(xtrue, "fail to bind (%d)", errno);
+                xsocketclose(socket);
+                return xfail;
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "socket is already bind");
+            return xsuccess;
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "socket is null");
+    }
+
+    return xfail;
+}
+
 
 // static inline int __xsocket_internal_convert_shutdown_method(xuint32 how)
 // {
