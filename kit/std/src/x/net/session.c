@@ -12,6 +12,54 @@
 
 #include "../net.h"
 
+extern xint64 xsessionsocketeventon(xsession * o, xuint32 mask, const void * data, xval val)
+{
+
+}
+
+extern xsession * xsessionnew(void)
+{
+    xsession * session = (xsession *) calloc(sizeof(xsession), 1);
+
+    session->flags           = (xobj_mask_allocated);
+    session->destruct        = xsessionrem;
+
+    session->socket.handle.f = xinvalid;
+    session->socket.on       = xsessionsocketeventon;
+
+    return session;
+}
+extern void * xsessionrem(void * p)
+{
+    xsession * o = (xsession *) p;
+    if(o)
+    {
+        xsynclock(o->sync);
+
+        xassertion(o->parent, "xsession's parent already linked");
+        xassertion(o->children.total > 0, "xsession's children exist");
+
+        if(xclientalive(o))
+        {
+            xclientclose(o);
+        }
+
+        o->readbuf  = xobjrem(o->readbuf);
+        o->writebuf = xobjrem(o->writebuf);
+
+        xsyncunlock(o->sync);
+
+        o->sync     = xobjrem(o->sync);
+
+        if(xobjallocated(o))
+        {
+            free(o);
+            o = xnil;
+        }
+    }
+    return o;
+}
+
 
 // static xint64 __xsession_internal_descriptor_event_on(xdescriptor * descriptor, xuint32 mask, void * p, xval data)
 // {

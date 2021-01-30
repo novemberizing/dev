@@ -14,6 +14,7 @@
 static xint32 check_descriptor_simple(xuint32 repeat);
 static xint32 check_descriptor_simple_nonblock(xuint32 repeat);
 static xint32 check_client_simple(xuint32 repeat);
+static xint32 check_server_simple(xuint32 repeat);
 
 int main(int argc, char ** argv)
 {
@@ -22,7 +23,24 @@ int main(int argc, char ** argv)
     xassertion(check_descriptor_simple(xrandomgen() % 64) != xsuccess, "fail to check descriptor simple");
     xassertion(check_descriptor_simple_nonblock(xrandomgen() % 64) != xsuccess, "fail to check descriptor simple nonblock read");
     xassertion(check_client_simple(xrandomgen() % 64) != xsuccess, "fail to check client simple");
+    xassertion(check_server_simple(xrandomgen() % 64) != xsuccess, "fail to check server simple");
     return 0;
+}
+
+static xint32 check_server_simple(xuint32 repeat)
+{
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = 0;
+    addr.sin_port   = htons(3371);
+    socklen_t addrlen = sizeof(struct sockaddr_in);
+
+    for(xuint32 i = 0; i < repeat; i++)
+    {
+        xserver local = xserverinit(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+        xserverrem(&local);
+    }
 }
 
 static xint32 check_client_simple(xuint32 repeat)

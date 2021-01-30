@@ -14,6 +14,62 @@
 
 #include "../net.h"
 
+extern xint64 xserversocketeventon(xserver * o, xuint32 mask, const void * data, xval val)
+{
+
+}
+
+extern xserver * xservernew(int domain, int type, int protocol, void * addr, xuint64 addrlen)
+{
+    xserver * server = (xserver *) calloc(sizeof(xserver), 1);
+
+    server->flags           = (xobj_mask_allocated);
+    server->destruct        = xserverrem;
+
+    server->socket.handle.f = xinvalid;
+    server->socket.on       = xserversocketeventon;
+
+    server->socket.domain   = domain;
+    server->socket.type     = type;
+    server->socket.protocol = protocol;
+
+    server->addr            = xdup(addr, addrlen);
+    server->addrlen         = addrlen;
+
+    return server;
+}
+
+extern void * xserverrem(void * p)
+{
+    xserver * o = (xserver *) p;
+    if(o)
+    {
+        xsynclock(o->sync);
+
+        xassertion(o->parent, "server's parent already linked");
+        xassertion(o->children.total > 0, "server's children exist");
+
+        if(xclientalive(o))
+        {
+            xclientclose(o);
+        }
+
+        o->addr     = xfree(o->addr);
+        o->addrlen  = 0;
+
+        xsyncunlock(o->sync);
+
+        o->sync     = xobjrem(o->sync);
+
+        if(xobjallocated(o))
+        {
+            free(o);
+            o = xnil;
+        }
+    }
+    return o;
+}
+
 
 // static xint64 __xserver_internal_descriptor_event_on(xdescriptor * descriptor, xuint32 mask, void * p, xval data)
 // {
