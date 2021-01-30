@@ -12,7 +12,7 @@
 
 #include "../net.h"
 
-extern xint64 xsessionsocketeventon(xsession * o, xuint32 mask, const void * data, xval val)
+extern xint64 xsessionsocketeventon(xsession * o, void * parent, xuint32 mask, const void * data, xval val)
 {
 
 }

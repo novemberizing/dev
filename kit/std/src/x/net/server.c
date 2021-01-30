@@ -14,7 +14,7 @@
 
 #include "../net.h"
 
-extern xint64 xserversocketeventon(xserver * o, xuint32 mask, const void * data, xval val)
+extern xint64 xserversocketeventon(xserver * o, void * parent, xuint32 mask, const void * data, xval val)
 {
 
 }

@@ -53,7 +53,7 @@ extern xint32 xsocketopen(xsocket * o)
             if(o->handle.f >= 0)
             {
                 o->status |= xdescriptor_status_open;
-                xsocketeventpub(o, xdescriptor_event_open, xnil, xvalgen(0));
+                xsocketeventpub(o, o->data, xdescriptor_event_open, xnil, xvalgen(0));
                 if(o->mask & xdescriptor_mask_nonblock)
                 {
                     xsocketnonblock_on(o);
@@ -118,7 +118,7 @@ extern xint32 xsocketshutdown(xsocket * socket, xuint32 how)
                     if((socket->status & xdescriptor_status_closeall) != xdescriptor_status_closeall)
                     {
                         socket->status |= xdescriptor_status_closeall;
-                        xsocketeventpub(socket, xdescriptor_status_closeall, xnil, xvalgen(0));
+                        xsocketeventpub(socket, socket->data, xdescriptor_status_closeall, xnil, xvalgen(0));
                     }
                 }
                 else if(how & xdescriptor_event_closein)
@@ -126,11 +126,11 @@ extern xint32 xsocketshutdown(xsocket * socket, xuint32 how)
                     if(socket->status & xdescriptor_status_closein)
                     {
                         socket->status |= xdescriptor_status_closein;
-                        xsocketeventpub(socket, xdescriptor_event_closein, xnil, xvalgen(0));
+                        xsocketeventpub(socket, socket->data, xdescriptor_event_closein, xnil, xvalgen(0));
                     }
                     if((socket->status & xdescriptor_status_closeall) == xdescriptor_status_closeall)
                     {
-                        xsocketeventpub(socket, xdescriptor_status_closeall, xnil, xvalgen(0));
+                        xsocketeventpub(socket, socket->data, xdescriptor_status_closeall, xnil, xvalgen(0));
                     }
                 }
                 else if(how & xdescriptor_event_closeout)
@@ -138,11 +138,11 @@ extern xint32 xsocketshutdown(xsocket * socket, xuint32 how)
                     if(socket->status & xdescriptor_event_closeout)
                     {
                         socket->status |= xdescriptor_status_closeout;
-                        xsocketeventpub(socket, xdescriptor_event_closein, xnil, xvalgen(0));
+                        xsocketeventpub(socket, socket->data, xdescriptor_event_closein, xnil, xvalgen(0));
                     }
                     if((socket->status & xdescriptor_status_closeall) == xdescriptor_status_closeall)
                     {
-                        xsocketeventpub(socket, xdescriptor_status_closeall, xnil, xvalgen(0));
+                        xsocketeventpub(socket, socket->data, xdescriptor_status_closeall, xnil, xvalgen(0));
                     }
                 }
             }
@@ -185,7 +185,7 @@ extern xint32 xsocketbind(xsocket * socket, void * addr, xuint64 addrlen)
             if(ret == xsuccess)
             {
                 socket->status |= xdescriptor_status_bind;
-                xsocketeventpub(socket, xdescriptor_event_bind, xnil, xvalgen(0));
+                xsocketeventpub(socket, socket->data, xdescriptor_event_bind, xnil, xvalgen(0));
                 return xsuccess;
             }
             else

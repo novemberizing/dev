@@ -113,7 +113,7 @@ extern xint32 xclientconnect(xclient * client, void * addr, xuint64 addrlen)
                         {
                             client->socket.status |= xdescriptor_status_connect;
                             client->socket.status &= (~xdescriptor_status_connecting);
-                            xclienteventpub(xaddressof(client->socket), xdescriptor_status_connect, xnil, xvalgen(0));
+                            xclienteventpub(xaddressof(client->socket), client, xdescriptor_status_connect, xnil, xvalgen(0));
                         }
                         return xsuccess;
                     }
@@ -125,7 +125,7 @@ extern xint32 xclientconnect(xclient * client, void * addr, xuint64 addrlen)
                             if((client->socket.status & xdescriptor_status_connecting) == xdescriptor_status_void)
                             {
                                 client->socket.status |= xdescriptor_status_connecting;
-                                xclienteventpub(xaddressof(client->socket), xdescriptor_status_connecting, xnil, xvalgen(0));
+                                xclienteventpub(xaddressof(client->socket), client, xdescriptor_status_connecting, xnil, xvalgen(0));
                             }
                             return xsuccess;
                         }
@@ -135,7 +135,7 @@ extern xint32 xclientconnect(xclient * client, void * addr, xuint64 addrlen)
                             {
                                 client->socket.status |= xdescriptor_status_connect;
                                 client->socket.status &= (~xdescriptor_status_connecting);
-                                xclienteventpub(xaddressof(client->socket), xdescriptor_status_connect, xnil, xvalgen(0));
+                                xclienteventpub(xaddressof(client->socket), client, xdescriptor_status_connect, xnil, xvalgen(0));
                             }
                             return xsuccess;
                         }
@@ -204,7 +204,7 @@ extern xuint32 xclientwait(xclient * client, xuint32 mask, xint64 second, xint64
                             {
                                 client->socket.status |= xdescriptor_status_connect;
                                 client->socket.status &= (~xdescriptor_status_connecting);
-                                xclienteventpub(xaddressof(client->socket), xdescriptor_event_connect, xnil, xvalgen(0));
+                                xclienteventpub(xaddressof(client->socket), client, xdescriptor_event_connect, xnil, xvalgen(0));
                             }
                             else
                             {
@@ -213,7 +213,7 @@ extern xuint32 xclientwait(xclient * client, xuint32 mask, xint64 second, xint64
                                 {
                                     client->socket.status |= xdescriptor_status_connect;
                                     client->socket.status &= (~xdescriptor_status_connecting);
-                                    xclienteventpub(xaddressof(client->socket), xdescriptor_event_connect, xnil, xvalgen(0));
+                                    xclienteventpub(xaddressof(client->socket), client, xdescriptor_event_connect, xnil, xvalgen(0));
                                 }
                                 else
                                 {

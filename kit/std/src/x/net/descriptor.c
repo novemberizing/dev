@@ -125,7 +125,7 @@ extern xint32 xdescriptorclose(xdescriptor * descriptor)
                 descriptor->handle.f = xinvalid;
                 descriptor->status |= xdescriptor_status_close;
                 descriptor->status &= (~(xdescriptor_status_in | xdescriptor_status_out));
-                xdescriptoreventpub(descriptor, xdescriptor_event_close, descriptor->data, xvalgen(0));
+                xdescriptoreventpub(descriptor, descriptor->data, xdescriptor_event_close, descriptor->data, xvalgen(0));
                 descriptor->status = xdescriptor_status_void;
                 return xsuccess;
             }
@@ -184,14 +184,14 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
                 if(n > 0)
                 {
                     descriptor->status |= xdescriptor_status_in;
-                    xdescriptoreventpub(descriptor, xdescriptor_status_in, buffer, xvalgen(n));
+                    xdescriptoreventpub(descriptor, descriptor->data, xdescriptor_status_in, buffer, xvalgen(n));
                     return n;
                 }
                 else if(n == 0)
                 {
                     xcheck(xtrue, "check this");
                     descriptor->status |= xdescriptor_status_exception;
-                    xdescriptoreventpub(descriptor, xdescriptor_event_exception, xnil, xvalgen(0));
+                    xdescriptoreventpub(descriptor, descriptor->data, xdescriptor_event_exception, xnil, xvalgen(0));
                     return xfail;
                 }
                 else
@@ -206,7 +206,7 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
                     {
                         xcheck(xtrue, "fail to read (%d)", err);
                         descriptor->status |= xdescriptor_status_exception;
-                        xdescriptoreventpub(descriptor, xdescriptor_event_exception, xnil, xvalgen(err));
+                        xdescriptoreventpub(descriptor, descriptor->data, xdescriptor_event_exception, xnil, xvalgen(err));
                         return xfail;
                     }
                 }
@@ -258,7 +258,7 @@ extern xint64 xdescriptorwrite(xdescriptor * descriptor, const void * data, xuin
                 if(n > 0)
                 {
                     descriptor->status |= xdescriptor_status_out;
-                    xdescriptoreventpub(descriptor, xdescriptor_event_out, xnil, xvalgen(n));
+                    xdescriptoreventpub(descriptor, descriptor->data, xdescriptor_event_out, xnil, xvalgen(n));
                     return n;
                 }
                 else if(n == 0)
@@ -278,7 +278,7 @@ extern xint64 xdescriptorwrite(xdescriptor * descriptor, const void * data, xuin
                     {
                         xcheck(xtrue, "fail to write (%d)", errno);
                         descriptor->status |= xdescriptor_status_exception;
-                        xdescriptoreventpub(descriptor, xdescriptor_status_exception, xnil, xvalgen(err));
+                        xdescriptoreventpub(descriptor, descriptor->data, xdescriptor_status_exception, xnil, xvalgen(err));
                         return xfail;
                     }
                 }
