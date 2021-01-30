@@ -9,6 +9,9 @@ struct xeventobj;
 
 typedef struct xeventobj xeventobj;
 
+typedef xeventobj * (*xeventobjfactory)(xeventobj *);
+typedef void (*xeventobjreleaser)(xeventobj *, xeventobj *);
+
 struct xeventobj
 {
     xuint32     flags;
@@ -26,6 +29,9 @@ struct xeventobj
         xeventobj * tail;
         xuint64     total;
     } children;
+
+    xeventobjfactory create;
+    xeventobjreleaser release;
 };
 
 // DESCRIPTOR /////////////////////////////////////////////////
@@ -47,6 +53,7 @@ struct xeventobj
 #define xdescriptor_event_invalid       (0x00000200U)
 #define xdescriptor_event_timeout       (0x00000400U)
 #define xdescriptor_event_bind          (0x00000800U)
+#define xdescriptor_event_listen        (0x00001000U)
 
 #define xdescriptor_status_void         xdescriptor_event_void
 #define xdescriptor_status_in           xdescriptor_event_in
@@ -62,6 +69,7 @@ struct xeventobj
 #define xdescriptor_status_invalid      xdescriptor_event_invalid
 #define xdescriptor_status_timeout      xdescriptor_event_timeout
 #define xdescriptor_status_bind         xdescriptor_event_bind
+#define xdescriptor_status_listen       xdescriptor_event_listen
 
 struct xdescriptor;
 struct xdescriptorio;
@@ -225,6 +233,9 @@ struct xclient
         xuint64     total;
     } children;
 
+    xeventobjfactory create;
+    xeventobjreleaser release;
+
     struct
     {
         union
@@ -258,8 +269,6 @@ struct xclient
     xbuffer * writebuf;
 };
 
-
-
 #define xclientinit(domain, type, protocol) (xclient) {         \
     0,                                                          \
     xclientrem,                                                 \
@@ -268,6 +277,8 @@ struct xclient
     xnil,                                                       \
     xnil,                                                       \
     { xnil, xnil, 0 },                                          \
+    xnil,                                                       \
+    xnil,                                                       \
     {                                                           \
         { .f = xinvalid },                                      \
         xdescriptor_mask_void,                                  \
@@ -292,9 +303,9 @@ extern xclient * xclientnew(int domain, int type, int protocol);
 extern void *    xclientrem(void * p);
 extern xint32    xclientconnect(xclient * client, void * addr, xuint64 addrlen);
 extern xuint32   xclientwait(xclient * client, xuint32 mask, xint64 second, xint64 nanosecond);
+extern xint32    xclientclose(xclient * client);
 
 #define xclientalive(client)                                (client ? xdescriptoralive((xdescriptor *) xaddressof(client->socket)) : xfalse)
-#define xclientclose(client)                                (client ? xdescriptorclose((xdescriptor *) xaddressof(client->socket)) : xfail)
 #define xclientread(client, buffer, size)                   xdescriptorread((xdescriptor *) xaddressof(client->socket), buffer, size)
 #define xclientwrite(client, data, len)                     xdescriptorwrite((xdescriptor *) xaddressof(client->socket), data, len)
 #define xclientmask_nonblock_on(client)                     (client ? xdescriptormask_nonblock_on((xdescriptor *) xaddressof(client->socket)) : xfail)
@@ -309,6 +320,8 @@ extern xuint32   xclientwait(xclient * client, xuint32 mask, xint64 second, xint
 #define xclientshutdown(client, how)                        (client ? xsocketshutdown((xsocket *) xaddressof(client->socket), how) : xfail)
 
 typedef xint64 (*xsessioneventon)(xsession *, void *, xuint32, const void *, xval);
+typedef xeventobj * (*xsessioneventobjfactory)(xsession *);
+typedef void (*xsessioneventobjreleaser)(xsession *, xeventobj *);
 
 struct xsession
 {
@@ -327,6 +340,9 @@ struct xsession
         xeventobj * tail;
         xuint64     total;
     } children;
+
+    xeventobjfactory create;
+    xeventobjreleaser release;
 
     struct
     {
@@ -362,9 +378,9 @@ extern xint64     xsessionsocketeventon(xsession * o, void * parent, xuint32 mas
 
 extern xsession * xsessionnew(void);
 extern void *     xsessionrem(void * p);
+extern xint32     xsessionclose(xsession * session);
 
 #define xsessionalive(session)                              (session ? xdescriptoralive((xdescriptor *) xaddressof(session->socket)) : xfalse)
-#define xsessionclose(session)                              (session ? xdescriptorclose((xdescriptor *) xaddressof(session->socket)) : xfail)
 #define xsessionread(session, buffer, size)                 xdescriptorread((xdescriptor *) xaddressof(session->socket), buffer, size)
 #define xsessionwrite(session, data, len)                   xdescriptorwrite((xdescriptor *) xaddressof(session->socket), data, len)
 #define xsessionmask_nonblock_on(session)                   (session ? xdescriptormask_nonblock_on((xdescriptor *) xaddressof(session->socket)) : xfail)
@@ -400,6 +416,9 @@ struct xserver
         xuint64     total;
     } children;
 
+    xeventobjfactory create;
+    xeventobjreleaser release;
+
     struct
     {
         union
@@ -428,6 +447,8 @@ struct xserver
 
     void *    addr;
     xuint64   addrlen;
+
+    int       backlog;
 };
 
 #define xserverinit(domain, type, protocol) (xserver) {     \
@@ -438,6 +459,8 @@ struct xserver
     xnil,                                                   \
     xnil,                                                   \
     { xnil, xnil, 0 },                                      \
+    xnil,                                                   \
+    xnil,                                                   \
     {                                                       \
         { .f = xinvalid },                                  \
         0,                                                  \
@@ -453,15 +476,22 @@ struct xserver
         protocol                                            \
     },                                                      \
     xnil,                                                   \
-    0 }
+    0,                                                      \
+    xdefaultserverbacklog() }
+
+extern xeventobj * xdefaultsessionfactory(xeventobj * child);
+extern void xdefaultsessionreleaser(xeventobj * o, xeventobj * child);
+extern int xdefaultserverbacklog(void);
 
 extern xint64    xserversocketeventon(xserver * o, void * parent, xuint32 mask, const void * data, xval val);
 
 extern xserver * xservernew(int domain, int type, int protocol, void * addr, xuint64 addrlen);
 extern void *    xserverrem(void * p);
+extern xint32    xserverclose(xserver * server);
+extern xint32    xserverbind(xserver * server, void * addr, xuint64 addrlen);
+extern xint32    xserverlisten(xserver * server, void * addr, xuint64 addrlen);
 
 #define xserveralive(server)                                (server ? xdescriptoralive((xdescriptor *) xaddressof(server->socket)) : xfalse)
-#define xserverclose(server)                                (server ? xdescriptorclose((xdescriptor *) xaddressof(server->socket)) : xfail)
 
 #define xservermask_nonblock_on(server)                     (server ? xdescriptormask_nonblock_on((xdescriptor *) xaddressof(server->socket)) : xfail)
 #define xservermask_nonblock_off(server)                    (server ? xdescriptormask_nonblock_off((xdescriptor *) xaddressof(server->socket)) : xfail)
@@ -469,7 +499,7 @@ extern void *    xserverrem(void * p);
 #define xservernonblock_on(server)                          xdescriptornonblock_on((xdescriptor *) (server ? xaddressof(server->socket) : xnil))
 #define xservernonblock_off(server)                         xdescriptornonblock_off((xdescriptor *) (session ? xaddressof(server->socket) : xnil))
 
-#define xservereventpub(server, parnet, mask, data, val)    xdescriptoreventpub(((xdescriptor *) socket), parnet, mask, data, val)
+#define xservereventpub(socket, parent, mask, data, val)    xdescriptoreventpub(((xdescriptor *) socket), parent, mask, data, val)
 
 #define xserveropen(server)                                 (server ? xsocketopen((xsocket *) xaddressof(server->socket)) : xfail)
 #define xservershutdown(server, how)                        (server ? xsocketshutdown((xsocket *) xaddressof(server->socket), how) : xfail)

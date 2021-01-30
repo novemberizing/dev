@@ -11147,6 +11147,9 @@ ac_config_headers="$ac_config_headers config.h"
 
 
 
+
+CFLAGS=-g
+
 am__api_version='1.16'
 
 # Find a good install program.  We prefer a C program (faster),

@@ -39,8 +39,34 @@ static xint32 check_server_simple(xuint32 repeat)
     {
         xserver local = xserverinit(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
+        int ret = xserverlisten(&local, &addr, addrlen);
+        if(ret == xsuccess)
+        {
+            printf("listen ...\n");
+        }
+        else
+        {
+            printf("fail to xserverlisten\n");
+        }
+
         xserverrem(&local);
+
+        xserver * server = xservernew(PF_INET, SOCK_STREAM, IPPROTO_TCP, &addr, addrlen);
+
+        ret = xserverlisten(server, xnil, 0);
+        if(ret == xsuccess)
+        {
+            printf("listen ...\n");
+        }
+        else
+        {
+            printf("fail to xserverlisten\n");
+        }
+
+        xserverrem(server);
     }
+
+    return xsuccess;
 }
 
 static xint32 check_client_simple(xuint32 repeat)
