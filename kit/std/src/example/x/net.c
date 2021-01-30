@@ -169,7 +169,6 @@ static xint32 check_client_simple(xuint32 repeat)
                     }
                 }
             }
-
         }
 
         client = xclientrem(client);
