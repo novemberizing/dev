@@ -15,16 +15,32 @@ static xint32 check_descriptor_simple(xuint32 repeat);
 static xint32 check_descriptor_simple_nonblock(xuint32 repeat);
 static xint32 check_client_simple(xuint32 repeat);
 static xint32 check_server_simple(xuint32 repeat);
+static xint32 check_descriptorio_simple(xuint32 repeat);
 
 int main(int argc, char ** argv)
 {
     xrandomon();
     
-    xassertion(check_descriptor_simple(xrandomgen() % 64) != xsuccess, "fail to check descriptor simple");
-    xassertion(check_descriptor_simple_nonblock(xrandomgen() % 64) != xsuccess, "fail to check descriptor simple nonblock read");
-    xassertion(check_client_simple(xrandomgen() % 64) != xsuccess, "fail to check client simple");
-    xassertion(check_server_simple(xrandomgen() % 64) != xsuccess, "fail to check server simple");
+    xassertion(check_descriptor_simple(xrandomgen() % 64 + 1) != xsuccess, "fail to check descriptor simple");
+    xassertion(check_descriptor_simple_nonblock(xrandomgen() % 64 + 1) != xsuccess, "fail to check descriptor simple nonblock read");
+    xassertion(check_client_simple(xrandomgen() % 64 + 1) != xsuccess, "fail to check client simple");
+    xassertion(check_server_simple(xrandomgen() % 64 + 1) != xsuccess, "fail to check server simple");
+    xassertion(check_descriptorio_simple(xrandomgen() % 64 + 1) != xsuccess, "fail to check descriptorio simple");
+
     return 0;
+}
+
+static xint32 check_descriptorio_simple(xuint32 repeat)
+{
+    xdescriptorio * io = xdescriptorionew();
+    for(xuint32 i = 0; i < repeat; i++)
+    {
+        xdescriptoriocall(io);
+
+        
+    }
+
+    return xsuccess;
 }
 
 static xint32 check_server_simple(xuint32 repeat)

@@ -136,9 +136,10 @@ struct xdescriptorio
     xuint64       total;
 };
 
+extern xdescriptorio * xdescriptorionew(void);
 extern void xdescriptorioadd(xdescriptorio * o, xdescriptor * descriptor);
 extern void xdescriptoriodel(xdescriptorio * o, xdescriptor * descriptor);
-
+extern void xdescriptoriocall(xdescriptorio * o);
 // SOCKET /////////////////////////////////////////////////////
 
 struct xsocket;
@@ -505,5 +506,7 @@ extern xint32    xserverlisten(xserver * server, void * addr, xuint64 addrlen);
 #define xservershutdown(server, how)                        (server ? xsocketshutdown((xsocket *) xaddressof(server->socket), how) : xfail)
 
 #define xserverwait(server, mask, second, nanosecond)       xdescriptorwait((xdescriptor *) xaddressof(server->socket), mask, second, nanosecond)
+
+/* NETWORK EVENT IO ***************************************************/
 
 #endif // __NOVEMBERIZING_X__NET__H__
