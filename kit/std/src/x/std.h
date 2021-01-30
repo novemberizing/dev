@@ -65,7 +65,7 @@ extern xtime xtimeset(xint64 second, xint64 nanosecond);
 extern xint64 xtimecmp(const xtime * x, const xtime * y);
 
 
-#define xaddressof(o)       (&o)
+#define xaddressof(o)       (&(o))
 
 typedef void *              (*xdestructor)(void *);
 typedef void                (*xvalcb)(xval);
