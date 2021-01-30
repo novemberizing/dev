@@ -185,6 +185,7 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
                 {
                     descriptor->status |= xdescriptor_status_in;
                     xdescriptoreventpub(descriptor, xdescriptor_status_in, buffer, xvalgen(n));
+                    return n;
                 }
                 else if(n == 0)
                 {

@@ -293,7 +293,8 @@ extern xint32 xclientconnect(xclient * client, void * addr, xuint64 addrlen);
 
 #define xclientalive(client)                            (client ? xdescriptoralive((xdescriptor *) xaddressof(client->socket)) : xfalse)
 #define xclientclose(client)                            (client ? xdescriptorclose((xdescriptor *) xaddressof(client->socket)) : xfail)
-
+#define xclientread(client, buffer, size)               xdescriptorread((xdescriptor *) xaddressof(client->socket), buffer, size)
+#define xclientwrite(client, data, len)                 xdescriptorwrite((xdescriptor *) xaddressof(client->socket), data, len)
 #define xclientmask_nonblock_on(client)                 (client ? xdescriptormask_nonblock_on((xdescriptor *) xaddressof(client->socket)) : xfail)
 #define xclientmask_nonblock_off(client)                (client ? xdescriptormask_nonblock_off((xdescriptor *) xaddressof(client->socket)) : xfail)
 

@@ -32,6 +32,8 @@ static xint32 check_client_simple(xuint32 repeat)
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     addr.sin_port   = htons(2000);
     socklen_t addrlen = sizeof(struct sockaddr_in);
+    char buffer[1024];
+    char data[1024];
 
     for(xuint32 i = 0; i < repeat; i++)
     {
@@ -86,16 +88,47 @@ static xint32 check_client_simple(xuint32 repeat)
                             printf("timeout wait in read\n");
                         }
                     }
+                    xint64 n = snprintf(data, 1024, "hello%02d\n", i);
+                    xclientwrite(client, data, n);
                     result = xclientwait(client, xdescriptor_event_out, 0, 1000000);
                     if(result & xdescriptor_event_out)
                     {
                         printf("event out\n");
+                        n = snprintf(data, 1024, "world%02d\n", i);
+                        xclientwrite(client, data, n);
                     }
                     else
                     {
                         if(result & xdescriptor_event_timeout)
                         {
                             printf("timeout wait in write\n");
+                        }
+                    }
+                    for(int i = 0; i < 2; i++)
+                    {
+                        result = xclientwait(client, xdescriptor_event_in, 1, 0);
+                        if(result & xdescriptor_event_in)
+                        {
+                            printf("event in\n");
+                            do {
+                                n = xclientread(client, buffer, 1024);
+                                if(n > 0)
+                                {
+                                    buffer[n] = 0;
+                                    printf("recv[%ld] => %s", n, buffer);
+                                }
+                                else if(n < 0)
+                                {
+                                    printf("fail to read\n");
+                                }
+                            } while(n > 0);
+                        }
+                        else
+                        {
+                            if(result & xdescriptor_event_timeout)
+                            {
+                                printf("timeout wait in read\n");
+                            }
                         }
                     }
                 }
