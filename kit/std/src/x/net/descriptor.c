@@ -27,6 +27,76 @@ static xuint32 __xdescriptor_internal_poll_mask_convert(xuint32 mask)
     return result;
 }
 
+extern void xdescriptordebug_event_mask(xuint32 mask)
+{
+    if(mask == xdescriptor_event_void)
+    {
+        printf("descriptor event void\n");
+    }
+    else
+    {
+        if(mask & xdescriptor_event_in)
+        {
+            printf("xdescriptor_event_in\n");
+        }
+        if(mask & xdescriptor_event_out)
+        {
+            printf("xdescriptor_event_out\n");
+        }
+        if((mask & xdescriptor_event_closeall) == xdescriptor_event_closeall)
+        {
+            printf("xdescriptor_event_closeout\n");
+        }
+        else
+        {
+            if(mask & xdescriptor_event_closein)
+            {
+                printf("xdescriptor_event_closein\n");
+            }
+            if(mask & xdescriptor_event_closeout)
+            {
+                printf("xdescriptor_event_closeout\n");
+            }
+        }
+        if(mask & xdescriptor_event_close)
+        {
+            printf("xdescriptor_event_close\n");
+        }
+        if(mask & xdescriptor_event_exception)
+        {
+            printf("xdescriptor_event_exception\n");
+        }
+        if(mask & xdescriptor_event_open)
+        {
+            printf("xdescriptor_event_open\n");
+        }
+        if(mask & xdescriptor_event_connect)
+        {
+            printf("xdescriptor_event_connect\n");
+        }
+        if(mask & xdescriptor_event_connecting)
+        {
+            printf("xdescriptor_event_connecting\n");
+        }
+        if(mask & xdescriptor_event_invalid)
+        {
+            printf("xdescriptor_event_invalid\n");
+        }
+        if(mask & xdescriptor_event_timeout)
+        {
+            printf("xdescriptor_event_timeout\n");
+        }
+        if(mask & xdescriptor_event_bind)
+        {
+            printf("xdescriptor_event_bind\n");
+        }
+        if(mask & xdescriptor_event_listen)
+        {
+            printf("xdescriptor_event_listen\n");
+        }
+    }
+}
+
 extern void xdescriptornonblock_on(xdescriptor * descriptor)
 {
     if(descriptor)
@@ -122,9 +192,9 @@ extern xint32 xdescriptorclose(xdescriptor * descriptor)
             
             if(ret == xsuccess)
             {
-                descriptor->handle.f = xinvalid;
-                descriptor->status |= xdescriptor_status_close;
-                descriptor->status &= (~(xdescriptor_status_in | xdescriptor_status_out));
+                descriptor->handle.f  = xinvalid;
+                descriptor->status   |= xdescriptor_status_close;
+                descriptor->status   &= (~(xdescriptor_status_in | xdescriptor_status_out));
                 xdescriptoreventpub(descriptor, descriptor->data, xdescriptor_event_close, descriptor->data, xvalgen(0));
                 descriptor->status = xdescriptor_status_void;
                 return xsuccess;
@@ -200,6 +270,10 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
                     if(err == EAGAIN)
                     {
                         descriptor->status &= (~xdescriptor_status_in);
+                        if(descriptor->io)
+                        {
+                            xdescriptorioreg(descriptor->io, descriptor);
+                        }
                         return xsuccess;
                     }
                     else
@@ -272,6 +346,10 @@ extern xint64 xdescriptorwrite(xdescriptor * descriptor, const void * data, xuin
                     if(err == EAGAIN)
                     {
                         descriptor->status &= (~xdescriptor_status_out);
+                        if(descriptor->io)
+                        {
+                            xdescriptorioreg(descriptor->io, descriptor);
+                        }
                         return xsuccess;
                     }
                     else

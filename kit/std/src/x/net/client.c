@@ -48,6 +48,8 @@ extern xclient * xclientnew(int domain, int type, int protocol)
     client->socket.domain   = domain;
     client->socket.type     = type;
     client->socket.protocol = protocol;
+    client->socket.open     = xclientopen;
+    client->socket.data     = client;
 
     return client;
 }
@@ -91,12 +93,14 @@ extern xint32 xclientconnect(xclient * client, void * addr, xuint64 addrlen)
     {
         if(xclientalive(client) == xfalse)
         {
-            int ret = xclientopen(client);
+            int ret = xsocketopen((xsocket *) xaddressof(client->socket));
+
             if(ret != xsuccess)
             {
                 xcheck(xtrue, "fail to client open");
                 return xfail;
             }
+            
             if((client->socket.status & xdescriptor_status_connect) == xdescriptor_status_void)
             {
                 if(addr && addrlen)
@@ -325,4 +329,24 @@ extern xint32 xclientclose(xclient * client)
         xcheck(xtrue, "client is null");
     }
     return xsuccess;
+}
+
+extern xint32 xclientopen(xdescriptor * descriptor)
+{
+    if(descriptor)
+    {
+        xclient * client = (xclient *) descriptor->data;
+        xint32 ret = xclientconnect(client, xnil, 0);
+
+        if(ret == xsuccess)
+        {
+            return xsuccess;
+        }
+        xcheck(xtrue, "fail to server");
+    }
+    else
+    {
+        xcheck(xtrue, "fail to descriptor");
+    }
+    return xfail;
 }

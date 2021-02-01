@@ -14,9 +14,15 @@
 
 #include "../net.h"
 
-extern xint64 xserversocketeventon(xserver * o, void * parent, xuint32 mask, const void * data, xval val)
+extern xint64 xserversocketeventon(xdescriptor * descriptor, void * parent, xuint32 mask, const void * data, xval val)
 {
-
+    xdescriptordebug_event_mask(mask);
+    if(mask & xdescriptor_event_in)
+    {
+        xserver * server = (xserver *) parent;
+        xsession * session = xserveraccept(server);
+    }
+    return xsuccess;
 }
 
 extern int xdefaultserverbacklog(void)
@@ -101,6 +107,8 @@ extern xserver * xservernew(int domain, int type, int protocol, void * addr, xui
     server->socket.domain   = domain;
     server->socket.type     = type;
     server->socket.protocol = protocol;
+    server->socket.open     = xserveropen;
+    server->socket.data     = server;
 
     server->addr            = xdup(addr, addrlen);
     server->addrlen         = addrlen;
@@ -122,6 +130,8 @@ extern void * xserverrem(void * p)
 
         xassertion(o->parent, "server's parent already linked");
         xassertion(o->children.total > 0, "server's children exist");
+
+        xdescriptoriounreg(o->socket.io, (xdescriptor *) xaddressof(o->socket));
 
         if(xserveralive(o))
         {
@@ -180,6 +190,7 @@ extern xint32 xserverbind(xserver * server, void * addr, xuint64 addrlen)
             server->addr    = xcopy(server->addr, addr, addrlen, server->addrlen != addrlen);
             server->addrlen = addrlen;
         }
+
         int ret = xsocketbind((xsocket *) xaddressof(server->socket), server->addr, server->addrlen);
         if(ret == xsuccess)
         {
@@ -206,7 +217,7 @@ extern xint32 xserverlisten(xserver * server, void * addr, xuint64 addrlen)
             ret = listen(server->socket.handle.f, server->backlog);
             if(ret == xsuccess)
             {
-                server->socket.status |= xdescriptor_status_listen;
+                server->socket.status |= (xdescriptor_status_listen | xdescriptor_event_out);
                 xservereventpub(xaddressof(server->socket), server, xdescriptor_event_listen, xnil, xvalgen(0));
                 return xsuccess;
             }
@@ -223,4 +234,42 @@ extern xint32 xserverlisten(xserver * server, void * addr, xuint64 addrlen)
         xcheck(xtrue, "server is null");
     }
     return xfail;
+}
+
+extern xint32 xserveropen(xdescriptor * descriptor)
+{
+    if(descriptor)
+    {
+        xserver * server = (xserver *) descriptor->data;
+        xint32 ret = xserverlisten(server, xnil, 0);
+        if(ret == xsuccess)
+        {
+            xcheck(xtrue, "server is open");
+            return xsuccess;
+        }
+        xcheck(xtrue, "fail to server");
+    }
+    else
+    {
+        xcheck(xtrue, "fail to descriptor");
+    }
+    return xfail;
+}
+
+extern xsession * xserveraccept(xserver * server)
+{
+    struct sockaddr addr;
+    socklen_t addrlen = sizeof(struct sockaddr);
+    int fd = accept(server->socket.handle.f, &addr, &addrlen);
+    if(fd >= 0)
+    {
+        printf("accept fd (%d)\n", fd);
+    }
+    else
+    {
+        int err = errno;
+        xcheck(xtrue, "fail to accept (%d)", err);
+    }
+    // accept(server->socket.)
+    return xnil;
 }

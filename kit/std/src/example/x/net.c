@@ -32,14 +32,21 @@ int main(int argc, char ** argv)
 
 static xint32 check_descriptorio_simple(xuint32 repeat)
 {
+    printf("===================================\n");
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = 0;
+    addr.sin_port = htons(3371);
+    socklen_t addrlen = sizeof(struct sockaddr_in);
     xdescriptorio * io = xdescriptorionew();
-    for(xuint32 i = 0; i < repeat; i++)
+    xserver * server = xservernew(PF_INET, SOCK_STREAM, IPPROTO_TCP, &addr, addrlen);
+    xdescriptorioreg(io, (xdescriptor *) xaddressof(server->socket));
+    while(xtrue)
     {
         xdescriptoriocall(io);
-
-        
     }
-
+    xdescriptoriorem(io);
+    xserverrem(server);
     return xsuccess;
 }
 
