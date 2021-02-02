@@ -3,14 +3,15 @@
 
 #include <x/std.h>
 
-struct xeventengine;
-struct xeventobject;
 
-typedef struct xeventengine xeventengine;
-typedef struct xeventobject xeventobject;
-
-extern xeventengine * xeventengine_new(void);
-extern void *         xeventengine_rem(void * pointer);
+/**
+ * xclient client;  
+ * 
+ * 사용자는 비즈니스 로직에만 신경쓰고 싶다.
+ * 
+ * 
+ * client.socket = xsocketnew();
+ */
 
 
 
