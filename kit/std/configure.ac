@@ -11,10 +11,7 @@ AC_CONFIG_FILES([
     Makefile
     src/Makefile
     src/x/Makefile
-    src/x/net/Makefile
-    src/x/event/Makefile
     src/example/Makefile
-    src/example/x/Makefile
 ])
 
 dnl ----------------------------------------------------------

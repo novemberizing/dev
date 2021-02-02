@@ -11140,7 +11140,7 @@ CC=$lt_save_CC
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/x/Makefile src/x/net/Makefile src/x/event/Makefile src/example/Makefile src/example/x/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/x/Makefile src/example/Makefile"
 
 
 ac_config_headers="$ac_config_headers config.h"
@@ -13489,10 +13489,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/x/Makefile") CONFIG_FILES="$CONFIG_FILES src/x/Makefile" ;;
-    "src/x/net/Makefile") CONFIG_FILES="$CONFIG_FILES src/x/net/Makefile" ;;
-    "src/x/event/Makefile") CONFIG_FILES="$CONFIG_FILES src/x/event/Makefile" ;;
     "src/example/Makefile") CONFIG_FILES="$CONFIG_FILES src/example/Makefile" ;;
-    "src/example/x/Makefile") CONFIG_FILES="$CONFIG_FILES src/example/x/Makefile" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
 
