@@ -4,15 +4,17 @@
 #include <x/std.h>
 
 struct xeventengine;
-
-struct xclient;
-struct xsession;
-struct xserver;
+struct xeventobject;
 
 typedef struct xeventengine xeventengine;
+typedef struct xeventobject xeventobject;
 
 extern xeventengine * xeventengine_new(void);
 extern void *         xeventengine_rem(void * pointer);
+
+
+
+
 
 /**
  * xclient_new()
