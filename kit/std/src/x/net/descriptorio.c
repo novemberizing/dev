@@ -78,9 +78,9 @@ extern void * xdescriptoriorem(void * p)
             {
                 io->tail = xnil;
             }
-            io->total = io->total - 1;
-            io->head = node->next;
-            node->io = xnil;
+            io->total  = io->total - 1;
+            io->head   = node->next;
+            node->io   = xnil;
             node->prev = xnil;
             node->next = xnil;
         }
@@ -99,67 +99,24 @@ extern void xdescriptoriocall(xdescriptorio * o)
     __xdescriptorio_epoll * io = (__xdescriptorio_epoll *) o;
     if(io)
     {
-        if(io->queue.total > 0)
-        {
-            printf("queue open\n");
-            xuint64 total = io->queue.total;
-            xdescriptor * descriptor = io->queue.head;
-            for(xuint64 i = 0; i < total && descriptor; i++)
-            {
-                if(descriptor->handle.f < 0)
-                {
-                    xdescriptoropen(descriptor);
-                    // printf("open");
-                }
-                printf("descriptor->handle.f => %d\n", descriptor->handle.f);
-                xdescriptor * next = descriptor->next;
-                if(descriptor->handle.f >= 0)
-                {
-                    xdescriptor * prev = descriptor->prev;
-                    if(prev)
-                    {
-                        prev->next = next;
-                    }
-                    else
-                    {
-                        io->queue.head = next;
-                    }
-                    if(next)
-                    {
-                        next->prev = prev;
-                    }
-                    else
-                    {
-                        io->queue.tail = prev;
-                    }
-                    io->queue.total = io->queue.total - 1;
-
-                    xdescriptorioreg(o, descriptor);
-
-                    printf("io total ... %lu?\n", io->total);
-                    printf("io queue total ... %lu?\n", io->queue.total);
-                }
-                descriptor = next;
-            }
-            printf("gogogog >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.\n");
-        }
         if(io->fd < 0)
         {
             io->fd = epoll_create(4096);    // 4096 is just hint
             printf("todo: reinitialize all descriptor\n");
-            xdescriptor * descriptor = o->head;
-            while(descriptor)
-            {
-                printf("descriptor %p\n", descriptor);
-                if(descriptor->handle.f >= 0)
-                {
-                    xdescriptorioreg(o, descriptor);
-                }
-                descriptor = descriptor->next;
-            }
+            // xdescriptor * descriptor
+
         }
         if(io->fd >= 0)
         {
+            if(io->queue.total > 0)
+            {
+                xuint64 total = io->queue.total;
+                xdescriptor * descriptor = io->queue.head;
+                for(xuint64 i = 0; i < total && descriptor; i++)
+                {
+                
+                }
+            }
             int nfds = epoll_wait(io->fd, io->events, io->nfds, 1);
             if(nfds >= 0)
             {
