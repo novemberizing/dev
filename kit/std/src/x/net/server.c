@@ -21,6 +21,7 @@ extern xint64 xserversocketeventon(xdescriptor * descriptor, void * parent, xuin
     {
         xserver * server = (xserver *) parent;
         xsession * session = xserveraccept(server);
+        printf("accept\n");
     }
     return xsuccess;
 }
@@ -263,7 +264,13 @@ extern xsession * xserveraccept(xserver * server)
     int fd = accept(server->socket.handle.f, &addr, &addrlen);
     if(fd >= 0)
     {
-        printf("accept fd (%d)\n", fd);
+        xsession * session = (xsession *) server->create((xeventobj *) server);
+        printf("accept fd (%d:%p)\n", fd, session);
+        if(server->socket.io)
+        {
+            xdescriptorioreg(server->socket.io, (xdescriptor *) xaddressof(session->socket));
+        }
+        return session;
     }
     else
     {

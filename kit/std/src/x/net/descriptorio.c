@@ -26,6 +26,13 @@ struct __xdescriptorio_epoll
     xdescriptor *       tail;
     xuint64             total;
 
+    struct
+    {
+        xdescriptor * head;
+        xdescriptor * tail;
+        xuint64       total;
+    } queue;
+
     int                  fd;
 
     int                  nfds;
@@ -92,14 +99,63 @@ extern void xdescriptoriocall(xdescriptorio * o)
     __xdescriptorio_epoll * io = (__xdescriptorio_epoll *) o;
     if(io)
     {
+        if(io->queue.total > 0)
+        {
+            printf("queue open\n");
+            xuint64 total = io->queue.total;
+            xdescriptor * descriptor = io->queue.head;
+            for(xuint64 i = 0; i < total && descriptor; i++)
+            {
+                if(descriptor->handle.f < 0)
+                {
+                    xdescriptoropen(descriptor);
+                    // printf("open");
+                }
+                printf("descriptor->handle.f => %d\n", descriptor->handle.f);
+                xdescriptor * next = descriptor->next;
+                if(descriptor->handle.f >= 0)
+                {
+                    xdescriptor * prev = descriptor->prev;
+                    if(prev)
+                    {
+                        prev->next = next;
+                    }
+                    else
+                    {
+                        io->queue.head = next;
+                    }
+                    if(next)
+                    {
+                        next->prev = prev;
+                    }
+                    else
+                    {
+                        io->queue.tail = prev;
+                    }
+                    io->queue.total = io->queue.total - 1;
+
+                    xdescriptorioreg(o, descriptor);
+
+                    printf("io total ... %lu?\n", io->total);
+                    printf("io queue total ... %lu?\n", io->queue.total);
+                }
+                descriptor = next;
+            }
+            printf("gogogog >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.\n");
+        }
         if(io->fd < 0)
         {
             io->fd = epoll_create(4096);    // 4096 is just hint
             printf("todo: reinitialize all descriptor\n");
             xdescriptor * descriptor = o->head;
-            if(descriptor->handle.f >= 0)
+            while(descriptor)
             {
-                xdescriptorioreg(o, descriptor);
+                printf("descriptor %p\n", descriptor);
+                if(descriptor->handle.f >= 0)
+                {
+                    xdescriptorioreg(o, descriptor);
+                }
+                descriptor = descriptor->next;
             }
         }
         if(io->fd >= 0)
@@ -175,88 +231,121 @@ extern void xdescriptoriocall(xdescriptorio * o)
     }
 }
 
-extern void xdescriptorioadd(xdescriptorio * io, xdescriptor * descriptor)
+extern void xdescriptorioreg(xdescriptorio * o, xdescriptor * descriptor)
 {
-    if(io)
+    if(descriptor && o)
     {
-        if(descriptor)
+        xassertion(descriptor->io || descriptor->prev || descriptor->next, "descriptor io is already exist");
+        if(descriptor->io == xnil)
         {
-            if(descriptor->io == xnil && descriptor->prev == xnil || descriptor->next == xnil)
+            descriptor->io = o;
+        }
+        xassertion(descriptor->io != o, "descriptor's io is not same");
+
+        __xdescriptorio_epoll * io = (__xdescriptorio_epoll *) o;
+
+        if(io->fd < 0)
+        {
+            descriptor->prev = io->queue.tail;
+            if(descriptor->prev)
             {
-                descriptor->io = io;
-                io->total = io->total + 1;
+                descriptor->prev->next = descriptor;
             }
             else
             {
-                if(descriptor->io == io)
+                io->queue.head = descriptor;
+            }
+            io->queue.total = io->queue.total + 1;
+        }
+        else
+        {
+            if(descriptor->handle.f < 0)
+            {
+                xdescriptoropen(descriptor);
+            }
+
+            if(descriptor->handle.f >= 0)
+            {
+                struct epoll_event event;
+                event.data.ptr = descriptor;
+                event.events = (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP | EPOLLET | EPOLLONESHOT);
+
+                if((descriptor->status & xdescriptor_event_in) == xdescriptor_event_void)
                 {
-                    xcheck(xtrue, "descriptor is already linked");
+                    event.events |= EPOLLIN;
+                }
+
+                if((descriptor->status & xdescriptor_event_out) == xdescriptor_event_void)
+                {
+                    event.events |= EPOLLOUT;
+                }
+
+                int ret = epoll_ctl(io->fd, EPOLL_CTL_ADD, descriptor->handle.f, &event);
+                if(ret != xsuccess)
+                {
+                    int err = errno;
+                    if(err == EEXIST)
+                    {
+                        ret = epoll_ctl(io->fd, EPOLL_CTL_MOD, descriptor->handle.f, &event);
+                        if(ret != xsuccess)
+                        {
+                            err = errno;
+                            xcheck(xtrue, "fail to reg (epoll_ctl ...) (%d)", err);
+                        }
+                    }
+                    else
+                    {
+                        xcheck(xtrue, "fail to reg (epoll_ctl ...) (%d)", err);
+                    }
+                }
+                if(ret == xsuccess)
+                {
+                    descriptor->prev = io->tail;
+                    if(descriptor->prev)
+                    {
+                        descriptor->prev->next = descriptor;
+                    }
+                    else
+                    {
+                        io->head = descriptor;
+                    }
+                    io->total = io->total + 1;
                 }
                 else
                 {
-                    xassertion(xtrue, "descriptor is already linked in the other descriptorio");
+                    // session is close
+                    // server is retry
+                    xassertion(xtrue, "implement this logic");
                 }
             }
-        }
-        else
-        {
-            xcheck(xtrue, "descriptor is null");
-        }
-    }
-    else
-    {
-        xcheck(xtrue, "descriptorio is null");
-    }
-}
-
-extern void xdescriptoriodel(xdescriptorio * o, xdescriptor * descriptor)
-{
-    if(o)
-    {
-        if(descriptor)
-        {
-            xdescriptor * prev = descriptor->prev;
-            xdescriptor * next = descriptor->next;
-
-            if(prev)
-            {
-                prev->next = next;
-            }
             else
             {
-                o->head = next;
+                descriptor->prev = io->queue.tail;
+                if(descriptor->prev)
+                {
+                    descriptor->prev->next = descriptor;
+                }
+                else
+                {
+                    io->queue.head = descriptor;
+                }
+                io->queue.total = io->queue.total + 1;
             }
-
-            if(next)
-            {
-                next->prev = prev;
-            }
-            else
-            {
-                o->tail = prev;
-            }
-
-            o->total = o->total - 1;
-        }
-        else
-        {
-            xcheck(xtrue, "descriptor is null");
         }
     }
-    else
-    {
-        xcheck(xtrue, "descriptorio is null");
-    }
-}
-
-extern void xdescriptorioreg(xdescriptorio * o, xdescriptor * descriptor)
-{
     if(descriptor && o)
     {
         if(descriptor->io == xnil)
         {
             descriptor->io = o;
-
+        }
+        xcheck(descriptor->io != o, "descriptor's io is not same");
+        if(descriptor->handle.f < 0)
+        {
+            xdescriptoropen(descriptor);
+        }
+        if(descriptor->handle.f >= 0)
+        {
             descriptor->prev = o->tail;
             if(descriptor->prev)
             {
@@ -266,16 +355,10 @@ extern void xdescriptorioreg(xdescriptorio * o, xdescriptor * descriptor)
             {
                 o->head = descriptor;
             }
+            descriptor->next = xnil;
             o->tail = descriptor;
             o->total = o->total + 1;
-        }
-        xcheck(descriptor->io != o, "descriptor's io is not same");
-        if(descriptor->handle.f < 0)
-        {
-            xdescriptoropen(descriptor);
-        }
-        if(descriptor->handle.f >= 0)
-        {
+
             __xdescriptorio_epoll * io = (__xdescriptorio_epoll *) o;
             if(io->fd >= 0)
             {
@@ -315,6 +398,18 @@ extern void xdescriptorioreg(xdescriptorio * o, xdescriptor * descriptor)
         }
         else
         {
+            descriptor->prev = descriptor->io->queue.tail;
+            if(descriptor->prev)
+            {
+                descriptor->prev->next = descriptor;
+            }
+            else
+            {
+                descriptor->io->queue.head = descriptor;
+            }
+            descriptor->io->queue.tail = descriptor;
+            descriptor->io->queue.total = descriptor->io->queue.total + 1;
+
             xcheck(xtrue, "descriptor handle is not alive (will be retried)");
         }
     }

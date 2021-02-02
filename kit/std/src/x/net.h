@@ -141,12 +141,17 @@ struct xdescriptorio
     xdescriptor * head;
     xdescriptor * tail;
     xuint64       total;
+
+    struct
+    {
+        xdescriptor * head;
+        xdescriptor * tail;
+        xuint64       total;
+    } queue;
 };
 
 extern xdescriptorio * xdescriptorionew(void);
 extern void * xdescriptoriorem(void * p);
-extern void xdescriptorioadd(xdescriptorio * o, xdescriptor * descriptor);
-extern void xdescriptoriodel(xdescriptorio * o, xdescriptor * descriptor);
 extern void xdescriptoriocall(xdescriptorio * o);
 
 extern void xdescriptorioreg(xdescriptorio * o, xdescriptor * descriptor);
