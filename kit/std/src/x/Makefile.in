@@ -137,7 +137,9 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
-am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) net.$(OBJEXT)
+am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) log.$(OBJEXT) \
+	thread.$(OBJEXT) descriptor.$(OBJEXT) descriptorio.$(OBJEXT) \
+	descriptorio-epoll.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -154,7 +156,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/net.Po ./$(DEPDIR)/std.Po
+am__depfiles_remade = ./$(DEPDIR)/descriptor.Po \
+	./$(DEPDIR)/descriptorio-epoll.Po ./$(DEPDIR)/descriptorio.Po \
+	./$(DEPDIR)/log.Po ./$(DEPDIR)/std.Po ./$(DEPDIR)/thread.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -325,8 +329,12 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = -I$(top_srcdir)/src
 ACLOCAL_AMFLAGS = -I m4
 lib_LIBRARIES = libnovemberizing.a
-libnovemberizing_a_SOURCES = std.c    \
-                             net.c
+libnovemberizing_a_SOURCES = std.c                  \
+                             log.c                  \
+                             thread.c               \
+                             descriptor.c           \
+                             descriptorio.c         \
+                             descriptorio-epoll.c
 
 all: all-am
 
@@ -404,8 +412,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptor.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptorio-epoll.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptorio.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -568,8 +580,12 @@ clean-am: clean-generic clean-libLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/net.Po
+		-rm -f ./$(DEPDIR)/descriptor.Po
+	-rm -f ./$(DEPDIR)/descriptorio-epoll.Po
+	-rm -f ./$(DEPDIR)/descriptorio.Po
+	-rm -f ./$(DEPDIR)/log.Po
 	-rm -f ./$(DEPDIR)/std.Po
+	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -615,8 +631,12 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/net.Po
+		-rm -f ./$(DEPDIR)/descriptor.Po
+	-rm -f ./$(DEPDIR)/descriptorio-epoll.Po
+	-rm -f ./$(DEPDIR)/descriptorio.Po
+	-rm -f ./$(DEPDIR)/log.Po
 	-rm -f ./$(DEPDIR)/std.Po
+	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
