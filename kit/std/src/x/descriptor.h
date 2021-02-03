@@ -65,6 +65,8 @@ struct xdescriptor
     xdescriptor *      next;
     xdescriptorio *    io;
 
+    xsync * sync;
+
     xdescriptor_opener          open;
     xdescriptor_event_processor process;
     xdescriptor_event_handler   on;

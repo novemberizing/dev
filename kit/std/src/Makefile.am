@@ -3,4 +3,5 @@ SUBDIRS = x       \
           example
 
 nobase_include_HEADERS = x/std.h    \
-                         x/socket.h
+                         x/socket.h \
+                         x/client.h

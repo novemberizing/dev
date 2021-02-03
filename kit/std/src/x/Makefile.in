@@ -139,7 +139,7 @@ libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
 am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) log.$(OBJEXT) \
 	thread.$(OBJEXT) descriptor.$(OBJEXT) descriptorio.$(OBJEXT) \
-	descriptorio-epoll.$(OBJEXT) socket.$(OBJEXT)
+	descriptorio-epoll.$(OBJEXT) socket.$(OBJEXT) client.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -156,7 +156,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/descriptor.Po \
+am__depfiles_remade = ./$(DEPDIR)/client.Po ./$(DEPDIR)/descriptor.Po \
 	./$(DEPDIR)/descriptorio-epoll.Po ./$(DEPDIR)/descriptorio.Po \
 	./$(DEPDIR)/log.Po ./$(DEPDIR)/socket.Po ./$(DEPDIR)/std.Po \
 	./$(DEPDIR)/thread.Po
@@ -336,7 +336,8 @@ libnovemberizing_a_SOURCES = std.c                  \
                              descriptor.c           \
                              descriptorio.c         \
                              descriptorio-epoll.c   \
-                             socket.c
+                             socket.c               \
+                             client.c
 
 all: all-am
 
@@ -414,6 +415,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptorio-epoll.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptorio.Po@am__quote@ # am--include-marker
@@ -583,7 +585,8 @@ clean-am: clean-generic clean-libLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/descriptor.Po
+		-rm -f ./$(DEPDIR)/client.Po
+	-rm -f ./$(DEPDIR)/descriptor.Po
 	-rm -f ./$(DEPDIR)/descriptorio-epoll.Po
 	-rm -f ./$(DEPDIR)/descriptorio.Po
 	-rm -f ./$(DEPDIR)/log.Po
@@ -635,7 +638,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/descriptor.Po
+		-rm -f ./$(DEPDIR)/client.Po
+	-rm -f ./$(DEPDIR)/descriptor.Po
 	-rm -f ./$(DEPDIR)/descriptorio-epoll.Po
 	-rm -f ./$(DEPDIR)/descriptorio.Po
 	-rm -f ./$(DEPDIR)/log.Po

@@ -85,8 +85,8 @@ extern xint64 xdescriptor_read(xdescriptor * descriptor, void * buffer, xuint64 
                 xint64 n = read(descriptor->handle.f, buffer, size);
                 if(n > 0)
                 {
-                    xdescriptoreventpub(descriptor, xdescriptor_event_in, buffer, n);
-                    return n;
+                    descriptor->status |= xdescriptor_status_in;
+                    return xdescriptoreventpub(descriptor, xdescriptor_event_in, buffer, n);
                 }
                 else if(n == 0)
                 {
@@ -138,8 +138,8 @@ extern xint64 xdescriptor_write(xdescriptor * descriptor, const void * data, xui
                 xint64 n = write(descriptor->handle.f, data, len);
                 if(n > 0)
                 {
-                    xdescriptoreventpub(descriptor, xdescriptor_event_out, data, n);
-                    return n;
+                    descriptor->status |= xdescriptor_status_out;
+                    return xdescriptoreventpub(descriptor, xdescriptor_event_out, data, n);
                 }
                 else if(n == 0)
                 {

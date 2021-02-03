@@ -2,9 +2,13 @@
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include "socket.h"
 #include "descriptor.h"
+#include "session.h"
+#include "server.h"
 
 struct xsocket
 {
@@ -23,6 +27,8 @@ struct xsocket
     xsocket_opener          open;
     xsocket_event_processor process;
     xsocket_event_handler   on;
+
+    xsync * sync;
 
     int domain;
     int type;
@@ -153,15 +159,26 @@ extern xint64 xsocket_read(xsocket * o, void * buffer, xuint64 size)
                 xint64 n = read(o->handle.f, buffer, size);
                 if(n > 0)
                 {
-
+                    o->status |= xsocket_status_in;
+                    return xsocketeventpub(o, xsocket_event_in, buffer, n);
                 }
                 else if(n == 0)
                 {
-
+                    return xfail;
                 }
                 else
                 {
-                    
+                    int err = errno;
+                    if(err == EAGAIN)
+                    {
+                        o->status &= (~xsocket_status_in);
+                        return xsuccess;
+                    }
+                    else
+                    {
+                        xcheck(err != EAGAIN, "fail to read (%d)", err);
+                        return xfail;
+                    }
                 }
             }
             else
@@ -184,6 +201,51 @@ extern xint64 xsocket_read(xsocket * o, void * buffer, xuint64 size)
 
 extern xint64 xsocket_write(xsocket * o, const void * data, xuint64 len)
 {
-    xint64 n = 0;
-    return n;
+    if(o)
+    {
+        if(o->handle.f >= 0)
+        {
+            if(data && len)
+            {
+                xint64 n = write(o->handle.f, data, len);
+                if(n > 0)
+                {
+                    o->status |= xsocket_status_out;
+                    return xsocketeventpub(o, xsocket_event_in, data, n);
+                }
+                else if(n == 0)
+                {
+                    return xfail;
+                }
+                else
+                {
+                    int err = errno;
+                    if(err == EAGAIN)
+                    {
+                        o->status &= (~xsocket_status_out);
+                        return xsuccess;
+                    }
+                    else
+                    {
+                        xcheck(err != EAGAIN, "fail to write (%d)", err);
+                        return xfail;
+                    }
+                }
+            }
+            else
+            {
+                xcheck(data == xnil || len == 0, "buffer is not exist");
+                return xsuccess;
+            }
+        }
+        else
+        {
+            xcheck(o->handle.f < 0, "socket is not open");
+        }
+    }
+    else
+    {
+        xcheck(o == xnil, "socket is null");
+    }
+    return xfail;
 }

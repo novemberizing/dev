@@ -19,6 +19,8 @@ typedef __UINT64_TYPE__     xuint64;
 
 extern int xlogfd(void);
 extern unsigned long xthreadid(void);
+
+extern void * xdup(const void * source, xuint64 len);
 extern void * xfree(void * address);
 
 #define xassertion(condition, format, ...) do {     \
@@ -47,5 +49,11 @@ extern void * xfree(void * address);
                           ##__VA_ARGS__);           \
     }                                               \
 } while(0)
+
+struct xstream;
+struct xsync;
+
+typedef struct xstream xstream;
+typedef struct xsync xsync;
 
 #endif // __NOVEMBERIZING_X__STD__H__
