@@ -15,6 +15,15 @@
 #define xdescriptor_event_out           (0x00000004U)
 #define xdescriptor_event_close         (0x00000008U)
 #define xdescriptor_event_exception     (0x00000010U)
+#define xdescriptor_event_create        (0x00000020U)
+
+#define xsocket_event_void              xdescriptor_event_void
+#define xsocket_event_open              xdescriptor_event_open
+#define xsocket_event_in                xdescriptor_event_in
+#define xsocket_event_out               xdescriptor_event_out
+#define xsocket_event_close             xdescriptor_event_close
+#define xsocket_event_exception         xdescriptor_event_exception
+#define xsocket_event_create            xdescriptor_event_create
 
 #define xdescriptor_status_void         xdescriptor_event_void
 #define xdescriptor_status_open         xdescriptor_event_open
@@ -22,6 +31,15 @@
 #define xdescriptor_status_out          xdescriptor_event_out
 #define xdescriptor_status_close        xdescriptor_event_close
 #define xdescriptor_status_exception    xdescriptor_event_exception
+#define xdescriptor_status_create       xdescriptor_event_create
+
+#define xsocket_status_void             xdescriptor_event_void
+#define xsocket_status_open             xdescriptor_event_open
+#define xsocket_status_in               xdescriptor_event_in
+#define xsocket_status_out              xdescriptor_event_out
+#define xsocket_status_close            xdescriptor_event_close
+#define xsocket_status_exception        xdescriptor_event_exception
+#define xsocket_status_create           xdescriptor_event_create
 
 struct xdescriptor;
 struct xdescriptorio;
@@ -30,6 +48,7 @@ typedef struct xdescriptor xdescriptor;
 typedef struct xdescriptorio xdescriptorio;
 
 typedef xint32 (*xdescriptor_opener)(xdescriptor *);
+typedef xint64 (*xdescriptor_event_processor)(xdescriptor *, xuint32);
 typedef xint64 (*xdescriptor_event_handler)(xdescriptor *, xuint32, const void *, xint64);
 
 struct xdescriptor
@@ -46,12 +65,12 @@ struct xdescriptor
     xdescriptor *      next;
     xdescriptorio *    io;
 
-    xdescriptor_opener open;            // 디스크립터의 오픈 함수가 존재하면 디스크립터 IO 에서 다시 오픈하는 디스크립터가 된다.
-
-    xdescriptor_event_handler on;
+    xdescriptor_opener          open;
+    xdescriptor_event_processor process;
+    xdescriptor_event_handler   on;
 };
 
-extern xdescriptor * xdescriptor_new(xint32 f, xdescriptor_opener opener);
+extern xdescriptor * xdescriptor_new(xint32 f, xdescriptor_event_handler handler, xdescriptor_event_processor processor, xdescriptor_opener opener);
 extern xdescriptor * xdescriptor_rem(xdescriptor * descriptor);
 
 #define xdescriptor_open(descriptor)    ((descriptor && descriptor->open) ? descriptor->open(descriptor) : xsuccess)

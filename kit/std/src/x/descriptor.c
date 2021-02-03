@@ -6,13 +6,15 @@
 #include "std.h"
 #include "descriptor.h"
 
-extern xdescriptor * xdescriptor_new(xint32 f, xdescriptor_opener opener)
+extern xdescriptor * xdescriptor_new(xint32 f, xdescriptor_event_handler handler, xdescriptor_event_processor processor, xdescriptor_opener opener)
 {
     xdescriptor * descriptor = (xdescriptor *) calloc(sizeof(xdescriptor), 1);
 
     if(descriptor)
     {
         descriptor->handle.f = f;
+        descriptor->process  = processor;
+        descriptor->on       = handler;
         descriptor->open     = opener;
     }
     else

@@ -170,14 +170,11 @@ static inline xint32 xdescriptorio_epoll_open(xdescriptorio_epoll * io)
                             event.events |= EPOLLOUT;
                         }
                         int ret = epoll_ctl(io->fd, EPOLL_CTL_ADD, descriptor->handle.f, &event);
-                        if(ret == xsuccess)
-                        {
-                            descriptor = descriptor->next;
-                        }
-                        else
+                        if(ret != xsuccess)
                         {
                             xassertion(ret != xsuccess, "fail to epoll_ctl (%d)", errno);
                         }
+                        descriptor = descriptor->next;
                     }
                     else
                     {
@@ -255,19 +252,30 @@ static inline void xdescriptorio_epoll_on(xdescriptorio_epoll * io, xdescriptor 
     // 만약에 프로세서가 여러개 존재하면 READ, WRITE & CLOSE 를 다른 곳에서 수행하자.
     if(mask & xdescriptor_event_exception)
     {
+        descriptor->process(descriptor, xdescriptor_event_out);
         xdescriptorio_epoll_descriptor_close(io, descriptor);
+    }
+    else if(mask & xdescriptor_event_out)
+    {
+        xint64 ret = descriptor->process(descriptor, xdescriptor_event_out);
+        if(ret < 0)
+        {
+            xcheck(ret < 0, "fail to event process");
+            xdescriptorio_epoll_descriptor_close(io, descriptor);
+        }
+    }
+    else if(descriptor->handle.f >= 0 && (mask & xdescriptor_event_in))
+    {
+        xint64 ret = descriptor->process(descriptor, xdescriptor_event_in);
+        if(ret < 0)
+        {
+            xcheck(ret < 0, "fail to event process");
+            xdescriptorio_epoll_descriptor_close(io, descriptor);
+        }
     }
     else
     {
-        if(mask & xdescriptor_event_out)
-        {
-            // 어떻게 구현해야할까?
-        }
-
-        if(mask & xdescriptor_event_in)
-        {
-            // 어떻게 구현해야할까? 궁극적으로는 DESCRIPTOR'S
-        }
+        xassertion(xtrue, "not support event");
     }
 }
 

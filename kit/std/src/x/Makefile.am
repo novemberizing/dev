@@ -8,6 +8,7 @@ libnovemberizing_a_SOURCES = std.c                  \
                              thread.c               \
                              descriptor.c           \
                              descriptorio.c         \
-                             descriptorio-epoll.c
+                             descriptorio-epoll.c   \
+                             socket.c
 
 # libnovemberizing_a_LIBADD  = net/libnovemberizing-net.a event/libnovemberizing-event.a
