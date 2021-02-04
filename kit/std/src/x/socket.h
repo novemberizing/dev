@@ -4,38 +4,26 @@
 #include <x/std.h>
 
 struct xsocket;
+struct xclient;
 struct xserver;
 struct xsession;
 
-/**
- * 소켓 데이터란 이름 말고 좋은 이름이 없을까?
- */
-
 typedef struct xsocket xsocket;
-typedef struct xsession xsession;
+typedef struct xclient xclient;
 typedef struct xserver xserver;
+typedef struct xsession xsession;
 
-typedef xint32 (*xsocket_opener)(xsocket *);
-typedef xint64 (*xsocket_event_processor)(xsocket *, xuint32);
 typedef xint64 (*xsocket_event_handler)(xsocket *, xuint32, const void *, xint64);
+typedef xint64 (*xsocket_process_func)(xsocket *, xuint32);
 
-extern xsocket * xsocket_new(xint32 f,
-                             int domain,
-                             int type,
-                             int protocol,
-                             xsocket_event_handler handler,
-                             xsocket_event_processor processor,
-                             xsocket_opener opener);
-
-extern xsocket * xsocket_rem(xsocket * o);
-
-extern xint32 xsocket_open(xsocket * o);
-extern xint32 xsocket_close(xsocket * o);
-extern xint64 xsocket_read(xsocket * o, void * buffer, xuint64 size);
-extern xint64 xsocket_write(xsocket * o, const void * data, xuint64 len);
-
-#define xsocketeventpub(o, event, data, val)    \
-    (o->on ? o->on(o, event, data, val)         \
-           : xsuccess)
+extern xsocket * xsocket_new(int domain, int type, int protocol, xsocket_event_handler handler, xsocket_process_func processor, xuint64 size);
+extern xint32 xsocket_open(xsocket * descriptor);
+extern xint32 xsocket_bind(xsocket * descriptor, const void * addr, xuint64 addrlen);
+extern xint32 xsocket_listen(xsocket * descriptor, int backlog);
+extern xint32 xsocket_connect(xsocket * descriptor, const void * addr, xuint64 addrlen);
+#define xsocket_read(descriptor, buffer, size)  xdescriptor_read((xdescriptor *) descriptor, buffer, size)
+#define xsocket_write(descriptor, data, len)    xdescriptor_write((xdescriptor *) descriptor, data, len)
+#define xsocket_close(descriptor)               xdescriptor_close((xdescriptor *) descriptor);
+extern xint32 xsocket_shutdown(xsocket * descriptor, xint32 how);
 
 #endif // __NOVEMBERIZING_X__SOCKET__H__

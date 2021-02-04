@@ -16,6 +16,8 @@ typedef __UINT8_TYPE__      xuint8;
 typedef __UINT16_TYPE__     xuint16;
 typedef __UINT32_TYPE__     xuint32;
 typedef __UINT64_TYPE__     xuint64;
+typedef void *              handle;
+typedef unsigned char       xbyte;
 
 extern int xlogfd(void);
 extern unsigned long xthreadid(void);
@@ -51,9 +53,21 @@ extern void * xfree(void * address);
 } while(0)
 
 struct xstream;
-struct xsync;
 
 typedef struct xstream xstream;
+
+struct xstream
+{
+    xstream * (*destruct)(xstream *);
+
+    void    * (*front)(xstream *);
+    void    * (*back)(xstream *);
+};
+
+extern xstream * xstream_new(xuint64 capacity);
+extern xstream * xstream_rem(xstream * stream);
+
+struct xsync;
 typedef struct xsync xsync;
 
 #endif // __NOVEMBERIZING_X__STD__H__

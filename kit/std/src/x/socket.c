@@ -5,247 +5,287 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include "socket.h"
 #include "descriptor.h"
-#include "session.h"
-#include "server.h"
+#include "socket.h"
 
 struct xsocket
 {
     union
     {
-        int    f;
-        void * v;
+        xint32 f;
+        handle v;
     } handle;
-
-    xuint32            status;
-
-    xdescriptor *      prev;
-    xdescriptor *      next;
-    xdescriptorio *    io;
-
-    xsocket_opener          open;
-    xsocket_event_processor process;
-    xsocket_event_handler   on;
-
-    xsync * sync;
+    xuint32               status;
+    xdescriptor *         prev;
+    xdescriptor *         next;
+    xdescriptorio *       io;
+    xsync *               sync;
+    xsocket_process_func  process;
+    xsocket_event_handler on;
 
     int domain;
     int type;
     int protocol;
 };
 
-extern xsocket * xsocket_new(xint32 f, int domain, int type, int protocol, xsocket_event_handler handler, xsocket_event_processor processor, xsocket_opener opener)
+extern xsocket * xsocket_new(int domain, int type, int protocol, xsocket_event_handler handler, xsocket_process_func processor, xuint64 size)
 {
-    xsocket * o = (xsocket *) calloc(sizeof(xsocket), 1);
+    xassertion(size < sizeof(xsocket), "invalid size");
 
-    xassertion(o == xnil, "fail to calloc (%d)", errno);
+    xsocket * descriptor = (xsocket *) calloc(size, 1);
 
-    o->handle.f = xinvalid;
-    o->open     = opener;
-    o->process  = processor;
-    o->on       = handler;
+    descriptor->handle.f = xinvalid;
 
-    o->domain   = domain;
-    o->type     = type;
-    o->protocol = protocol;
+    descriptor->domain   = domain;
+    descriptor->type     = type;
+    descriptor->protocol = protocol;
 
-    return o;
+    descriptor->on       = handler;
+    descriptor->process  = processor;
+
+    return descriptor;
 }
 
-extern xsocket * xsocket_rem(xsocket * o)
+extern xint32 xsocket_open(xsocket * descriptor)
 {
-    if(o)
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    if(descriptor->handle.f < 0)
     {
-        xassertion(o->handle.f >= 0, "socket must close");
-        xassertion(o->prev || o->next || o->io, "socket must unregister");
+        descriptor->handle.f = socket(descriptor->domain, descriptor->type, descriptor->protocol);
 
-        free(o);
-        o = xnil;
-    }
-
-    return o;
-}
-
-extern xint32 xsocket_open(xsocket * o)
-{
-    if(o)
-    {
-        if(o->handle.f < 0)
+        if(descriptor->handle.f >= 0)
         {
-            o->handle.f = socket(o->domain, o->type, o->protocol);
-
-            if(o->handle.f >= 0)
+            descriptor->status |= xdescriptor_status_create;
+            xint64 ret = xdescriptor_event_on(descriptor, xdescriptor_event_create, xnil, 0);
+            if(ret < 0)
             {
-                o->status |= xsocket_event_create;
-
-                if(o->on)
-                {
-                    if(o->on(o, xsocket_event_create, xnil, 0) != xsuccess)
-                    {
-                        int ret = close(o->handle.f);
-
-                        xcheck(ret != xsuccess, "fail to close (%d)", errno);
-
-                        o->handle.f = xinvalid;
-                        o->status |= xsocket_status_close;
-                        o->on(o, xsocket_event_close, xnil, 0);
-                        o->status = xsocket_status_void;
-
-                        return xfail;
-                    }
-                }
-
-                return xsuccess;
-            }
-            else
-            {
-                xcheck(o->handle.f < 0, "fail to socket (%d)", errno);
+                descriptor->status |= xdescriptor_status_exception;
+                xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
                 return xfail;
             }
-        }
-        else
-        {
-            xcheck(o->handle.f >= 0, "fail to open");
             return xsuccess;
         }
+        else
+        {
+            xcheck(descriptor->handle.f < 0, "fail to socket (%d)", errno);
+            return xfail;
+        }
     }
     else
     {
-        xcheck(o == xnil, "socket is null");
-    }
-    return xfail;
-}
-
-extern xint32 xsocket_close(xsocket * o)
-{
-    if(o)
-    {
-        if(o->handle.f >= 0)
-        {
-            int ret = close(o->handle.f);
-            xcheck(ret != xsuccess, "fail to close (%d)", errno);
-
-            o->handle.f = xinvalid;
-            if(o->on)
-            {
-                o->status |= xsocket_status_close;
-                o->on(o, xsocket_event_close, xnil, 0);
-            }
-            o->status = xsocket_status_void;
-        }
-        else
-        {
-            xcheck(o->handle.f < 0, "socket is not open");
-        }
+        xcheck(descriptor->handle.f >= 0, "descriptor is already open");
         return xsuccess;
     }
-    else
-    {
-        xcheck(o == xnil, "socket is null");
-    }
-
-    return xfail;
 }
 
-extern xint64 xsocket_read(xsocket * o, void * buffer, xuint64 size)
+extern xint32 xsocket_bind(xsocket * descriptor, const void * addr, xuint64 addrlen)
 {
-    if(o)
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
     {
-        if(o->handle.f >= 0)
+        if(descriptor->handle.f >= 0)
         {
-            if(buffer && size)
+            if((descriptor->status & xdescriptor_status_bind) == xdescriptor_status_void)
             {
-                xint64 n = read(o->handle.f, buffer, size);
-                if(n > 0)
+                xint64 ret = bind(descriptor->handle.f, (const struct sockaddr *) addr, addrlen);
+                if(ret == xsuccess)
                 {
-                    o->status |= xsocket_status_in;
-                    return xsocketeventpub(o, xsocket_event_in, buffer, n);
-                }
-                else if(n == 0)
-                {
-                    return xfail;
+                    ret = xdescriptor_event_on(descriptor, xdescriptor_event_bind, xnil, 0);
+                    if(ret < 0)
+                    {
+                        xcheck(ret != xsuccess, "fail to bind event handling");
+                        descriptor->status |= xdescriptor_status_exception;
+                        xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                        return xfail;
+                    }
+                    return xsuccess;
                 }
                 else
                 {
-                    int err = errno;
-                    if(err == EAGAIN)
-                    {
-                        o->status &= (~xsocket_status_in);
-                        return xsuccess;
-                    }
-                    else
-                    {
-                        xcheck(err != EAGAIN, "fail to read (%d)", err);
-                        return xfail;
-                    }
+                    xcheck(ret != xsuccess, "fail to bind (%d)", errno);
+                    descriptor->status |= xdescriptor_status_exception;
+                    xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                    return xfail;
                 }
             }
             else
             {
-                xcheck(buffer == xnil || size == 0, "buffer is not exist");
+                xcheck(xtrue, "descriptor is already bind");
                 return xsuccess;
             }
         }
         else
         {
-            xcheck(o->handle.f < 0, "socket is not open");
+            xcheck(descriptor->handle.f < 0, "descriptor is not open");
         }
     }
     else
     {
-        xcheck(o == xnil, "socket is null");
+        xcheck(xtrue, "descriptor status is exception");
     }
     return xfail;
 }
 
-extern xint64 xsocket_write(xsocket * o, const void * data, xuint64 len)
+extern xint32 xsocket_listen(xsocket * descriptor, int backlog)
 {
-    if(o)
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
     {
-        if(o->handle.f >= 0)
+        if(descriptor->handle.f >= 0)
         {
-            if(data && len)
+            if((descriptor->status & xdescriptor_status_listen) == xdescriptor_status_void)
             {
-                xint64 n = write(o->handle.f, data, len);
-                if(n > 0)
+                if(descriptor->status & xdescriptor_status_bind)
                 {
-                    o->status |= xsocket_status_out;
-                    return xsocketeventpub(o, xsocket_event_in, data, n);
-                }
-                else if(n == 0)
-                {
-                    return xfail;
-                }
-                else
-                {
-                    int err = errno;
-                    if(err == EAGAIN)
+                    xint64 ret = listen(descriptor->handle.f, backlog);
+                    if(ret == xsuccess)
                     {
-                        o->status &= (~xsocket_status_out);
+                        descriptor->status |= xdescriptor_status_listen;
+                        ret = xdescriptor_event_on(descriptor, xdescriptor_event_listen, xnil, 0);
+                        if(ret < 0)
+                        {
+                            xcheck(ret != xsuccess, "fail to listen event handling");
+                            descriptor->status |= xdescriptor_status_exception;
+                            xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                            return xfail;
+                        }
                         return xsuccess;
                     }
                     else
                     {
-                        xcheck(err != EAGAIN, "fail to write (%d)", err);
-                        return xfail;
+                        xcheck(ret != xsuccess, "fail to listen (%d)", errno);
+                        descriptor->status |= xdescriptor_status_exception;
+                        xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
                     }
+                }
+                else
+                {
+                    xcheck(xtrue, "descriptor status is not bind");
                 }
             }
             else
             {
-                xcheck(data == xnil || len == 0, "buffer is not exist");
+                xcheck(xtrue, "descriptor status is already listen");
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "descriptor is not open");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "descriptor status is exception");
+    }
+    return xfail;
+}
+
+extern xint32 xsocket_connect(xsocket * descriptor, const void * addr, xuint64 addrlen)
+{
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
+    {
+        if(descriptor->handle.f >= 0)
+        {
+            if((descriptor->status & xdescriptor_status_connect) == xdescriptor_status_void)
+            {
+                xint64 ret = connect(descriptor->handle.f, (const struct sockaddr *) addr, addrlen);
+                if(ret == xsuccess)
+                {
+                    descriptor->status |= xdescriptor_status_connect;
+                    ret = xdescriptor_event_on(descriptor, xdescriptor_event_connect, xnil, 0);
+                    if(ret != xsuccess)
+                    {
+                        xcheck(ret != xsuccess, "fail to connect event handing");
+                        descriptor->status |= xdescriptor_status_exception;
+                        xdescriptor_event_on(descriptor, xdescriptor_status_exception, xnil, 0);
+                        return xfail;
+                    }
+                    return xsuccess;
+                }
+                else
+                {
+                    xcheck(ret != xsuccess, "fail to connect (%d)", errno);
+                    descriptor->status |= xdescriptor_status_exception;
+                    xdescriptor_event_on(descriptor, xdescriptor_status_exception, xnil, 0);
+                    return xfail;
+                }
+            }
+            else
+            {
+                xcheck(xtrue, "descriptor is already connect");
                 return xsuccess;
             }
         }
         else
         {
-            xcheck(o->handle.f < 0, "socket is not open");
+            xcheck(descriptor->handle.f < 0, "descriptor is not open");
         }
     }
     else
     {
-        xcheck(o == xnil, "socket is null");
+        xcheck(xtrue, "descriptor status is exception");
     }
+
     return xfail;
+}
+
+extern xint32 xsocket_shutdown(xsocket * descriptor, xint32 how)
+{
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    if(descriptor->handle.f >= 0)
+    {
+        if((how & xdescriptor_event_shutdown_all) == xdescriptor_event_shutdown_all)
+        {
+            if((descriptor->status & xdescriptor_status_shutdown_all) != xdescriptor_status_shutdown_all)
+            {
+                xint64 ret = shutdown(descriptor->handle.f, SHUT_RDWR);
+                xcheck(ret != xsuccess, "fail to shutdown (%d)", errno);
+                descriptor->status |= xdescriptor_status_shutdown_all;
+                xdescriptor_event_on(descriptor, xdescriptor_event_shutdown_all, xnil, 0);
+            }
+            else
+            {
+                xcheck(xtrue, "already all shutdown");
+            }
+        }
+        else if(how & xdescriptor_event_shutdown_in)
+        {
+            if((descriptor->status & xdescriptor_status_shutdown_in) == xdescriptor_status_void)
+            {
+                xint64 ret = shutdown(descriptor->handle.f, SHUT_RD);
+                xcheck(ret != xsuccess, "fail to shutdown (%d)", errno);
+                descriptor->status |= xdescriptor_status_shutdown_in;
+                xdescriptor_event_on(descriptor, xdescriptor_event_shutdown_in, xnil, 0);
+            }
+            else
+            {
+                xcheck(xtrue, "already shutdown in");
+            }
+        }
+        else if(how & xdescriptor_event_shutdown_out)
+        {
+            if((descriptor->status & xdescriptor_status_shutdown_out) == xdescriptor_status_void)
+            {
+                xint64 ret = shutdown(descriptor->handle.f, SHUT_WR);
+                xcheck(ret != xsuccess, "fail to shutdown (%d)", errno);
+                descriptor->status |= xdescriptor_status_shutdown_out;
+                xdescriptor_event_on(descriptor, xdescriptor_event_shutdown_out, xnil, 0);
+            }
+            else
+            {
+                xcheck(xtrue, "already shutdown out");
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "unknown flags");
+        }
+    }
+    return xsuccess;
 }
