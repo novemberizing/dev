@@ -23,8 +23,9 @@ extern xint64 xdescriptor_read(xdescriptor * descriptor, void * buffer, xuint64 
                 {
                     descriptor->status |= xdescriptor_status_exception;
                     xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                    return ret;
                 }
-                return ret;
+                return n;
             }
             else if(n == 0)
             {
@@ -74,8 +75,9 @@ extern xint64 xdescriptor_write(xdescriptor * descriptor, const void * data, xui
                 {
                     descriptor->status |= xdescriptor_status_exception;
                     xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                    return ret;
                 }
-                return ret;
+                return n;
             }
             else if(n == 0)
             {

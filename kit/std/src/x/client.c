@@ -107,8 +107,22 @@ extern xint64 xclient_read(xclient * client, void * buffer, xuint64 size)
 
     if(client->descriptor->stream.in)
     {
-        xassertion(xtrue, "implement this");
-        return xfail;
+        // TODO: 8192 대신에 적절한 값을 체크하도록 하자.
+        xstream_recapacity(client->descriptor->stream.in, 8196);
+        xint64 n = xsocket_read(client->descriptor,
+                                xstream_back(client->descriptor->stream.in),
+                                xstream_remain(client->descriptor->stream.in));
+
+        if(n >= 0)
+        {
+            xstream_push(client->descriptor->stream.in, xnil, n);
+            if(buffer && size)
+            {
+                return xstream_pop(client->descriptor->stream.in, buffer, size);
+            }
+        }
+
+        return n;
     }
 
     return xsocket_read(client->descriptor, buffer, size);
@@ -120,8 +134,36 @@ extern xint64 xclient_write(xclient * client, const void * data, xuint64 len)
 
     if(client->descriptor->stream.out)
     {
-        xassertion(xtrue, "implement this");
-        return xfail;
+        if(xstream_size(client->descriptor->stream.out) == 0)
+        {
+            xint64 n = xsocket_write(client->descriptor, data, len);
+
+            if(n >= 0)
+            {
+                if(n != len)
+                {
+                    xstream_push(client->descriptor->stream.out,
+                                 xaddressof(data[n]),
+                                 len - n);
+                }
+            }
+            return n;
+        }
+        else
+        {
+            xstream_push(client->descriptor->stream.out, data, len);
+            xint64 n = xsocket_write(client->descriptor,
+                                     xstream_front(client->descriptor->stream.out),
+                                     xstream_size(client->descriptor->stream.out));
+
+            if(n >= 0)
+            {
+                xstream_pop(client->descriptor->stream.out, xnil, n);
+                return len;
+            }
+
+            return n;
+        }
     }
 
     return xsocket_write(client->descriptor, data, len);
