@@ -291,14 +291,112 @@ extern void xdescriptorio_call(xdescriptorio * o)
 
     xassertion(io == xnil, "descriptor event generator is null");
 
+    xdescriptor * descriptor = io->queue.head;
+    xuint32 total = io->queue.total;
+    for(xuint32 i = 0; i < total && descriptor; i++)
+    {
+        xdescriptor * prev = descriptor->prev;
+        xdescriptor * next = descriptor->next;
+        if(prev)
+        {
+            prev->next = next;
+        }
+        else
+        {
+            o->queue.head = next;
+        }
+        if(next)
+        {
+            next->prev = prev;
+        }
+        else
+        {
+            o->queue.tail = prev;
+        }
+        descriptor->next = xnil;
+        descriptor->prev = xnil;
+        o->queue.total = o->queue.total - 1;
+        xint32 ret = xdescriptor_open(descriptor);
+        if(ret == xsuccess)
+        {
+            descriptor->prev = o->children.tail;
+            if(descriptor->prev)
+            {
+                descriptor->prev->next = descriptor;
+            }
+            else
+            {
+                o->children.head = descriptor;
+            }
+            o->children.tail = descriptor;
+            o->children.total = o->children.total + 1;
+
+            if(io->fd >= 0)
+            {
+                struct epoll_event event;
+                event.data.ptr = descriptor;
+                event.events = (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP | EPOLLET | EPOLLONESHOT);
+
+                if((descriptor->status & xdescriptor_status_in) == xdescriptor_status_void)
+                {
+                    event.events |= EPOLLIN;
+                }
+
+                if((descriptor->status & xdescriptor_status_out) == xdescriptor_status_void)
+                {
+                    event.events |= EPOLLOUT;
+                }
+
+                // REGISTER EVENT
+
+                int ret = epoll_ctl(io->fd, EPOLL_CTL_ADD, descriptor->handle.f, &event);
+                if(ret != xsuccess)
+                {
+                    int err = errno;
+                    if(err == EEXIST)
+                    {
+                        ret = epoll_ctl(io->fd, EPOLL_CTL_ADD, descriptor->handle.f, &event);
+                        if(ret != xsuccess)
+                        {
+                            descriptor->status |= xdescriptor_status_exception;
+                            xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                        }
+                    }
+                    else
+                    {
+                        descriptor->status |= xdescriptor_status_exception;
+                        xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                    }
+                }
+            }
+        }
+        else
+        {
+            descriptor->prev = o->queue.tail;
+            if(descriptor->prev)
+            {
+                descriptor->prev->next = descriptor;
+            }
+            else
+            {
+                o->queue.tail = descriptor;
+            }
+            o->queue.tail = descriptor;
+            o->queue.total = o->queue.total + 1;
+        }
+    }
+
     if(io->fd < 0)
     {
         io->fd = epoll_create(io->maxevents);
+
         if(io->fd >= 0)
         {
             xdescriptor * descriptor = io->children.head;
+
             while(descriptor)
             {
+                xdescriptor * next = descriptor->next;
                 struct epoll_event event;
                 event.data.ptr = descriptor;
                 event.events = (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP | EPOLLET | EPOLLONESHOT);
@@ -317,10 +415,6 @@ extern void xdescriptorio_call(xdescriptorio * o)
                             descriptor->status |= xdescriptor_status_exception;
                             xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
                         }
-                        else
-                        {
-                            descriptor = descriptor->next;
-                        }
                     }
                     else
                     {
@@ -330,15 +424,69 @@ extern void xdescriptorio_call(xdescriptorio * o)
                         xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
                     }
                 }
-                else
-                {
-                    descriptor = descriptor->next;
-                }
+
+                descriptor = next;
             }
         }
         else
         {
             xcheck(xtrue, "fail to epoll_create (%d)", errno);
+        }
+    }
+
+    if(io->fd >= 0)
+    {
+        int nfds = epoll_wait(io->fd, io->events, io->maxevents, io->timeout);
+        if(nfds >= 0)
+        {
+            for(xint32 i = 0; i < nfds; i++)
+            {
+                xdescriptor * descriptor = (xdescriptor *) io->events[i].data.ptr;
+                if(descriptor->status & (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP))
+                {
+                    descriptor->status |= xdescriptor_status_exception;
+                    xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                    continue;
+                }
+                if(descriptor->status & EPOLLOUT)
+                {
+                    descriptor->status |= xdescriptor_status_out;
+                    xint64 ret = xdescriptor_event_on(descriptor, xdescriptor_event_out, xnil, 0);
+                    if(ret < 0)
+                    {
+                        descriptor->status |= xdescriptor_status_exception;
+                        xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                        continue;
+                    }
+                }
+                if(descriptor->status & EPOLLIN)
+                {
+                    descriptor->status |= xdescriptor_status_in;
+                    xint64 ret = xdescriptor_event_on(descriptor, xdescriptor_event_in, xnil, 0);
+                    if(ret < 0)
+                    {
+                        descriptor->status |= xdescriptor_status_exception;
+                        xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                        continue;
+                    }
+                }
+            }
+        }
+        else
+        {
+            int err = errno;
+            if(err != EINTR)
+            {
+                switch(err)
+                {
+                    case EBADF: xcheck(err == EBADF, "epfd is not a valid file descriptor. (%d)", err); break;
+                    case EFAULT: xcheck(err = EFAULT, "The memory area pointed to by events is not accessible with write permissions. (%d)", err); break;
+                    case EINVAL: xcheck(err == EINVAL, "epfd is not an epoll file descriptor, or maxevents is less than or equal to zero. (%d)", err); break;
+                    default:     xcheck(err, "Undocumented exception (%d)", err); break;
+                }
+                close(io->fd);
+                io->fd = xinvalid;
+            }
         }
     }
 }

@@ -99,6 +99,7 @@ extern xint32 xsocket_bind(xsocket * descriptor, const void * addr, xuint64 addr
                 xint64 ret = bind(descriptor->handle.f, (const struct sockaddr *) addr, addrlen);
                 if(ret == xsuccess)
                 {
+                    descriptor->status |= xdescriptor_status_bind;
                     ret = xdescriptor_event_on(descriptor, xdescriptor_event_bind, xnil, 0);
                     if(ret < 0)
                     {

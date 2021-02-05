@@ -10,12 +10,17 @@
 #include <x/std.h>
 #include <x/io.h>
 #include <x/client.h>
+#include <x/server.h>
 
 static xint32 xexample_simple_client(void);
 static xint32 xexample_simple_client_with_ncat(void);
 static xint32 xexample_simple_client_with_ncat_nonblock(void);
 static xint32 xexample_simple_client_with_ncat_nonblock_wait(void);
 static xint32 xexample_simple_nonblock_connect(void);
+static xint32 xexample_simple_server(void);
+static xint32 xexample_simple_server_open(void);
+
+static xint32 xexample_simple_server_with_descriptorio(void);
 
 int main(int argc, char ** argv)
 {
@@ -23,6 +28,74 @@ int main(int argc, char ** argv)
     xexample_simple_client_with_ncat();
     xexample_simple_client_with_ncat_nonblock();
     xexample_simple_nonblock_connect();
+    xexample_simple_server();
+    xexample_simple_server_open();
+
+    return 0;
+}
+
+static xint32 xexample_simple_server_with_descriptorio(void)
+{
+    struct sockaddr_in addrin;
+    addrin.sin_family = AF_INET;
+    addrin.sin_addr.s_addr = 0;
+    addrin.sin_port = htons(3371);
+
+    xserver * server = xserver_new(PF_INET, SOCK_STREAM, IPPROTO_TCP, &addrin, sizeof(struct sockaddr_in), sizeof(xserver));
+
+    // xevent_generator_io ...
+    // printf("server is created => %p\n", server);
+
+    // xint32 ret = xserver_listen(server);
+    // if(ret == xsuccess)
+    // {
+    //     printf("server is listen\n");
+    // }
+    // else
+    // {
+    //     printf("server is not listen\n");
+    // }
+
+    server = xserver_rem(server);
+
+    return 0;
+}
+
+static xint32 xexample_simple_server_open(void)
+{
+    struct sockaddr_in addrin;
+    addrin.sin_family = AF_INET;
+    addrin.sin_addr.s_addr = 0;
+    addrin.sin_port = htons(3371);
+
+    xserver * server = xserver_new(PF_INET, SOCK_STREAM, IPPROTO_TCP, &addrin, sizeof(struct sockaddr_in), sizeof(xserver));
+    printf("server is created => %p\n", server);
+
+    xint32 ret = xserver_listen(server);
+    if(ret == xsuccess)
+    {
+        printf("server is listen\n");
+    }
+    else
+    {
+        printf("server is not listen\n");
+    }
+
+    server = xserver_rem(server);
+
+    return 0;
+}
+
+static xint32 xexample_simple_server(void)
+{
+    struct sockaddr_in addrin;
+    addrin.sin_family = AF_INET;
+    addrin.sin_addr.s_addr = 0;
+    addrin.sin_port = htons(3371);
+
+    xserver * server = xserver_new(PF_INET, SOCK_STREAM, IPPROTO_TCP, &addrin, sizeof(struct sockaddr_in), sizeof(xserver));
+    printf("server is created => %p\n", server);
+    server = xserver_rem(server);
 
     return 0;
 }

@@ -23,6 +23,7 @@ struct xserver
 };
 
 extern xserver * xserver_new(int domain, int type, int protocol, const void * addr, xuint32 addrlen, xuint64 size);
+extern xserver * xserver_rem(xserver * server);
 
 extern xint32 xserver_listen(xserver * server);
 extern xint32 xserver_close(xserver * server);

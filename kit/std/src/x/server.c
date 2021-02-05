@@ -40,6 +40,8 @@ struct xsocket
 static xint64 xserver_socket_event_on(xsocket * descriptor, xuint32 event, const void * param, xint64 val);
 static xint64 xserver_socket_process(xsocket * descriptor, xuint32 event);
 
+static xsocket * xserver_socket_rem(xsocket * descriptor);
+
 extern xserver * xserver_new(int domain, int type, int protocol, const void * addr, xuint32 addrlen, xuint64 size)
 {
     xassertion(size < sizeof(xserver), "invalid size parameter");
@@ -61,6 +63,20 @@ extern xserver * xserver_new(int domain, int type, int protocol, const void * ad
     server->descriptor->parent   = server;
 
     return server;
+}
+
+extern xserver * xserver_rem(xserver * server)
+{
+    xassertion(server == xnil, "server is null");
+
+    server->descriptor = xserver_socket_rem(server->descriptor);
+    server->sync = xsync_rem(server->sync);
+
+    xassertion(server->sessions.head || server->sessions.tail || server->sessions.total, "server's sessions not cleared");
+
+    free(server);
+
+    return xnil;
 }
 
 extern xint32 xserver_listen(xserver * server)
@@ -201,4 +217,24 @@ static xint64 xserver_socket_process(xsocket * descriptor, xuint32 event)
     xcheck(xtrue, "implement this");
 
     return xsuccess;
+}
+
+static xsocket * xserver_socket_rem(xsocket * descriptor)
+{
+    if(descriptor)
+    {
+        if(descriptor->handle.f >= 0)
+        {
+            int ret = close(descriptor->handle.f);
+            xcheck(ret != xsuccess, "fail to close (%d)", errno);
+        }
+
+        xassertion(descriptor->next || descriptor->prev || descriptor->io, "descriptorio not cleared");
+        descriptor->sync = xsync_rem(descriptor->sync);
+        descriptor->addr = xfree(descriptor->addr);
+
+        free(descriptor);
+        descriptor = xnil;
+    }
+    return descriptor;
 }
