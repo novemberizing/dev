@@ -8,19 +8,113 @@
 #include <stdio.h>
 
 #include <x/std.h>
+#include <x/io.h>
 #include <x/client.h>
 
 static xint32 xexample_simple_client(void);
 static xint32 xexample_simple_client_with_ncat(void);
 static xint32 xexample_simple_client_with_ncat_nonblock(void);
 static xint32 xexample_simple_client_with_ncat_nonblock_wait(void);
+static xint32 xexample_simple_nonblock_connect(void);
 
 int main(int argc, char ** argv)
 {
     xexample_simple_client();
     xexample_simple_client_with_ncat();
     xexample_simple_client_with_ncat_nonblock();
+    xexample_simple_nonblock_connect();
 
+    return 0;
+}
+
+static xint32 xexample_simple_nonblock_connect(void)
+{
+    struct sockaddr_in addrin;
+    addrin.sin_family = AF_INET;
+    addrin.sin_addr.s_addr = inet_addr("127.0.0.1");
+    addrin.sin_port = htons(2000);
+    char data[1024];
+    char buffer[1024];
+
+    xclient * client = xclient_new(AF_INET, SOCK_STREAM, IPPROTO_TCP, &addrin, sizeof(struct sockaddr_in), sizeof(xclient));
+    xclient_mask_add(client, xdescriptor_mask_nonblock);
+
+    xint32 ret = xclient_connect(client);
+    if(ret == xsuccess)
+    {
+        if(xclient_status(client) & xdescriptor_status_connect)
+        {
+            printf("succeed to xclient connect\n");
+        }
+        else if(xclient_status(client) & xdescriptor_status_connecting)
+        {
+            printf("succeed to xclient connect (connecting)\n");
+        }
+        xuint32 events = xclient_wait(client, xdescriptor_event_connect, 1, 0);
+        if((events & xdescriptor_event_exception) == xdescriptor_event_void)
+        {
+            if(events & xdescriptor_event_connect)
+            {
+                printf("succeed to xclient connect (wait)\n");
+            }
+            else
+            {
+                if(events & xdescriptor_event_timeout)
+                {
+                    printf("fail to xclient wait connect (timeout)\n");
+                }
+            }
+        }
+        else
+        {
+            printf("client wait exception\n");
+        }
+
+        xint32 len = snprintf(data, 1024, "helloworld\n");
+        xint64 n = xclient_write(client, data, len);
+        if(n > 0)
+        {
+            printf("succeed to xclient write => %ld\n", n);
+        }
+        else if(n == 0)
+        {
+            printf("fail to xclient write (nonblock)\n");
+        }
+        else
+        {
+            printf("fail to xclient write (exception)\n");
+        }
+        xclient_nonblock_off(client);
+        n = xclient_read(client, buffer, n);
+        if(n > 0)
+        {
+            buffer[n] = 0;
+            printf("succeed to xclient read => %lu => %s", n, buffer);
+        }
+        else if(n == 0)
+        {
+            printf("fail to xclient read (nonblock)\n");
+        }
+        else
+        {
+            printf("fail to xclient read (exception)\n");
+        }
+        ret = xclient_close(client);
+        if(ret == xsuccess)
+        {
+            printf("succeed to xclient close\n");
+        }
+        else
+        {
+            printf("fail to xclient close\n");
+        }
+    }
+    else
+    {
+        printf("fail to xclient connect\n");
+    }
+
+    xclient_rem(client);
     return 0;
 }
 
@@ -54,21 +148,39 @@ static xint32 xexample_simple_client_with_ncat_nonblock_wait(void)
         {
             printf("fail to xclient write (exception)\n");
         }
-        xclient_nonblock_off(client);
-        n = xclient_read(client, buffer, n);
-        if(n > 0)
+        xuint32 events = xclient_wait(client, xdescriptor_event_in, 1, 0);
+        if((events & xdescriptor_event_exception) == xdescriptor_event_void)
         {
-            buffer[n] = 0;
-            printf("succeed to xclient read => %lu => %s", n, buffer);
-        }
-        else if(n == 0)
-        {
-            printf("fail to xclient read (nonblock)\n");
+            if(events & xdescriptor_event_in)
+            {
+                n = xclient_read(client, buffer, n);
+                if(n > 0)
+                {
+                    buffer[n] = 0;
+                    printf("succeed to xclient read => %lu => %s", n, buffer);
+                }
+                else if(n == 0)
+                {
+                    printf("fail to xclient read (nonblock)\n");
+                }
+                else
+                {
+                    printf("fail to xclient read (exception)\n");
+                }
+            }
+            else
+            {
+                if(events & xdescriptor_event_timeout)
+                {
+                    printf("fail to event wait\n");
+                }
+            }
         }
         else
         {
-            printf("fail to xclient read (exception)\n");
+            printf("event wait exception\n");
         }
+
         ret = xclient_close(client);
         if(ret == xsuccess)
         {

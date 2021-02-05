@@ -17,6 +17,7 @@ struct xsocket
         xint32 f;
         handle v;
     } handle;
+    xuint32               mask;
     xuint32               status;
     xdescriptor *         prev;
     xdescriptor *         next;
@@ -173,6 +174,6 @@ static xint64 xsession_socket_event_on(xsocket * descriptor, xuint32 event, cons
 static xint64 xsession_socket_process(xsocket * descriptor, xuint32 event)
 {
     xcheck(xtrue, "implement this");
-    
+
     return xsuccess;
 }

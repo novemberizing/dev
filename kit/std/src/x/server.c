@@ -17,6 +17,7 @@ struct xsocket
         xint32 f;
         handle v;
     } handle;
+    xuint32               mask;
     xuint32               status;
     xdescriptor *         prev;
     xdescriptor *         next;
@@ -191,7 +192,7 @@ extern xsession * xserver_accept(xserver * server)
 static xint64 xserver_socket_event_on(xsocket * descriptor, xuint32 event, const void * param, xint64 val)
 {
     xcheck(xtrue, "implement this");
-    
+
     return xsuccess;
 }
 

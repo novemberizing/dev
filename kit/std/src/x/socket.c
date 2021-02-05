@@ -16,6 +16,7 @@ struct xsocket
         xint32 f;
         handle v;
     } handle;
+    xuint32               mask;
     xuint32               status;
     xdescriptor *         prev;
     xdescriptor *         next;
@@ -57,6 +58,11 @@ extern xint32 xsocket_open(xsocket * descriptor)
 
         if(descriptor->handle.f >= 0)
         {
+            if(descriptor->mask & xdescriptor_mask_nonblock)
+            {
+                xint32 ret = xdescriptor_nonblock_on((xdescriptor *) descriptor);
+                xassertion(ret != xsuccess, "fail to xdescriptor nonblock");
+            }
             descriptor->status |= xdescriptor_status_create;
             xint64 ret = xdescriptor_event_on(descriptor, xdescriptor_event_create, xnil, 0);
             if(ret < 0)
@@ -210,10 +216,27 @@ extern xint32 xsocket_connect(xsocket * descriptor, const void * addr, xuint64 a
                 }
                 else
                 {
-                    xcheck(ret != xsuccess, "fail to connect (%d)", errno);
-                    descriptor->status |= xdescriptor_status_exception;
-                    xdescriptor_event_on(descriptor, xdescriptor_status_exception, xnil, 0);
-                    return xfail;
+                    int err = errno;
+                    if(err == EINPROGRESS || err == EAGAIN)
+                    {
+                        descriptor->status |= xdescriptor_status_connecting;
+                        ret = xdescriptor_event_on(descriptor, xdescriptor_status_connecting, xnil, 0);
+                        if(ret != xsuccess)
+                        {
+                            xcheck(ret != xsuccess, "fail to connecting event handing");
+                            descriptor->status |= xdescriptor_status_exception;
+                            xdescriptor_event_on(descriptor, xdescriptor_status_exception, xnil, 0);
+                            return xfail;
+                        }
+                        return xsuccess;
+                    }
+                    else
+                    {
+                        xcheck(ret != xsuccess, "fail to connect (%d)", err);
+                        descriptor->status |= xdescriptor_status_exception;
+                        xdescriptor_event_on(descriptor, xdescriptor_status_exception, xnil, 0);
+                        return xfail;
+                    }
                 }
             }
             else
@@ -319,4 +342,14 @@ extern xint32 xsocket_nonblock_off(xsocket * descriptor)
 extern xuint32 xsocket_wait(xsocket * descriptor, xuint32 event, xint64 second, xint64 nanosecond)
 {
     return xdescriptor_wait((xdescriptor *) descriptor, event, second, nanosecond);
+}
+
+extern void      xsocket_mask_add(xsocket * descriptor, xuint32 mask)
+{
+    xdescriptor_mask_add((xdescriptor *) descriptor, mask);
+}
+
+extern void      xsocket_mask_del(xsocket * descriptor, xuint32 mask)
+{
+    xdescriptor_mask_del((xdescriptor *) descriptor, mask);
 }

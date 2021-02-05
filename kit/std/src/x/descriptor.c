@@ -296,3 +296,31 @@ extern xuint32 xdescriptor_wait(xdescriptor * descriptor, xuint32 event, xint64 
     }
     return xdescriptor_event_exception;
 }
+
+extern void    xdescriptor_mask_add(xdescriptor * descriptor, xuint32 mask)
+{
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    descriptor->mask |= mask;
+}
+
+extern void    xdescriptor_mask_del(xdescriptor * descriptor, xuint32 mask)
+{
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    descriptor->mask &= (~mask);
+}
+
+extern xint32  xdescriptor_is_normal(xdescriptor * descriptor)
+{
+    return descriptor &&
+           descriptor->handle.f >= 0 &&
+           (descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void;
+}
+
+extern xint32  xdescriptor_is_unnormal(xdescriptor * descriptor)
+{
+    return descriptor == xnil ||
+           descriptor->handle.f < 0 ||
+           (descriptor->status & xdescriptor_status_exception);
+}

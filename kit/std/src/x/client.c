@@ -19,6 +19,7 @@ struct xsocket
         xint32 f;
         handle v;
     } handle;
+    xuint32               mask;
     xuint32               status;
     xdescriptor *         prev;
     xdescriptor *         next;
@@ -197,30 +198,29 @@ extern xint32 xclient_shutdown(xclient * client, xint32 how)
     return xsocket_shutdown(client->descriptor, how);
 }
 
-extern xuint32 xclient_wait(xsocket * descriptor, xuint32 event, xint64 second, xint64 nanosecond)
+extern xuint32 xclient_wait(xclient * client, xuint32 event, xint64 second, xint64 nanosecond)
 {
-    xassertion(xtrue, "implement this");
-    xassertion(descriptor == xnil, "descriptor is null");
+    xassertion(client == xnil || client->descriptor == xnil, "descriptor is null");
     
-    if(descriptor->handle.f >= 0)
+    if(client->descriptor->handle.f >= 0)
     {
-        if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
+        if((client->descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
         {
             struct pollfd pollfd;
-            pollfd.fd = descriptor->handle.f;
+            pollfd.fd = client->descriptor->handle.f;
             pollfd.revents = 0;
             pollfd.events  = (POLLNVAL | POLLPRI | POLLHUP | POLLRDHUP | POLLERR);
-            if(event & (xdescriptor_event_in | xdescriptor_event_connect))
+            if(event & xdescriptor_event_in)
             {
                 pollfd.events |= POLLIN;
             }
-            if(event & xdescriptor_event_out)
+            if(event & (xdescriptor_event_out | xdescriptor_event_connect))
             {
                 pollfd.events |= POLLOUT;
             }
             xtime current = xtimeget();
             xtime limit = xtimegen(current.second + second, current.nanosecond + nanosecond);
-            struct timespec timeout = { 0, 1000 };  // 1 unisecond: TODO: 적절한 값을 찾자.
+            struct timespec timeout = { 0, 10 };  // 10 nanosecond: TODO: 적절한 값을 찾자.
             xuint32 result = 0;
             while((result & event) != event && (result & xdescriptor_event_exception) == xdescriptor_event_void)
             {
@@ -234,26 +234,126 @@ extern xuint32 xclient_wait(xsocket * descriptor, xuint32 event, xint64 second, 
                     }
                     else
                     {
-                        if(event & xdescriptor_event_connect && (descriptor->status & xdescriptor_status_connect) == xdescriptor_status_void)
+                        if(event & xdescriptor_event_connect && (result & xdescriptor_status_connect) == xdescriptor_status_void)
                         {
-                            int ret = connect(descriptor->handle.f, (struct sockaddr *) descriptor->addr, descriptor->addrlen);
-                            if(ret == xsuccess)
+                            if((client->descriptor->status & xdescriptor_event_connect) == xdescriptor_status_void)
                             {
-                                result |= xdescriptor_event_connect;
-
-                                descriptor->status |= xdescriptor_status_connect;
-                                descriptor->status &= (~xdescriptor_status_connecting);
-                                xint64 ret = xdescriptor_event_on(descriptor, xdescriptor_status_connect, xnil, 0);
-                                if(ret < 0)
+                                if(pollfd.revents & POLLOUT)
                                 {
-                                    descriptor->status |= xdescriptor_status_exception;
-                                    result             |= xdescriptor_event_exception;
-                                    break;
+                                    int option = 0;
+                                    int optionlen = sizeof(int);
+                                    int ret = getsockopt(client->descriptor->handle.f, SOL_SOCKET, SO_ERROR, &option, &optionlen);
+
+                                    if(ret == xsuccess)
+                                    {
+                                        if(option)
+                                        {
+                                            if(option == EAGAIN || option == EALREADY || option == EINPROGRESS)
+                                            {
+                                                if(second > 0 || nanosecond > 0)
+                                                {
+                                                    current = xtimeget();
+                                                    if(xtimecmp(&limit, &current) <= 0)
+                                                    {
+                                                        result |= xdescriptor_event_timeout;
+                                                        break;
+                                                    }
+                                                }
+                                                pollfd.revents = 0;
+                                                continue;
+                                            }
+                                            else
+                                            {
+                                                switch(option)
+                                                {
+                                                    case EACCES:        xcheck(option == EACCES, "For UNIX domain sockets, which are identified by pathname: Write permission is denied on the socket file, or search permission is denied for one of the directories in the path prefix. (%d)", option); break;
+                                                    case EPERM:         xcheck(option == EPERM,  "The user tried to connect to a broadcast address without having the socket broadcast flag enabled or the connection request failed because of a local firewall rule. (%d)", option); break;
+                                                    case EADDRINUSE:    xcheck(option == EADDRINUSE, "Local address is already in use. (%d)", option); break;
+                                                    case EADDRNOTAVAIL: xcheck(option == EADDRNOTAVAIL, "(Internet  domain  sockets) The socket referred to by sockfd had not previously been bound to an address and, upon attempting to bind it to an ephemeral port, it was determined that all port numbers in the ephemeral port range are currently in use. See the discussion of /proc/sys/net/ipv4/ip_local_port_range in ip(7). (%d)", option); break;
+                                                    case EAFNOSUPPORT:  xcheck(option == EAFNOSUPPORT, "The passed address didn't have the correct address family in its sa_family field. (%d)", option); break;
+                                                    case EBADF:         xcheck(option == EBADF, "sockfd is not a valid open file descriptor. (%d)", option); break;
+                                                    case ECONNREFUSED:  xcheck(option == ECONNREFUSED, "A connect() on a stream socket found no one listening on the remote address. (%d)", option); break;
+                                                    case EFAULT:        xcheck(option == EFAULT, "The socket structure address is outside the user's address space. (%d)", option); break;
+                                                    case EINTR:         xcheck(option == EINTR, "The system call was interrupted by a signal that was caught; see signal(7). (%d)", option); break;
+                                                    case EISCONN:       xcheck(option == EISCONN, "The socket is already connected. (%d)", option); break;
+                                                    case ENETUNREACH:   xcheck(option == ENETUNREACH, "Network is unreachable. (%d)", option); break;
+                                                    case ENOTSOCK:      xcheck(option == ENOTSOCK, "The file descriptor sockfd does not refer to a socket. (%d)", option); break;
+                                                    case EPROTOTYPE:    xcheck(option == EPROTOTYPE, "The socket type  does not support the requested communications protocol. This error can occur, for example, on an attempt to connect a UNIX domain datagram socket to a stream socket. (%d)", option); break;
+                                                    case ETIMEDOUT:     xcheck(option == ETIMEDOUT, "Timeout while attempting connection. The server may be too busy to accept new connections. Note that for IP sockets the timeout may be very long when syn‐cookies are enabled on the server. (%d)", option); break;
+                                                    default:            xcheck(option, "Undocumented (%d)", option); break;
+                                                }
+                                                result |= xdescriptor_event_exception;
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            result |= xdescriptor_event_connect;
+                                            if(event & xdescriptor_event_out)
+                                            {
+                                                result |= xdescriptor_event_out;
+                                            }
+                                            client->descriptor->status |= xdescriptor_status_connect;
+                                            client->descriptor->status &= (~xdescriptor_status_connecting);
+                                            xint64 ret = xdescriptor_event_on(client->descriptor, xdescriptor_event_connect, xnil, 0);
+                                            if(ret < 0)
+                                            {
+                                                client->descriptor->status |= xdescriptor_status_exception;
+                                                xdescriptor_event_on(client->descriptor, xdescriptor_event_exception, xnil, 0);
+                                                result |= xdescriptor_event_exception;
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                if(second > 0 || nanosecond > 0)
+                                                {
+                                                    current = xtimeget();
+                                                    if(xtimecmp(&limit, &current) <= 0)
+                                                    {
+                                                        result |= xdescriptor_event_timeout;
+                                                        break;
+                                                    }
+                                                }
+                                                pollfd.revents = 0;
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        int err = errno;
+                                        switch(err)
+                                        {
+                                            case EBADF:       xcheck(err == EBADF, "The argument sockfd is not a valid file descriptor. (%d)", err); break;
+                                            case EFAULT:      xcheck(err == EFAULT, "The address pointed to by optval is not in a valid part of the process address space. For getsockopt(), this error may also be returned if optlen is not in a valid part of the process address space. (%d)", err); break;
+                                            case EINVAL:      xcheck(err == EINVAL, "optlen  invalid  in setsockopt().  In some cases this error can also occur for an invalid value in optval (e.g., for the IP_ADD_MEMBERSHIP option described in ip. (%d)", err); break;
+                                            case ENOPROTOOPT: xcheck(err == ENOPROTOOPT, "The option is unknown at the level indicated. (%d)", err); break;
+                                            case ENOTSOCK:    xcheck(err == ENOTSOCK, "The file descriptor sockfd does not refer to a socket. (%d)", err); break;
+                                            default:          xcheck(err, "unknnow (%d)", err); break;
+                                        }
+                                        result |= xdescriptor_event_exception;
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    xcheck(xtrue, "check this (%d)", pollfd.revents);
+                                    if(second > 0 || nanosecond > 0)
+                                    {
+                                        current = xtimeget();
+                                        if(xtimecmp(&limit, &current) <= 0)
+                                        {
+                                            result |= xdescriptor_event_timeout;
+                                            break;
+                                        }
+                                    }
+                                    pollfd.revents = 0;
+                                    continue;
                                 }
                             }
                             else
                             {
-
+                                result |= xdescriptor_status_connect;
                             }
                         }
                         else
@@ -266,6 +366,16 @@ extern xuint32 xclient_wait(xsocket * descriptor, xuint32 event, xint64 second, 
                             {
                                 result |= xdescriptor_event_in;
                             }
+                            if(second > 0 || nanosecond > 0)
+                            {
+                                current = xtimeget();
+                                if(xtimecmp(&limit, &current) <= 0)
+                                {
+                                    result |= xdescriptor_event_timeout;
+                                    break;
+                                }
+                            }
+                            pollfd.revents = 0;
                         }
                     }
                 }
@@ -302,9 +412,27 @@ extern xuint32 xclient_wait(xsocket * descriptor, xuint32 event, xint64 second, 
     }
     else
     {
-        xcheck(descriptor->handle.f < 0, "descriptor is not open");
+        xcheck(client->descriptor->handle.f < 0, "descriptor is not open");
     }
     return xdescriptor_event_exception;
+}
+
+extern void xclient_mask_add(xclient * client, xuint32 mask)
+{
+    xassertion(client == xnil || client->descriptor == xnil, "client is null or descriptor is null");
+    xdescriptor_mask_add((xdescriptor *) client->descriptor, mask);
+}
+
+extern void xclient_mask_del(xclient * client, xuint32 mask)
+{
+    xassertion(client == xnil || client->descriptor == xnil, "client is null or descriptor is null");
+    xdescriptor_mask_del((xdescriptor *) client->descriptor, mask);
+}
+
+extern xuint32 xclient_status(xclient * client)
+{
+    xassertion(client == xnil || client->descriptor == xnil, "client is null or descriptor is null");
+    return client->descriptor->status;
 }
 
 /**

@@ -138,9 +138,9 @@ am__v_AR_1 =
 libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
 am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) log.$(OBJEXT) \
-	thread.$(OBJEXT) stream.$(OBJEXT) descriptor.$(OBJEXT) \
-	socket.$(OBJEXT) client.$(OBJEXT) server.$(OBJEXT) \
-	session.$(OBJEXT)
+	time.$(OBJEXT) thread.$(OBJEXT) stream.$(OBJEXT) \
+	descriptor.$(OBJEXT) socket.$(OBJEXT) client.$(OBJEXT) \
+	server.$(OBJEXT) session.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -160,7 +160,8 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/client.Po ./$(DEPDIR)/descriptor.Po \
 	./$(DEPDIR)/log.Po ./$(DEPDIR)/server.Po \
 	./$(DEPDIR)/session.Po ./$(DEPDIR)/socket.Po \
-	./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po ./$(DEPDIR)/thread.Po
+	./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po ./$(DEPDIR)/thread.Po \
+	./$(DEPDIR)/time.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -333,6 +334,7 @@ ACLOCAL_AMFLAGS = -I m4
 lib_LIBRARIES = libnovemberizing.a
 libnovemberizing_a_SOURCES = std.c                  \
                              log.c                  \
+                             time.c                 \
                              thread.c               \
                              stream.c               \
                              descriptor.c           \
@@ -426,6 +428,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/time.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -597,6 +600,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/stream.Po
 	-rm -f ./$(DEPDIR)/thread.Po
+	-rm -f ./$(DEPDIR)/time.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -651,6 +655,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/stream.Po
 	-rm -f ./$(DEPDIR)/thread.Po
+	-rm -f ./$(DEPDIR)/time.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

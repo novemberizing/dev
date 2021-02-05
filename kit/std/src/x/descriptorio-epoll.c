@@ -2,379 +2,306 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/epoll.h>
 
+#include "io.h"
+#include "std.h"
 #include "descriptor.h"
-#include "descriptorio-epoll.h"
 
-static inline xint32 xdescriptorio_epoll_reg(xdescriptorio_epoll * io, xdescriptor * descriptor)
+struct xdescriptorio_epoll
 {
-    if(io && descriptor)
+    struct
+    {
+        xdescriptor * head;
+        xdescriptor * tail;
+        xuint32       total;
+    } children;
+    struct
+    {
+        xdescriptor * head;
+        xdescriptor * tail;
+        xuint32       total;
+    } queue;
+
+    int fd;
+    struct epoll_event * events;
+    int maxevents;
+    int timeout;
+};
+
+typedef struct xdescriptorio_epoll xdescriptorio_epoll;
+
+extern xdescriptorio * xdescriptorio_new(void)
+{
+    xdescriptorio_epoll * io = (xdescriptorio_epoll *) calloc(sizeof(xdescriptorio_epoll), 1);
+
+    xassertion(io == xnil, "fail to calloc (%d)", errno);
+
+    io->fd        = xinvalid;
+    io->maxevents = 1024;   // check this constant
+    io->events    = malloc(sizeof(struct epoll_event) * io->maxevents);
+    xassertion(io->events == xnil, "fail to malloc (%d)", errno);
+    io->timeout   = 1;      // check this timeout
+
+    return (xdescriptorio *) io;
+}
+
+extern xdescriptorio * xdescriptorio_rem(xdescriptorio * o)
+{
+    xdescriptorio_epoll * io = (xdescriptorio_epoll *) o;
+
+    if(io)
     {
         if(io->fd >= 0)
         {
-            if(descriptor->handle.f >= 0)
-            {
-                struct epoll_event event;
-
-                event.data.ptr = descriptor;
-                event.events   = (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP | EPOLLET | EPOLLONESHOT);
-
-                if((descriptor->status & xdescriptor_status_in) == xdescriptor_status_void)
-                {
-                    event.events |= EPOLLIN;
-                }
-
-                if((descriptor->status & xdescriptor_status_out) == xdescriptor_status_void)
-                {
-                    event.events |= EPOLLOUT;
-                }
-
-                int ret = epoll_ctl(io->fd, EPOLL_CTL_ADD, descriptor->handle.f, &event);
-
-                if(ret != xsuccess)
-                {
-                    int err = errno;
-                    if(err == EEXIST)
-                    {
-                        ret = epoll_ctl(io->fd, EPOLL_CTL_MOD, descriptor->handle.f, &event);
-                        if(ret != xsuccess)
-                        {
-                            xassertion(ret != xsuccess, "fail to epoll_ctl (%d)", errno);
-                            return xfail;
-                        }
-                    }
-                    else
-                    {
-                        xassertion(ret != xsuccess && ret != EEXIST, "fail to epoll_ctl (%d)", err);
-                        return xfail;
-                    }
-                }
-
-                return xsuccess;
-            }
-            else
-            {
-                xassertion(descriptor->handle.f < 0, "descriptor is not alive");
-            }
+            close(io->fd);
         }
-        else
-        {
-            xassertion(io->fd < 0, "io is not open");
-        }
-    }
-    else
-    {
-        xassertion(io == xnil || descriptor == xnil, "io is null or descriptor is null");
 
-        return xfail;
+        io->events = xfree(io->events);
+
+        free(io);
+        io = xnil;
     }
+
+    return (xdescriptorio *) io;
 }
 
-static inline void xdescriptorio_epoll_unreg(xdescriptorio_epoll * io, xdescriptor * descriptor)
+extern xint32 xdescriptorio_reg(xdescriptorio * o, xdescriptor * descriptor)
 {
-    if(io && descriptor)
+    xdescriptorio_epoll * io = (xdescriptorio_epoll *) o;
+
+    xassertion(io == xnil, "descriptor event generator is null");
+
+    if(descriptor)
     {
-        if(io->fd >= 0)
+        if(descriptor->io == xnil)
         {
-            if(descriptor->handle.f >= 0)
+            descriptor->io = o;
+            if(descriptor->handle.f < 0)
             {
-                int ret = epoll_ctl(io->fd, EPOLL_CTL_DEL, descriptor->handle.f, xnil);
-
-                if(ret != xsuccess)
-                {
-                    xassertion(ret != xsuccess, "fail to epoll_ctl (%d)", errno);
-                }
-            }
-        }
-    }
-}
-
-static inline void xdescriptorio_epoll_descriptor_open(xdescriptorio_epoll * io)
-{
-    xassertion(io == xnil || io->fd < 0, "descriptorio is null or not open");
-    xuint32 total = io->queue.total;
-    xdescriptor * descriptor = io->queue.head;
-    for(xuint32 i = 0; i < total && descriptor; i++)
-    {
-        xassertion(descriptor->open == xnil, "descriptor passive open");
-        if(descriptor->open(descriptor) == xsuccess)
-        {
-            if(xdescriptorio_epoll_reg(io, descriptor) == xsuccess)
-            {
-                xdescriptor * prev = descriptor->prev;
-                xdescriptor * next = descriptor->next;
-                if(prev)
-                {
-                    prev->next = next;
-                }
-                else
-                {
-                    io->queue.head = next;
-                }
-                if(next)
-                {
-                    next->prev = prev;
-                }
-                else
-                {
-                    io->queue.tail = prev;
-                }
-                io->queue.total = io->queue.total - 1;
-
-                descriptor->prev = io->children.tail;
-                descriptor->next = xnil;
+                descriptor->prev = o->queue.tail;
                 if(descriptor->prev)
                 {
                     descriptor->prev->next = descriptor;
                 }
                 else
                 {
-                    io->children.head = descriptor;
+                    o->queue.head = descriptor;
                 }
-                io->children.tail = descriptor;
-                io->children.total = io->children.total + 1;
-                continue;
+                o->queue.tail = descriptor;
+                o->queue.total = o->queue.total + 1;
             }
             else
             {
-                xdescriptor_close(descriptor);
-            }
-        }
-        descriptor = descriptor->next;
-    }
-}
+                xassertion(descriptor->status & xdescriptor_status_exception, "critical - maybe bug");
 
-static inline xint32 xdescriptorio_epoll_open(xdescriptorio_epoll * io)
-{
-    if(io)
-    {
-        if(io->fd < 0)
-        {
-            io->fd = epoll_create(io->nfds);
-            if(io->fd >= 0)
-            {
-                xdescriptor * descriptor = io->children.head;
-                while(descriptor)
+                descriptor->prev = o->children.tail;
+                if(descriptor->prev)
                 {
-                    if(descriptor->handle.f >= 0)
+                    descriptor->prev->next = descriptor;
+                }
+                else
+                {
+                    o->children.head = descriptor;
+                }
+                o->children.tail = descriptor;
+                o->children.total = o->children.total + 1;
+
+                if(io->fd >= 0)
+                {
+                    struct epoll_event event;
+                    event.data.ptr = descriptor;
+                    event.events = (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP | EPOLLET | EPOLLONESHOT);
+                    if((descriptor->status & xdescriptor_status_in) == xdescriptor_status_void)
                     {
-                        struct epoll_event event;
-                        event.data.ptr = descriptor;
-                        event.events   = (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP | EPOLLET | EPOLLONESHOT);
-                        if((descriptor->status & xdescriptor_status_in) == xdescriptor_status_void)
-                        {
-                            event.events |= EPOLLIN;
-                        }
-                        if((descriptor->status & xdescriptor_status_out) == xdescriptor_status_void)
+                        event.events |= EPOLLIN;
+                    }
+                    if((descriptor->status & xdescriptor_status_out) == xdescriptor_status_void)
+                    {
+                        event.events |= EPOLLOUT;
+                    }
+                    if((descriptor->status & xdescriptor_status_connect) == xdescriptor_status_void)
+                    {
+                        if(descriptor->status & xdescriptor_status_connecting)
                         {
                             event.events |= EPOLLOUT;
                         }
-                        int ret = epoll_ctl(io->fd, EPOLL_CTL_ADD, descriptor->handle.f, &event);
-                        if(ret != xsuccess)
+                        else
                         {
-                            xassertion(ret != xsuccess, "fail to epoll_ctl (%d)", errno);
+                            xassertion(xtrue, "critical - maybe bug");
                         }
-                        descriptor = descriptor->next;
+                    }
+                    int ret = epoll_ctl(io->fd, EPOLL_CTL_ADD, descriptor->handle.f, &event);
+                    if(ret != xsuccess)
+                    {
+                        int err = errno;
+                        xcheck(xtrue, "it's may be bug (%d)", err);
+                        if(err == EEXIST)
+                        {
+                            ret = epoll_ctl(io->fd, EPOLL_CTL_MOD, descriptor->handle.f, &event);
+                            if(ret != xsuccess)
+                            {
+                                xcheck(xtrue, "fail to epoll_ctl (%d)", errno);
+                                xdescriptor * prev = descriptor->prev;
+                                xdescriptor * next = descriptor->next;
+                                if(prev)
+                                {
+                                    prev->next = next;
+                                }
+                                else
+                                {
+                                    o->children.head = next;
+                                }
+                                if(next)
+                                {
+                                    next->prev = prev;
+                                }
+                                else
+                                {
+                                    o->children.tail = next;
+                                }
+                                descriptor->prev = xnil;
+                                descriptor->next = xnil;
+                                descriptor->io   = xnil;
+                                o->children.total = o->children.total - 1;
+                                descriptor->status |= xdescriptor_status_exception;
+                                xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                                return xfail;
+                            }
+                            else
+                            {
+                                return xsuccess;
+                            }
+                        }
+                        else
+                        {
+                            switch(err)
+                            {
+                                case EBADF:     xcheck(err == EBADF, "epfd or fd is not a valid file descriptor. (%d)", err); break;
+                                case EINVAL:    xcheck(err == EINVAL, "epfd is not an epoll file descriptor, or fd is the same as epfd, or the requested operation op is not supported by this interface. (%d)", err); break;
+                                case ELOOP:     xcheck(err == ELOOP, "fd refers to an epoll instance and this EPOLL_CTL_ADD operation would result in a circular loop of epoll instances monitoring one another. (%d)", err); break;
+                                case ENOENT:    xcheck(err == ENOENT, "op was EPOLL_CTL_MOD or EPOLL_CTL_DEL, and fd is not registered with this epoll instance. (%d)", err); break;
+                                case ENOMEM:    xcheck(err == ENOMEM, "There was insufficient memory to handle the requested op control operation. (%d)", err); break;
+                                case ENOSPC:    xcheck(err == ENOSPC, "The limit imposed by /proc/sys/fs/epoll/max_user_watches was encountered while trying to register (EPOLL_CTL_ADD) a new file descriptor on an epoll instance. (%d)", err); break;
+                                case EPERM:     xcheck(err == EPERM, "The target file fd does not support epoll. This error can occur if fd refers to, for example, a regular file or a directory. (%d)", err); break;
+                                default:        xcheck(err, "Undocumented error (%d)", err); break;
+                            }
+                        }
                     }
                     else
                     {
-                        xassertion(descriptor->handle.f < 0, "descriptor's handle is invalid");
+                        return xsuccess;
                     }
                 }
-                return xsuccess;
             }
-            return xfail;
         }
-        return xsuccess;
+        else if(descriptor->io == io)
+        {
+            xcheck(descriptor->io == io, "already registered");
+            return xsuccess;
+        }
+        else
+        {
+            xassertion(descriptor->io != io, "already registered and descriptor's generators are not same");
+        }
     }
     else
     {
-        xcheck(io == xnil, "io is null");
+        xcheck(descriptor == xnil, "descriptor is null");
     }
     return xfail;
 }
 
-static inline void xdescriptorio_epoll_descriptor_close(xdescriptorio_epoll * io, xdescriptor * descriptor)
+extern xint32 xdescriptorio_unreg(xdescriptorio * o, xdescriptor * descriptor)
 {
-    xdescriptorio_epoll_unreg(io, descriptor);
+    xdescriptorio_epoll * io = (xdescriptorio_epoll *) o;
 
-    xdescriptor * prev = descriptor->prev;
-    xdescriptor * next = descriptor->next;
+    xassertion(io == xnil, "descriptor event generator is null");
 
-    if(prev)
+    if(descriptor)
     {
-        prev->next = next;
-    }
-    else
-    {
-        io->children.head = next;
-    }
-
-    if(next)
-    {
-        next->prev = prev;
-    }
-    else
-    {
-        io->children.tail = prev;
-    }
-
-    descriptor->prev = xnil;
-    descriptor->next = xnil;
-    descriptor->io   = xnil;
-
-    io->children.total = io->children.total - 1;
-
-    if(descriptor->open)
-    {
-        descriptor->io   = (xdescriptorio *) io;
-        descriptor->prev = io->queue.tail;
-
-        if(descriptor->prev)
+        if(descriptor->io == o)
         {
-            descriptor->prev->next = descriptor;
-        }
-        else
-        {
-            io->queue.head = descriptor;
-        }
+            xdescriptor * prev = descriptor->prev;
+            xdescriptor * next = descriptor->next;
 
-        io->queue.tail   = descriptor;
-        io->queue.total  = io->queue.total + 1;
-    }
-
-    xdescriptor_close(descriptor);
-}
-
-static inline void xdescriptorio_epoll_on(xdescriptorio_epoll * io, xdescriptor * descriptor, xuint32 mask)
-{
-    xassertion(io == xnil || descriptor == xnil, "io is null or descriptor is null");
-    // 만약에 프로세서가 여러개 존재하면 READ, WRITE & CLOSE 를 다른 곳에서 수행하자.
-    if(mask & xdescriptor_event_exception)
-    {
-        descriptor->process(descriptor, xdescriptor_event_out);
-        xdescriptorio_epoll_descriptor_close(io, descriptor);
-    }
-    else if(mask & xdescriptor_event_out)
-    {
-        xint64 ret = descriptor->process(descriptor, xdescriptor_event_out);
-        if(ret < 0)
-        {
-            xcheck(ret < 0, "fail to event process");
-            xdescriptorio_epoll_descriptor_close(io, descriptor);
-        }
-    }
-    else if(descriptor->handle.f >= 0 && (mask & xdescriptor_event_in))
-    {
-        xint64 ret = descriptor->process(descriptor, xdescriptor_event_in);
-        if(ret < 0)
-        {
-            xcheck(ret < 0, "fail to event process");
-            xdescriptorio_epoll_descriptor_close(io, descriptor);
-        }
-    }
-    else
-    {
-        xassertion(xtrue, "not support event");
-    }
-}
-
-extern xdescriptorio * xdescriptorio_epoll_new(void)
-{
-    xdescriptorio_epoll * io = (xdescriptorio_epoll *) calloc(sizeof(xdescriptorio_epoll), 1);
-
-    /**
-     * EPOLL 최신 커널 소스를 분석해서,
-     * 1024 혹은 괜찮은 값을 찾자.
-     */
-    io->fd      = xinvalid;
-    io->nfds    = 1024;
-    io->events  = (struct epoll_event *) malloc(sizeof(struct epoll_event) * io->nfds);
-    io->timeout = 1;
-
-    xassertion(io->events == xnil, "fail to malloc (%d)", errno);
-
-    return (xdescriptorio *) io;
-}
-
-extern xdescriptorio * xdescriptorio_epoll_rem(xdescriptorio * address)
-{
-    xdescriptorio_epoll * io = (xdescriptorio_epoll *) address;
-    if(io)
-    {
-        xassertion(io->children.head || io->children.tail || io->children.total, "io's children is exist");
-        xassertion(io->queue.head || io->queue.tail || io->queue.total, "io's queue is exist");
-
-        /**
-         * 여기에서 닫기를 수행하는 이유는
-         * 이것은 다른 객체에서 관리되지 않는 객체이며, 다시 오픈하거나 하는 로직이 없기 때문이다.
-         */
-        if(io->fd >= 0)
-        {
-            int ret = close(io->fd);
-            xassertion(ret != xsuccess, "fail to close (%d)", errno);
-        }
-
-        io->events = xfree(io->events);
-    }
-    else
-    {
-        xcheck(io == xnil, "io is null");
-    }
-
-    return (xdescriptorio *) io;
-}
-
-extern void xdescriptorio_epoll_call(xdescriptorio * address)
-{
-    xdescriptorio_epoll * io = (xdescriptorio_epoll *) address;
-    if(io)
-    {
-        if(xdescriptorio_epoll_open(io) == xsuccess)
-        {
-            xdescriptorio_epoll_descriptor_open(io);
-            int nfds = epoll_wait(io->fd, io->events, io->nfds, io->timeout);
-            if(nfds >= 0)
+            if(prev)
             {
-                for(int i = 0; i < nfds; i++)
+                prev->next = next;
+            }
+            else
+            {
+                if(descriptor->handle.f >= 0)
                 {
-                    xdescriptor * descriptor = (xdescriptor *) io->events[i].data.ptr;
-                    xassertion(descriptor == xnil, "descriptor is null");
+                    o->children.head = next;
+                }
+                else
+                {
+                    o->queue.head = next;
+                }
+            }
 
-                    if(io->events[i].events & (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP))
-                    {
-                        descriptor->status |= xdescriptor_status_exception;
-                        xdescriptorio_epoll_on(io, descriptor, xdescriptor_event_exception);
-                    }
-                    else
-                    {
-                        if(io->events[i].events & EPOLLOUT)
-                        {
-                            descriptor->status |= xdescriptor_status_out;
-                            xdescriptorio_epoll_on(io, descriptor, xdescriptor_event_out);
-                        }
-                        if(io->events[i].events & EPOLLIN)
-                        {
-                            descriptor->status |= xdescriptor_status_in;
-                            xdescriptorio_epoll_on(io, descriptor, xdescriptor_event_in);
-                        }
-                    }
+            if(next)
+            {
+                next->prev = prev;
+            }
+            else
+            {
+                if(descriptor->handle.f >= 0)
+                {
+                    o->children.tail = prev;
+                }
+                else
+                {
+                    o->queue.tail = prev;
+                }
+            }
+
+            if(descriptor->handle.f >= 0)
+            {
+                o->children.total = o->children.total - 1;
+                if(io->fd >= 0)
+                {
+                    int ret = epoll_ctl(io->fd, EPOLL_CTL_DEL, descriptor->handle.f, xnil);
+                    xcheck(ret != xsuccess, "fail to epoll_ctl (%d)", errno);
                 }
             }
             else
             {
-                int err = errno;
-                if(err != EINTR)
-                {
-                    xassertion(nfds < 0, "fail to epoll_wait (%d)", err);
-                    close(io->fd);
-                    io->fd = xinvalid;
-                }
+                o->queue.total = o->queue.total - 1;
             }
+
+            return xsuccess;
+        }
+        else if(descriptor->io == xnil)
+        {
+            return xsuccess;
+        }
+        else
+        {
+            return xfail;
         }
     }
-    else
+    return xsuccess;
+}
+
+extern void xdescriptorio_call(xdescriptorio * o)
+{
+    xdescriptorio_epoll * io = (xdescriptorio_epoll *) o;
+
+    xassertion(io == xnil, "descriptor event generator is null");
+
+    if(io->fd < 0)
     {
-        xcheck(io == xnil, "io is null");
+        io->fd = epoll_create(io->maxevents);
+        if(io->fd >= 0)
+        {
+            xdescriptor * descriptor = io->children.head;
+
+        }
+        else
+        {
+            xcheck(xtrue, "fail to epoll_create (%d)", errno);
+        }
     }
 }
