@@ -106,7 +106,7 @@ extern xint64 xsession_write(xsession * session, const void * data, xuint64 len)
                 if(n != len)
                 {
                     xstream_push(session->descriptor->stream.out,
-                                 xaddressof(data[n]),
+                                 xaddressof(((unsigned char *) data)[n]),
                                  len - n);
                 }
             }
@@ -159,5 +159,20 @@ extern xsession * xserver_default_session_factory(xserver * server)
 
 extern void xserver_default_session_releaser(xserver * server, xsession * session)
 {
+    xcheck(xtrue, "implement this");
     // TODO: IMPLEMENT THIS
+}
+
+static xint64 xsession_socket_event_on(xsocket * descriptor, xuint32 event, const void * param, xint64 val)
+{
+    xcheck(xtrue, "implement this");
+
+    return xsuccess;
+}
+
+static xint64 xsession_socket_process(xsocket * descriptor, xuint32 event)
+{
+    xcheck(xtrue, "implement this");
+    
+    return xsuccess;
 }

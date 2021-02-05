@@ -1,7 +1,11 @@
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <poll.h>
 
 #include "descriptor.h"
 
@@ -129,4 +133,166 @@ extern xint64 xdescriptor_close(xdescriptor * descriptor)
         xassertion(descriptor->handle.f < 0, "descriptor is not open");
     }
     return xsuccess;
+}
+
+extern xint32 xdescriptor_nonblock_on(xdescriptor * descriptor)
+{
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    if(descriptor->handle.f >= 0)
+    {
+        if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
+        {
+            int flags = fcntl(descriptor->handle.f, F_GETFL);
+            if(flags >= 0)
+            {
+                flags |= O_NONBLOCK;
+                int ret = fcntl(descriptor->handle.f, F_SETFL, flags);
+                if(ret >= 0)
+                {
+                    return xsuccess;
+                }
+                else
+                {
+                    xcheck(ret < 0, "fail to fcntl (%d)", errno);
+                }
+            }
+            else
+            {
+                xcheck(flags < 0, "fail to fcntl (%d)", errno);
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "descriptor's status is not normal");
+        }
+    }
+    else
+    {
+        xcheck(descriptor->handle.f < 0, "descriptor is not open");
+    }
+    return xfail;
+}
+
+extern xint32 xdescriptor_nonblock_off(xdescriptor * descriptor)
+{
+    xassertion(descriptor == xnil, "descriptor is null");
+
+    if(descriptor->handle.f >= 0)
+    {
+        if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
+        {
+            int flags = fcntl(descriptor->handle.f, F_GETFL);
+            if(flags >= 0)
+            {
+                flags &= (~O_NONBLOCK);
+                int ret = fcntl(descriptor->handle.f, F_SETFL, flags);
+                if(ret >= 0)
+                {
+                    return xsuccess;
+                }
+                else
+                {
+                    xcheck(ret < 0, "fail to fcntl (%d)", errno);
+                }
+            }
+            else
+            {
+                xcheck(flags < 0, "fail to fcntl (%d)", errno);
+            }
+        }
+        else
+        {
+            xcheck(xtrue, "descriptor's status is not normal");
+        }
+    }
+    else
+    {
+        xcheck(descriptor->handle.f < 0, "descriptor is not open");
+    }
+    return xfail;
+}
+
+extern xuint32 xdescriptor_wait(xdescriptor * descriptor, xuint32 event, xint64 second, xint64 nanosecond)
+{
+    xassertion(descriptor == xnil, "descriptor is null");
+    
+    if(descriptor->handle.f >= 0)
+    {
+        if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
+        {
+            struct pollfd pollfd;
+            pollfd.fd = descriptor->handle.f;
+            pollfd.revents = 0;
+            pollfd.events  = (POLLNVAL | POLLPRI | POLLHUP | POLLRDHUP | POLLERR);
+            if(event & xdescriptor_event_in)
+            {
+                pollfd.events |= POLLIN;
+            }
+            if(event & xdescriptor_event_out)
+            {
+                pollfd.events |= POLLOUT;
+            }
+            xtime current = xtimeget();
+            xtime limit = xtimegen(current.second + second, current.nanosecond + nanosecond);
+            struct timespec timeout = { 0, 1000 };  // 1 unisecond: TODO: 적절한 값을 찾자.
+            xuint32 result = 0;
+            while((result & event) != event && (result & xdescriptor_event_exception) == xdescriptor_event_void)
+            {
+                int nfds = ppoll(&pollfd, 1, &timeout, xnil);
+                if(nfds >= 0)
+                {
+                    if(pollfd.revents & (POLLNVAL | POLLPRI | POLLHUP | POLLRDHUP | POLLERR))
+                    {
+                        result |= xdescriptor_event_exception;
+                        break;
+                    }
+                    else
+                    {
+                        if(pollfd.revents & POLLOUT)
+                        {
+                            result |= xdescriptor_event_out;
+                        }
+                        if(pollfd.revents & POLLIN)
+                        {
+                            result |= xdescriptor_event_in;
+                        }
+                    }
+                }
+                else
+                {
+                    int err = errno;
+                    switch(err)
+                    {
+                        case EFAULT: xassertion(err == EFAULT, "The array given as argument was not contained in the calling program's address space. (%d)", err); break;
+                        case EINTR:  xassertion(err == EINTR, "A signal occurred before any requested event. (%d)", err); break;
+                        case EINVAL: xassertion(err == EINVAL, "The nfds value exceeds the RLIMIT_NOFILE value. or The timeout value expressed in *ip is invalid (negative). (%d)", err); break;
+                        case ENOMEM: xassertion(err == ENOMEM, "There was no space to allocate file descriptor tables. (%d)", err); break;
+                        default:     xassertion(err, "Unknown (%d)", err); break;
+                    }
+                }
+                if((result & event) != event && (result & xdescriptor_event_exception) == xdescriptor_event_void)
+                {
+                    current = xtimeget();
+                    if(xtimecmp(&limit, &current) <= 0)
+                    {
+                        result |= xdescriptor_event_timeout;
+                        break;
+                    }
+                    pollfd.revents = 0;
+                    continue;
+                }
+            }
+            return result;
+        }
+        else
+        {
+            xcheck(xtrue, "descriptor's status is exception");
+        }
+    }
+    else
+    {
+        xcheck(descriptor->handle.f < 0, "descriptor is not open");
+    }
+    return xdescriptor_event_exception;
 }

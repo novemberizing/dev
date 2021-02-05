@@ -27,6 +27,20 @@ extern unsigned long xthreadid(void);
 extern void * xdup(const void * source, xuint64 len);
 extern void * xfree(void * address);
 
+struct xtime;
+
+typedef struct xtime xtime;
+
+struct xtime
+{
+    xint64 second;
+    xint64 nanosecond;
+};
+
+extern xtime xtimeget(void);
+extern xtime xtimegen(xint64 second, xint64 nanosecond);
+extern xint64 xtimecmp(const xtime * x, const xtime * y);
+
 #define xassertion(condition, format, ...) do {     \
     if(condition) {                                 \
         dprintf(xlogfd(), "[assertion] %s:%d "      \
@@ -94,5 +108,7 @@ extern xstream * xstream_rem(xstream * stream);
 
 struct xsync;
 typedef struct xsync xsync;
+
+extern xsync * xsync_rem(xsync * sync);
 
 #endif // __NOVEMBERIZING_X__STD__H__

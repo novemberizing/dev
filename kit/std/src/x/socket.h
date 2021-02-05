@@ -21,9 +21,15 @@ extern xint32 xsocket_open(xsocket * descriptor);
 extern xint32 xsocket_bind(xsocket * descriptor, const void * addr, xuint64 addrlen);
 extern xint32 xsocket_listen(xsocket * descriptor, int backlog);
 extern xint32 xsocket_connect(xsocket * descriptor, const void * addr, xuint64 addrlen);
-#define xsocket_read(descriptor, buffer, size)  xdescriptor_read((xdescriptor *) descriptor, buffer, size)
-#define xsocket_write(descriptor, data, len)    xdescriptor_write((xdescriptor *) descriptor, data, len)
-#define xsocket_close(descriptor)               xdescriptor_close((xdescriptor *) descriptor);
+extern xint64 xsocket_read(xsocket * descriptor, void * buffer, xuint64 size);
+extern xint64 xsocket_write(xsocket * descriptor, const void * data, xuint64 len);
+extern xint32 xsocket_close(xsocket * descriptor);
 extern xint32 xsocket_shutdown(xsocket * descriptor, xint32 how);
+extern xint32 xsocket_nonblock_on(xsocket * descriptor);
+extern xint32 xsocket_nonblock_off(xsocket * descriptor);
+extern xuint32 xsocket_wait(xsocket * descriptor, xuint32 event, xint64 second, xint64 nanosecond);
+
+// #define xsocket_nonblock_on(descriptor)         xdescriptor_nonblock_on((xdescriptor *) descriptor)
+// #define xsocket_nonblock_off(descriptor)        xdescriptor_nonblock_off((xdescriptor *) descriptor)
 
 #endif // __NOVEMBERIZING_X__SOCKET__H__

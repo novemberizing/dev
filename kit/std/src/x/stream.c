@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "std.h"
 
@@ -13,7 +14,7 @@ struct xsimplestream
     void *    (*back)(xstream *);
     xuint64   (*size)(xstream *);
     xuint64   (*remain)(xstream *);
-    void      (*recapacity)(xstream *);
+    void      (*recapacity)(xstream *, xuint64);
     void      (*push)(xstream *, const void *, xuint64);
     xuint64   (*pop)(xstream *, void *, xuint64);
 
@@ -57,7 +58,7 @@ extern xstream * xstream_new(xuint64 capacity)
     stream->push       = xsimplestream_push;
     stream->pop        = xsimplestream_pop;
 
-    return stream;
+    return (xstream *) stream;
 }
 
 extern xstream * xstream_rem(xstream * stream)
@@ -81,7 +82,7 @@ static xstream * xsimplestream_destructor(xstream * o)
         free(stream);
         stream = xnil;
     }
-    return stream;
+    return (xstream *) stream;
 }
 
 static void *    xsimplestream_front(xstream * o)
@@ -134,7 +135,7 @@ static void      xsimplestream_recapacity(xstream * o, xuint64 capacity)
     }
 }
 
-static void      xsimepestream_push(xstream * o, const void * data, xuint64 len)
+static void      xsimplestream_push(xstream * o, const void * data, xuint64 len)
 {
     xsimplestream * stream = (xsimplestream *) o;
 

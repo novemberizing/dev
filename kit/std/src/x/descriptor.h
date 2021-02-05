@@ -22,6 +22,8 @@
 #define xdescriptor_event_shutdown_in       (0x00000200u)
 #define xdescriptor_event_shutdown_out      (0x00000400u)
 #define xdescriptor_event_shutdown_all      (xdescriptor_event_shutdown_in | xdescriptor_event_shutdown_out)
+#define xdescriptor_event_timeout           (0x00000800u)
+#define xdescriptor_event_connecting        (0x00001000u)
 
 #define xdescriptor_status_void             xdescriptor_event_void
 #define xdescriptor_status_open             xdescriptor_event_open
@@ -36,6 +38,8 @@
 #define xdescriptor_status_shutdown_in      xdescriptor_event_shutdown_in
 #define xdescriptor_status_shutdown_out     xdescriptor_event_shutdown_out
 #define xdescriptor_status_shutdown_all     xdescriptor_event_shutdown_all
+#define xdescriptor_status_timeout          xdescriptor_event_timeout
+#define xdescriptor_status_connecting       xdescriptor_event_connecting
 
 struct xdescriptor;
 struct xdescriptorio;
@@ -79,6 +83,9 @@ struct xdescriptor
 extern xint64 xdescriptor_read(xdescriptor * descriptor, void * buffer, xuint64 size);
 extern xint64 xdescriptor_write(xdescriptor * descriptor, const void * data, xuint64 len);
 extern xint64 xdescriptor_close(xdescriptor * descriptor);
+extern xint32 xdescriptor_nonblock_on(xdescriptor * descriptor);
+extern xint32 xdescriptor_nonblock_off(xdescriptor * descriptor);
+extern xuint32 xdescriptor_wait(xdescriptor * descriptor, xuint32 event, xint64 second, xint64 nanosecond);
 
 // #define xdescrpitor_close(descriptor)   xdescriptor_do(descriptor, xdescriptor_event_close)
 

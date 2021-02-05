@@ -187,3 +187,17 @@ extern xsession * xserver_accept(xserver * server)
 
     return xnil;
 }
+
+static xint64 xserver_socket_event_on(xsocket * descriptor, xuint32 event, const void * param, xint64 val)
+{
+    xcheck(xtrue, "implement this");
+    
+    return xsuccess;
+}
+
+static xint64 xserver_socket_process(xsocket * descriptor, xuint32 event)
+{
+    xcheck(xtrue, "implement this");
+
+    return xsuccess;
+}

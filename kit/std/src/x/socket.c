@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -288,4 +289,34 @@ extern xint32 xsocket_shutdown(xsocket * descriptor, xint32 how)
         }
     }
     return xsuccess;
+}
+
+extern xint64 xsocket_read(xsocket * descriptor, void * buffer, xuint64 size)
+{
+    return xdescriptor_read((xdescriptor *) descriptor, buffer, size);
+}
+
+extern xint64 xsocket_write(xsocket * descriptor, const void * data, xuint64 len)
+{
+    return xdescriptor_write((xdescriptor *) descriptor, data, len);
+}
+
+extern xint32 xsocket_close(xsocket * descriptor)
+{
+    return xdescriptor_close((xdescriptor *) descriptor);
+}
+
+extern xint32 xsocket_nonblock_on(xsocket * descriptor)
+{
+    return xdescriptor_nonblock_on((xdescriptor *) descriptor);
+}
+
+extern xint32 xsocket_nonblock_off(xsocket * descriptor)
+{
+    return xdescriptor_nonblock_off((xdescriptor *) descriptor);
+}
+
+extern xuint32 xsocket_wait(xsocket * descriptor, xuint32 event, xint64 second, xint64 nanosecond)
+{
+    return xdescriptor_wait((xdescriptor *) descriptor, event, second, nanosecond);
 }

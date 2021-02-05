@@ -23,4 +23,7 @@ extern xint32 xsession_shutdown(xsession * session, xint32 how);
 extern xsession * xserver_default_session_factory(xserver * server);
 extern void xserver_default_session_releaser(xserver * server, xsession * session);
 
+#define xsession_nonblock_on(session)   (session ? xsocket_nonblock_on(session->descriptor) : xfail)
+#define xsession_nonblock_off(session)  (session ? xsocket_nonblock_off(session->descriptor) : xfail)
+
 #endif // __NOVEMBERIZING_X__SESSION__H__

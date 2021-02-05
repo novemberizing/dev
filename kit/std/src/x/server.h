@@ -28,4 +28,7 @@ extern xint32 xserver_listen(xserver * server);
 extern xint32 xserver_close(xserver * server);
 extern xsession * xserver_accept(xserver * server);
 
+#define xserver_nonblock_on(server)     (server ? xsocket_nonblock_on(server->descriptor) : xfail)
+#define xserver_nonblock_off(server)    (server ? xsocket_nonblock_off(server->descriptor) : xfail)
+
 #endif // __NOVEMBERIZING_X__SERVER__H__
