@@ -297,7 +297,44 @@ extern void xdescriptorio_call(xdescriptorio * o)
         if(io->fd >= 0)
         {
             xdescriptor * descriptor = io->children.head;
+            while(descriptor)
+            {
+                struct epoll_event event;
+                event.data.ptr = descriptor;
+                event.events = (EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLRDHUP | EPOLLET | EPOLLONESHOT);
+                int ret = epoll_ctl(io->fd, EPOLL_CTL_ADD, descriptor->handle.f, &event);
+                if(ret != xsuccess)
+                {
+                    int err = errno;
+                    if(err == EEXIST)
+                    {
+                        ret = epoll_ctl(io->fd, EPOLL_CTL_MOD, descriptor->handle.f, &event);
 
+                        if(ret != xsuccess)
+                        {
+                            xcheck(xtrue, "fail to epoll_ctl (%d)", err);
+
+                            descriptor->status |= xdescriptor_status_exception;
+                            xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                        }
+                        else
+                        {
+                            descriptor = descriptor->next;
+                        }
+                    }
+                    else
+                    {
+                        xcheck(xtrue, "fail to epoll_ctl (%d)", err);
+
+                        descriptor->status |= xdescriptor_status_exception;
+                        xdescriptor_event_on(descriptor, xdescriptor_event_exception, xnil, 0);
+                    }
+                }
+                else
+                {
+                    descriptor = descriptor->next;
+                }
+            }
         }
         else
         {
