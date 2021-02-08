@@ -25,3 +25,8 @@ extern void * xdup(const void * source, xuint64 len)
     }
     return xnil;
 }
+
+extern const char * xerrorstr(void * func, int no)
+{
+    return "";
+}

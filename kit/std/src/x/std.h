@@ -23,6 +23,7 @@ typedef unsigned char       xbyte;
 
 extern int xlogfd(void);
 extern unsigned long xthreadid(void);
+extern const char * xerrorstr(void * func, int no);
 
 extern void * xdup(const void * source, xuint64 len);
 extern void * xfree(void * address);

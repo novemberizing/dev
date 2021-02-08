@@ -188,9 +188,14 @@ extern xsession * xserver_accept(xserver * server)
                         server->descriptor->status |= xdescriptor_status_exception;
                         xdescriptor_event_on(server->descriptor, xdescriptor_event_exception, xnil, 0);
                     }
-                    else if(err == EAGAIN || err == ECONNABORTED || err == EINTR || err == EMFILE || err == ENFILE || err == ENOBUFS || err == ENOMEM || err == EPROTO || err == EPERM)
+                    else if(err == EAGAIN)
                     {
-                        xassertion(xtrue, "fail to accept (%d) - server is ok", err);
+                        server->descriptor->status &= (~xdescriptor_status_in);
+                        printf("server is nonblock\n");
+                    }
+                    else if(err == ECONNABORTED || err == EINTR || err == EMFILE || err == ENFILE || err == ENOBUFS || err == ENOMEM || err == EPROTO || err == EPERM)
+                    {
+                        xcheck(xtrue, "fail to accept (%d) - server is ok", err);
                     }
                     else if(err == EFAULT || err == EOPNOTSUPP)
                     {
@@ -219,8 +224,46 @@ extern xsession * xserver_accept(xserver * server)
 static xint64 xserver_socket_event_on(xsocket * descriptor, xuint32 event, const void * param, xint64 val)
 {
     xdescriptor_debug_print_event(event);
-    xcheck(xtrue, "implement this");
 
+    xserver * server = descriptor->parent;
+
+    if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
+    {
+        if(descriptor->status & xdescriptor_status_in)
+        {
+            xsession * session = xserver_accept(server);
+            if(session)
+            {
+                int ret = xdescriptorio_reg(descriptor->io, session->descriptor);
+                if(ret == xsuccess)
+                {
+                }
+                else
+                {
+                    xcheck(ret != xsuccess, "fail to xdescriptorio reg");
+                    server->release(server, session);
+                }
+            }
+            else
+            {
+                if(server->descriptor->status & xdescriptor_status_exception)
+                {
+                    
+                }
+            }
+
+
+            xcheck(xtrue, "implement this");
+        }
+        else
+        {
+            xcheck(xtrue, "implement this");
+        }
+    }
+    else
+    {
+        xcheck(xtrue, "implement this");
+    }
     return xsuccess;
 }
 
