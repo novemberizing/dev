@@ -6,21 +6,7 @@
 #include "descriptor.h"
 #include "descriptorio.h"
 
-extern xint32 xdescriptorio_dispatch(xdescriptorio * io, xdescriptor * descriptor, xuint32 event)
-{
-    switch(event)
-    {
-        case xdescriptor_event_exception:       return xdescriptorio_dispatch_exception(io, descriptor);
-        case xdescriptor_event_in:              return xdescriptorio_dispatch_in(io, descriptor);
-        case xdescriptor_event_out:             return xdescriptorio_dispatch_out(io, descriptor);
-        case xdescriptor_event_open:            return xdescriptorio_dispatch_open(io, descriptor);
-        case xdescriptor_event_close:           return xdescriptorio_dispatch_close(io, descriptor);
-        case xdescriptor_event_shutdown_all:    return xdescriptorio_dispatch_shutdown_all(io, descriptor);
-        case xdescriptor_event_shutdown_in:     return xdescriptorio_dispatch_shutdown_in(io, descriptor);
-        case xdescriptor_event_shutdown_out:    return xdescriptorio_dispatch_shutdown_out(io, descriptor);
-    }
-    xassertion(event, "unsupported event (0x%08x)", event);
-}
+
 
 extern xdescriptor * xdescriptorio_queue_head(xdescriptorio * io)
 {
@@ -49,6 +35,33 @@ extern void xdescriptorio_queue_push(xdescriptorio * io, xdescriptor * descripto
     io->queue.total = io->queue.total + 1;
 }
 
+extern xdescriptor * xdescriptorio_queue_pop(xdescriptorio * io)
+{
+    xassertion(io == xnil, "io is null");
+
+    xdescriptor * descriptor = io->queue.head;
+
+    if(descriptor)
+    {
+        if(descriptor->next)
+        {
+            descriptor->next->prev = xnil;
+        }
+        else
+        {
+            io->queue.tail = xnil;
+        }
+        io->queue.head = descriptor->next;
+        io->queue.total = io->queue.total - 1;
+
+        xassertion(io->queue.total == xinvalid, "invalid queue status");
+
+        descriptor->next = xnil;
+        descriptor->prev = xnil;
+    }
+    return descriptor;
+}
+
 extern xdescriptor * xdescriptorio_queue_del(xdescriptorio * io, xdescriptor * descriptor)
 {
     xassertion(io == xnil || descriptor == xnil, "io is null or descriptor is null");
@@ -63,6 +76,7 @@ extern xdescriptor * xdescriptorio_queue_del(xdescriptorio * io, xdescriptor * d
     }
     else
     {
+        xassertion(io->queue.head != descriptor, "critical");
         io->queue.head = next;
     }
 
@@ -72,6 +86,7 @@ extern xdescriptor * xdescriptorio_queue_del(xdescriptorio * io, xdescriptor * d
     }
     else
     {
+        xassertion(io->queue.tail != descriptor, "critical");
         io->queue.tail = prev;
     }
 
@@ -102,6 +117,41 @@ extern void xdescriptorio_children_push(xdescriptorio * io, xdescriptor * descri
     io->children.tail = descriptor;
 
     io->children.total = io->children.total + 1;
+}
+
+extern xdescriptor * xdescriptorio_children_del(xdescriptorio * io, xdescriptor * descriptor)
+{
+    xassertion(io == xnil || descriptor == xnil, "io is null or descriptor is null");
+    xassertion(io != descriptor->io, "descriptor's not register in this io");
+
+    xdescriptor * prev = descriptor->prev;
+    xdescriptor * next = descriptor->next;
+
+    if(prev)
+    {
+        prev->next = next;
+    }
+    else
+    {
+        xassertion(io->children.head != descriptor, "critical");
+        io->children.head = next;
+    }
+
+    if(next)
+    {
+        next->prev = prev;
+    }
+    else
+    {
+        xassertion(io->children.tail != descriptor, "critical");
+        io->children.tail = prev;
+    }
+    io->children.total = io->children.total - 1;
+
+    descriptor->prev = xnil;
+    descriptor->next = xnil;
+
+    return next;
 }
 
 // extern xuint32 xdescriptorio_status(xdescriptorio * o)

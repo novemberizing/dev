@@ -21,6 +21,7 @@
 #define xdescriptor_event_timeout           (0x00000800u)
 #define xdescriptor_event_connecting        (0x00001000u)
 #define xdescriptor_event_register          (0x00002000u)
+#define xdescriptor_event_rem               (0x00004000u)
 
 #define xdescriptor_status_void             xdescriptor_event_void
 #define xdescriptor_status_open             xdescriptor_event_open
@@ -38,6 +39,7 @@
 #define xdescriptor_status_timeout          xdescriptor_event_timeout
 #define xdescriptor_status_connecting       xdescriptor_event_connecting
 #define xdescriptor_status_register         xdescriptor_event_register
+#define xdescriptor_status_rem              xdescriptor_event_rem
 
 struct xdescriptor;
 typedef struct xdescriptor xdescriptor;
