@@ -10,12 +10,6 @@
 #include "std.h"
 #include "io.h"
 
-struct xdescriptor;
-struct xdescriptorio;
-
-typedef struct xdescriptor xdescriptor;
-typedef struct xdescriptorio xdescriptorio;
-
 typedef xint64 (*xdescriptor_event_handler)(xdescriptor *, xuint32, const void *, xint64);
 typedef xint64 (*xdescriptor_process_func)(xdescriptor *, xuint32);
 
@@ -60,30 +54,6 @@ extern void    xdescriptor_mask_add(xdescriptor * descriptor, xuint32 mask);
 extern void    xdescriptor_mask_del(xdescriptor * descriptor, xuint32 mask);
 extern xint32  xdescriptor_is_normal(xdescriptor * descriptor);
 extern xint32  xdescriptor_is_unnormal(xdescriptor * descriptor);
-
-struct xdescriptorio
-{
-    struct
-    {
-        xdescriptor * head;
-        xdescriptor * tail;
-        xuint32       total;
-    } children;
-    struct
-    {
-        xdescriptor * head;
-        xdescriptor * tail;
-        xuint32       total;
-    } queue;
-};
-
-extern xdescriptorio * xdescriptorio_new(void);
-extern xdescriptorio * xdescriptorio_rem(xdescriptorio * o);
-
-extern xint32 xdescriptorio_reg(xdescriptorio * o, xdescriptor * descriptor);
-extern xint32 xdescriptorio_unreg(xdescriptorio * o, xdescriptor * descriptor);
-
-extern void xdescriptorio_call(xdescriptorio * o);
 
 // #define xdescrpitor_close(descriptor)   xdescriptor_do(descriptor, xdescriptor_event_close)
 

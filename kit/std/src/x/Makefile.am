@@ -8,7 +8,10 @@ libnovemberizing_a_SOURCES = std.c                  \
                              time.c                 \
                              thread.c               \
                              stream.c               \
+                             io.c                   \
                              descriptor.c           \
+                             descriptorio.c         \
+                             descriptorio-epoll.c   \
                              socket.c               \
                              client.c               \
                              server.c               \

@@ -1,6 +1,8 @@
 #ifndef   __NOVEMBERIZING_X__IO__H__
 #define   __NOVEMBERIZING_X__IO__H__
 
+#include <x/std.h>
+
 #define xdescriptor_mask_nonblock           (0x00000001u)
 
 #define xdescriptor_event_void              (0x00000000u)
@@ -34,5 +36,50 @@
 #define xdescriptor_status_shutdown_all     xdescriptor_event_shutdown_all
 #define xdescriptor_status_timeout          xdescriptor_event_timeout
 #define xdescriptor_status_connecting       xdescriptor_event_connecting
+
+#define xdescriptorio_status_void           (0x00000000u)
+#define xdescriptorio_status_cancel         (0x80000000u)
+
+struct xdescriptor;
+struct xdescriptorio;
+
+typedef struct xdescriptor xdescriptor;
+typedef struct xdescriptorio xdescriptorio;
+
+struct xdescriptorio
+{
+    struct
+    {
+        xdescriptor * head;
+        xdescriptor * tail;
+        xuint32       total;
+    } children;
+    struct
+    {
+        xdescriptor * head;
+        xdescriptor * tail;
+        xuint32       total;
+    } queue;
+    struct
+    {
+        xdescriptor * head;
+        xdescriptor * tail;
+        xuint32       total;
+    } exceptions;
+    xuint32 status;
+};
+
+extern void xdescriptor_debug_print_event(xuint32 event);
+
+extern xdescriptorio * xdescriptorio_new(void);
+extern xdescriptorio * xdescriptorio_rem(xdescriptorio * o);
+
+extern xint32 xdescriptorio_reg(xdescriptorio * o, xdescriptor * descriptor);
+extern xint32 xdescriptorio_unreg(xdescriptorio * o, xdescriptor * descriptor);
+
+extern void xdescriptorio_call(xdescriptorio * o);
+extern void xdescriptorio_clear(xdescriptorio * o);
+extern void xdescriptorio_term(xdescriptorio * o);
+extern xuint32 xdescriptorio_status(xdescriptorio * o);
 
 #endif // __NOVEMBERIZING_X__IO__H__

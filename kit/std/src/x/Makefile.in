@@ -138,8 +138,9 @@ am__v_AR_1 =
 libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
 am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) log.$(OBJEXT) \
-	time.$(OBJEXT) thread.$(OBJEXT) stream.$(OBJEXT) \
-	descriptor.$(OBJEXT) socket.$(OBJEXT) client.$(OBJEXT) \
+	time.$(OBJEXT) thread.$(OBJEXT) stream.$(OBJEXT) io.$(OBJEXT) \
+	descriptor.$(OBJEXT) descriptorio.$(OBJEXT) \
+	descriptorio-epoll.$(OBJEXT) socket.$(OBJEXT) client.$(OBJEXT) \
 	server.$(OBJEXT) session.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -158,7 +159,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/client.Po ./$(DEPDIR)/descriptor.Po \
-	./$(DEPDIR)/log.Po ./$(DEPDIR)/server.Po \
+	./$(DEPDIR)/descriptorio-epoll.Po ./$(DEPDIR)/descriptorio.Po \
+	./$(DEPDIR)/io.Po ./$(DEPDIR)/log.Po ./$(DEPDIR)/server.Po \
 	./$(DEPDIR)/session.Po ./$(DEPDIR)/socket.Po \
 	./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po ./$(DEPDIR)/thread.Po \
 	./$(DEPDIR)/time.Po
@@ -337,7 +339,10 @@ libnovemberizing_a_SOURCES = std.c                  \
                              time.c                 \
                              thread.c               \
                              stream.c               \
+                             io.c                   \
                              descriptor.c           \
+                             descriptorio.c         \
+                             descriptorio-epoll.c   \
                              socket.c               \
                              client.c               \
                              server.c               \
@@ -421,6 +426,9 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptor.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptorio-epoll.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptorio.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/session.Po@am__quote@ # am--include-marker
@@ -593,6 +601,9 @@ clean-am: clean-generic clean-libLIBRARIES clean-libtool \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/client.Po
 	-rm -f ./$(DEPDIR)/descriptor.Po
+	-rm -f ./$(DEPDIR)/descriptorio-epoll.Po
+	-rm -f ./$(DEPDIR)/descriptorio.Po
+	-rm -f ./$(DEPDIR)/io.Po
 	-rm -f ./$(DEPDIR)/log.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/session.Po
@@ -648,6 +659,9 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/client.Po
 	-rm -f ./$(DEPDIR)/descriptor.Po
+	-rm -f ./$(DEPDIR)/descriptorio-epoll.Po
+	-rm -f ./$(DEPDIR)/descriptorio.Po
+	-rm -f ./$(DEPDIR)/io.Po
 	-rm -f ./$(DEPDIR)/log.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/session.Po

@@ -113,6 +113,17 @@ extern xint32 xserver_listen(xserver * server)
                 xcheck(ret < 0, "fail to xsocket listen");
                 return xfail;
             }
+            else
+            {
+                server->descriptor->status |= (xdescriptor_status_open | xdescriptor_status_out);
+                xint64 ret = xdescriptor_event_on(server->descriptor, xdescriptor_event_open, xnil, 0);
+                if(ret != xsuccess)
+                {
+                    server->descriptor->status |= xdescriptor_status_exception;
+                    xdescriptor_event_on(server->descriptor, xdescriptor_event_exception, xnil, 0);
+                    return xfail;
+                }
+            }
         }
         else
         {
@@ -207,6 +218,7 @@ extern xsession * xserver_accept(xserver * server)
 
 static xint64 xserver_socket_event_on(xsocket * descriptor, xuint32 event, const void * param, xint64 val)
 {
+    xdescriptor_debug_print_event(event);
     xcheck(xtrue, "implement this");
 
     return xsuccess;
@@ -214,6 +226,11 @@ static xint64 xserver_socket_event_on(xsocket * descriptor, xuint32 event, const
 
 static xint64 xserver_socket_process(xsocket * descriptor, xuint32 event)
 {
+    switch(event)
+    {
+        case xdescriptor_event_open: return xserver_listen(descriptor->parent);
+    }
+
     xcheck(xtrue, "implement this");
 
     return xsuccess;

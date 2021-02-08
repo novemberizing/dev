@@ -6,11 +6,23 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <signal.h>
 
 #include <x/std.h>
 #include <x/io.h>
 #include <x/client.h>
 #include <x/server.h>
+
+static xdescriptorio * __global_io = xnil;
+
+static void terminate_descriptor_io(int number)
+{
+    if(__global_io)
+    {
+        printf("terminate descriptorio\n");
+        __global_io->status |= xdescriptorio_status_cancel;
+    }
+}
 
 static xint32 xexample_simple_client(void);
 static xint32 xexample_simple_client_with_ncat(void);
@@ -30,12 +42,18 @@ int main(int argc, char ** argv)
     xexample_simple_nonblock_connect();
     xexample_simple_server();
     xexample_simple_server_open();
+    xexample_simple_server_with_descriptorio();
 
     return 0;
 }
 
+/**
+ */
+
 static xint32 xexample_simple_server_with_descriptorio(void)
 {
+    signal(SIGINT, terminate_descriptor_io);
+    // signal(SIGINT)
     struct sockaddr_in addrin;
     addrin.sin_family = AF_INET;
     addrin.sin_addr.s_addr = 0;
@@ -43,18 +61,18 @@ static xint32 xexample_simple_server_with_descriptorio(void)
 
     xserver * server = xserver_new(PF_INET, SOCK_STREAM, IPPROTO_TCP, &addrin, sizeof(struct sockaddr_in), sizeof(xserver));
 
-    // xevent_generator_io ...
-    // printf("server is created => %p\n", server);
+    xdescriptorio * io = xdescriptorio_new();
+    __global_io = io;
 
-    // xint32 ret = xserver_listen(server);
-    // if(ret == xsuccess)
-    // {
-    //     printf("server is listen\n");
-    // }
-    // else
-    // {
-    //     printf("server is not listen\n");
-    // }
+    xdescriptorio_reg(io, (xdescriptor *) server->descriptor);
+
+    while((xdescriptorio_status(io) & xdescriptorio_status_cancel) == xdescriptorio_status_void)
+    {
+        xdescriptorio_call(io);
+    }
+    xdescriptorio_clear(io);
+
+    xdescriptorio_rem(io);
 
     server = xserver_rem(server);
 
