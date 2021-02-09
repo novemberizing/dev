@@ -112,4 +112,9 @@ typedef struct xsync xsync;
 
 extern xsync * xsync_rem(xsync * sync);
 
+#define xsynclock(sync)                     (sync ? xsuccess : xfail)
+#define xsyncunlock(sync)                   (sync ? xsuccess : xfail)
+#define xsyncwait(sync, second, nanosecond) (sync ? xsuccess : xfail)
+#define xsyncwakeup(sync, all)              (sync ? xsuccess : xfail)
+
 #endif // __NOVEMBERIZING_X__STD__H__
