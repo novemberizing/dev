@@ -13,6 +13,9 @@
 #define xeventcategory_type_signal          (0x00000004u)
 #define xeventcategory_type_custom          (0x00000008u)
 
+#define xeventobject_status_void            (0x00000000u)
+#define xeventobject_status_exception       (0x00000001u)
+
 struct xevent;
 struct xeventlist;
 struct xeventqueue;
@@ -42,6 +45,14 @@ struct xeventqueue_node
     xevent *      prev;
     xevent *      next;
     xeventqueue * cntr;
+};
+
+struct xeventgenerator
+{
+    xeventgenerator_node * head;
+    xeventgenerator_node * tail;
+    xuint64 size;
+    xsync * sync;
 };
 
 struct xevent
@@ -106,5 +117,7 @@ struct xeventobject
 
 extern xeventgenerator_node * xeventgenerator_register_object(xeventgenerator * generator, xeventobject * object);
 extern void xeventgenerator_unregister_object(xeventgenerator_node * node);
+
+extern void xeventqueue_push()
 
 #endif // __NOVEMBERIZING_X__EVENT__H__

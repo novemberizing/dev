@@ -7,53 +7,79 @@
 #ifndef   __NOVEMBERIZING_X__DESCRIPTOR__H__
 #define   __NOVEMBERIZING_X__DESCRIPTOR__H__
 
-#include "std.h"
-#include "io.h"
+#include <x/event.h>
 
-typedef xint64 (*xdescriptor_event_handler)(xdescriptor *, xuint32, const void *, xint64);
-typedef xint64 (*xdescriptor_process_func)(xdescriptor *, xuint32);
+#define xdescriptorstatus_void          xeventobject_status_void
+#define xdescriptorstatus_exception     xeventobject_status_exception
+#define xdescriptorstatus_open          (0x00000001u)
+#define xdescriptorstatus_register      (0x00000002u)
+
+struct xdescriptor;
+
+typedef struct xdescriptor xdescriptor;
+
+typedef xint64 (*xdescriptorevent_handler)(xdescriptor *, xuint32, const void *, xint64);
+typedef xint64 (*xdescriptorevent_processor)(xdescriptor *, xuint32);
 
 struct xdescriptor
 {
+    /** INHERITED EVENT MEMBER */
+    xeventqueue_node           eventnode;
+    xeventhandler              on;         // 이벤트를 처리한다.
+    /** INHERITED EVENT OBJECT MEMBER */
+    xeventengine_node          enginenode;
+    xeventgeneratorlist        generators;
+    xeventlist                 events;
+    xsync *                    sync;
+    xuint32                    masks;
+    xuint32                    status;
+    /** DESCRIPTOR OBJECT MEMBER */
     union
     {
-        xint32 f;
-        handle v;
+        int    f;
+        void * v;
     } handle;
-    xuint32                   mask;
-    xuint32                   status;
-    xdescriptor *             prev;
-    xdescriptor *             next;
-    xdescriptorio *           io;
-    xsync *                   sync;
-    xdescriptor_process_func  process;
-    xdescriptor_event_handler on;
+    xdescriptorevent_handler   done;       // 이벤트가 처리된 후 호출한다.
+    xdescriptorevent_processor process;    // 이벤트 타입을 명시하여 액션을 수행한다.
 };
 
-#define xdescriptor_do(descriptor, event)   (descriptor                 \
-    ? ((xdescriptor *) descriptor)->process((xdescriptor *) descriptor, \
-                                            event)                      \
-    : xfail)
 
-#define xdescriptor_event_on(descriptor, event, data, val) (descriptor  \
-    ? ((xdescriptor *) descriptor)->on((xdescriptor *) descriptor,      \
-                                       event,                           \
-                                       data,                            \
-                                       val)                             \
-    : xfail)
+// #include "std.h"
+// #include "io.h"
 
-#define xdescriptor_open(descriptor)    xdescriptor_do(descriptor, xdescriptor_event_open)
+// typedef xint64 (*xdescriptor_event_handler)(xdescriptor *, xuint32, const void *, xint64);
+// typedef xint64 (*xdescriptor_process_func)(xdescriptor *, xuint32);
 
-extern xint64  xdescriptor_read(xdescriptor * descriptor, void * buffer, xuint64 size);
-extern xint64  xdescriptor_write(xdescriptor * descriptor, const void * data, xuint64 len);
-extern xint64  xdescriptor_close(xdescriptor * descriptor);
-extern xint32  xdescriptor_nonblock_on(xdescriptor * descriptor);
-extern xint32  xdescriptor_nonblock_off(xdescriptor * descriptor);
-extern xuint32 xdescriptor_wait(xdescriptor * descriptor, xuint32 event, xint64 second, xint64 nanosecond);
-extern void    xdescriptor_mask_add(xdescriptor * descriptor, xuint32 mask);
-extern void    xdescriptor_mask_del(xdescriptor * descriptor, xuint32 mask);
-extern xint32  xdescriptor_is_normal(xdescriptor * descriptor);
-extern xint32  xdescriptor_is_unnormal(xdescriptor * descriptor);
+// struct xdescriptor
+// {
+//     xdescriptor_process_func  process;
+//     xdescriptor_event_handler on;
+// };
+
+// #define xdescriptor_do(descriptor, event)   (descriptor                 \
+//     ? ((xdescriptor *) descriptor)->process((xdescriptor *) descriptor, \
+//                                             event)                      \
+//     : xfail)
+
+// #define xdescriptor_event_on(descriptor, event, data, val) (descriptor  \
+//     ? ((xdescriptor *) descriptor)->on((xdescriptor *) descriptor,      \
+//                                        event,                           \
+//                                        data,                            \
+//                                        val)                             \
+//     : xfail)
+
+// #define xdescriptor_open(descriptor)    xdescriptor_do(descriptor, xdescriptor_event_open)
+
+// extern xint64  xdescriptor_read(xdescriptor * descriptor, void * buffer, xuint64 size);
+// extern xint64  xdescriptor_write(xdescriptor * descriptor, const void * data, xuint64 len);
+// extern xint64  xdescriptor_close(xdescriptor * descriptor);
+// extern xint32  xdescriptor_nonblock_on(xdescriptor * descriptor);
+// extern xint32  xdescriptor_nonblock_off(xdescriptor * descriptor);
+// extern xuint32 xdescriptor_wait(xdescriptor * descriptor, xuint32 event, xint64 second, xint64 nanosecond);
+// extern void    xdescriptor_mask_add(xdescriptor * descriptor, xuint32 mask);
+// extern void    xdescriptor_mask_del(xdescriptor * descriptor, xuint32 mask);
+// extern xint32  xdescriptor_is_normal(xdescriptor * descriptor);
+// extern xint32  xdescriptor_is_unnormal(xdescriptor * descriptor);
 
 // #define xdescrpitor_close(descriptor)   xdescriptor_do(descriptor, xdescriptor_event_close)
 
