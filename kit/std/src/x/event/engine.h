@@ -10,13 +10,14 @@
 
 struct xeventengine
 {
+    xeventobject * head;
+    xeventobject * tail;
+    xuint64 size;
     xsync * sync;
-    struct
-    {
-        xeventobject * head;
-        xeventobject * tail;
-        xuint64        size;
-    } objects;
+
+    xeventgenerator * timegen;
+    xeventgenerator * descriptorgen;
+    xeventgenerator * signalgen;
 };
 
 extern xeventengine * xeventengine_new(void);

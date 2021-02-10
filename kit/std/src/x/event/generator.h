@@ -5,11 +5,11 @@
 
 struct xeventgenerator
 {
+    xeventgenerator_node * head;
+    xeventgenerator_node * tail;
+    xuint64 size;
 };
 
 
-
-extern xint32 xeventgenerator_register_object(xeventgenerator * generator, xeventobject * object);
-extern xint32 xeventgenerator_unregister_object(xeventgenerator * generator, xeventobject * object);
 
 #endif // __NOVEMBERIZING_X__EVENT__GENERATOR__H__
