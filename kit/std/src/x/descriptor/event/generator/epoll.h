@@ -6,26 +6,21 @@
 
 #include <x/descriptor/event/generator.h>
 
-struct xdescriptorevent_generator_epoll;
+struct xdescriptoreventgen_epoll;
 
-typedef struct xdescriptorevent_generator_epoll xdescriptorevent_generator_epoll;
+typedef struct xdescriptoreventgen_epoll xdescriptoreventgen_epoll;
 
-struct xdescriptorevent_generator_epoll
+struct xdescriptoreventgen_epoll
 {
-    /** INHERITED EVENT GENERATOR */
-    xeventgenerator_node * head;
-    xeventgenerator_node * tail;
+    xdescriptorsub * head;
+    xdescriptorsub * tail;
     xuint64 size;
     xsync * sync;
-    /** DESCRIPTOR EVENT GENERATOR EPOLL MEMBER */
-    int f;
-    int maxevents;
-    int timeout;
+
+    xint32 f;
+    xint32 max;
+    xint32 timeout;
     struct epoll_event * events;
 };
-
-extern xint32 xdescriptorevent_generator_epoll_register_descriptor(int f, xdescriptor * descriptor);
-extern xint32 xdescriptorevent_generator_epoll_unregister_descriptor(int f, xdescriptor * descriptor);
-extern xint32 xdescriptorevent_generator_epoll_create(xdescriptorevent_generator_epoll * generator);
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR_EVENT_GENERATOR_EPOLL__H__

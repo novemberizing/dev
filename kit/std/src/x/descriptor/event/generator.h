@@ -2,22 +2,22 @@
 #define   __NOVEMBERIZING_X__DESCRIPTOR_EVENT_GENERATOR__H__
 
 #include <x/descriptor.h>
+#include <x/descriptor/subscriptions.h>
 
-struct xdescriptorevent_generator;
+struct xdescriptoreventgen;
 
-typedef struct xdescriptorevent_generator xdescriptorevent_generator;
+typedef struct xdescriptoreventgen xdescriptoreventgen;
 
-struct xdescriptorevent_generator
+struct xdescriptoreventgen
 {
-    /** INHERITED EVENT GENERATOR */
-    xeventgenerator_node * head;
-    xeventgenerator_node * tail;
-    xuint64 size;
-    xsync * sync;
+    struct
+    {
+        xdescriptorsubs alive;
+        xdescriptorsubs open;
+        xdescriptorsubs close;
+    } subscriptions;
 };
 
-extern xeventgenerator_node * xdescriptorevent_generator_register_object(xdescriptorevent_generator * generator, xdescriptor * descriptor);
-extern void xdescriptorevent_generator_unregister_object(xeventgenerator_node * node);
-extern void xdescriptorevent_generator_once(xeventgenerator * o);
+extern xdescriptorsub * xdescriptoreventgen_register(xdescriptoreventgen * o, xdescriptor * descriptor);
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR_EVENT_GENERATOR__H__
