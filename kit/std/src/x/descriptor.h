@@ -3,11 +3,19 @@
 
 #include <x/event.h>
 
-#define xdescriptor_event_open      (0x00000001u)
-#define xdescriptor_event_in        (0x00000002u)
-#define xdescriptor_event_out       (0x00000004u)
-#define xdescriptor_event_close     (0x00000008u)
-#define xdescriptor_event_exception (0x00000010u)
+#define xdescriptor_event_void          (0x00000000u)
+#define xdescriptor_event_open          (0x00000001u)
+#define xdescriptor_event_in            (0x00000002u)
+#define xdescriptor_event_out           (0x00000004u)
+#define xdescriptor_event_close         (0x00000008u)
+#define xdescriptor_event_exception     (0x00000010u)
+
+#define xdescriptor_status_void         xdescriptor_event_void
+#define xdescriptor_status_open         xdescriptor_event_open
+#define xdescriptor_status_in           xdescriptor_event_in
+#define xdescriptor_status_out          xdescriptor_event_out
+#define xdescriptor_status_close        xdescriptor_event_close
+#define xdescriptor_status_exception    xdescriptor_event_exception
 
 struct xdescriptor;
 struct xdescriptorsub;
@@ -25,7 +33,11 @@ typedef xint64 (*xdescriptor_event_processor)(xdescriptor *, xuint32);
 struct xdescriptor
 {
     xsubscription * subscription;
-    xint32  handle;
+    union
+    {
+        int f;
+        void * v;
+    } handle;
     xuint32 mask;
     xuint32 status;
     xsync * sync;

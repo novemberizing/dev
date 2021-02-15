@@ -13,11 +13,12 @@ struct xdescriptoreventgen
     struct
     {
         xdescriptorsubs alive;
-        xdescriptorsubs open;
-        xdescriptorsubs close;
+        xdescriptorsubs queue;
     } subscriptions;
 };
 
 extern xdescriptorsub * xdescriptoreventgen_register(xdescriptoreventgen * o, xdescriptor * descriptor);
+extern xsubscription * xdescriptoreventgen_unregister(xdescriptoreventgen * o, xsubscription * sub);
+extern void xdescriptoreventgen_once(xdescriptoreventgen * o);
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR_EVENT_GENERATOR__H__

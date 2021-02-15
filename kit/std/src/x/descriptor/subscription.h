@@ -19,6 +19,8 @@ struct xdescriptorsub
         xdescriptorsubs * cntr;
         xdescriptoreventgen * generator;
     } generatornode;
+
+    xdescriptor * descriptor;
 };
 
 

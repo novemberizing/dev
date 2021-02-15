@@ -3,6 +3,10 @@
 
 #define xnil            ((void *) 0)
 #define xinvalid        (-1)
+#define xsuccess        (0)
+#define xfail           (-1)
+#define xtrue           (1)
+#define xfalse          (0)
 
 #define xaddressof(o)   (&o)
 

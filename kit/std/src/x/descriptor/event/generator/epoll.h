@@ -12,10 +12,11 @@ typedef struct xdescriptoreventgen_epoll xdescriptoreventgen_epoll;
 
 struct xdescriptoreventgen_epoll
 {
-    xdescriptorsub * head;
-    xdescriptorsub * tail;
-    xuint64 size;
-    xsync * sync;
+    struct
+    {
+        xdescriptorsubs alive;
+        xdescriptorsubs queue;
+    } subscriptions;
 
     xint32 f;
     xint32 max;

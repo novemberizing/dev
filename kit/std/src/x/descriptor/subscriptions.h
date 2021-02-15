@@ -7,6 +7,11 @@ struct xdescriptorsubs;
 
 typedef struct xdescriptorsubs xdescriptorsubs;
 
+/**
+ * 이름이 마음에 들지 않는다. 딱히 이만한 이름도 없다.
+ * 
+ * xdescriptorsubs
+ */
 struct xdescriptorsubs
 {
     xdescriptorsub * head;
