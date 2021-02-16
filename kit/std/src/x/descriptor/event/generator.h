@@ -19,6 +19,7 @@ struct xdescriptoreventgen
 
 extern xdescriptorsub * xdescriptoreventgen_register(xdescriptoreventgen * o, xdescriptor * descriptor);
 extern xsubscription * xdescriptoreventgen_unregister(xdescriptoreventgen * o, xsubscription * sub);
+extern xint32 xdescriptorevent_subscription_renewal(xdescriptorsub * subscription);
 extern void xdescriptoreventgen_once(xdescriptoreventgen * o);
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR_EVENT_GENERATOR__H__

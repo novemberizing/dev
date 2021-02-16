@@ -3,6 +3,8 @@
 
 #include <x/std.h>
 
+#define xeventcategory_descriptor   1
+
 struct xevent;
 struct xeventqueue;
 struct xeventengine;

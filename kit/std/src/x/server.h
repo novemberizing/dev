@@ -15,4 +15,6 @@ struct xserver
     // session
 };
 
+typedef struct xserver xserver;
+
 #endif // __NOVEMBERIZING_X__SERVER__H__

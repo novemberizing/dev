@@ -21,7 +21,7 @@ struct xeventengine
 {
     struct
     {
-        xdescriptorEventGen        descriptor;
+        xdescriptoreventgen        descriptor;
         xtimeevent_generator       time;
         xsignalevent_generator     signal;
     } generator;
@@ -40,6 +40,8 @@ extern xsubscription * xeventengine_register_client(xeventengine * engine, xclie
 
 extern xsubscription * xeventengine_register_time(xeventengine * engine, xint64 second, xint64 nanosecond, void * object);
 extern xsubscription * xeventengine_register_signal(xeventengine * engine, xint32 number, void * object);
+
+extern void xeventengine_event_push(xeventengine * engine, xuint32 category, xuint32 event, void * object);
 
 /** INTERNAL USE */
 extern xsubscription * xeventengine_register_session(xeventengine * engine, xsession * session);

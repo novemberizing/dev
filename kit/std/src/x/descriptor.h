@@ -32,7 +32,7 @@ typedef xint64 (*xdescriptor_event_processor)(xdescriptor *, xuint32);
 
 struct xdescriptor
 {
-    xsubscription * subscription;
+    xdescriptorsub * subscription;
     union
     {
         int f;
@@ -41,10 +41,14 @@ struct xdescriptor
     xuint32 mask;
     xuint32 status;
     xsync * sync;
-    void    (*on)(xdescriptor *, xuint32, const void *, xint64);
-    xint64  (*process)(xdescriptor *, xuint32);
+    xint64  (*on)(xdescriptor *, xuint32, const void *, xuint64, xint64);
+    xint64  (*process)(xdescriptor *, xuint32, const void *, xuint64);
 };
 
+extern xint64 xdescriptorevent_dispatch(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size);
+extern xint64 xdescriptorevent_process(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size);
+extern xint64 xdescriptorevent_finish(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size, xint64 result);
+extern xint32 xdescriptorexist_out(xdescriptor * descriptor);
 // xdescriptorevent_dispatch
 // xdescriptorevent_process
 // xdescriptorevent_quit
