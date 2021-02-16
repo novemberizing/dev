@@ -42,7 +42,11 @@ struct xdescriptor
     xuint32 status;
     xsync * sync;
     void    (*on)(xdescriptor *, xuint32, const void *, xint64);
-    xint32  (*process)(xdescriptor *, xuint32);
+    xint64  (*process)(xdescriptor *, xuint32);
 };
+
+// xdescriptorevent_dispatch
+// xdescriptorevent_process
+// xdescriptorevent_quit
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__H__

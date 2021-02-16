@@ -1,3 +1,11 @@
+20210216
+
+1. XDESCRIPTOREVENT DISPATCH
+2. XDESCRIPTOREVENT PROCESS
+3. XDESCRIPTOREVENT FINISH
+
+관련한 이벤트 처리에 대한 컨셉을 잡고 만들자.
+
 어떻게 하면 이벤트 생성 시에 동적할당으로 이벤트 객체를 생성하지 않을까?
 하나의 이벤트 객체가 여러개의 이벤트 생성 객체에 등록되려면,...
 빠져버린 늪은 O(1) 을 보장하기 위해서 객체의 크기가 커진다.
