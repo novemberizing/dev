@@ -21,6 +21,8 @@ event 에 따른 data 타입의 정의가 필요하다,
 
 size: int64: buffer 의 경우 의미가 있지만, 그렇지 않은 경우 의미가 없다.
 
+2. DESCRIPTOR EXCEPTION ERROR CODE 구조체를 정의하고, EXCEPTION 발생 시에 함수를 처리할 수 있도록 한다.
+
 
 ----
 
