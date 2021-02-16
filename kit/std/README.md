@@ -2,6 +2,26 @@
 
 1. 현재까지의 구현을 설계한다.
 
+dispatch(descriptor: descriptor, event: uint32, data: reference, size: int64): int64
+
+파라미터에 대한 고민과 컨셉을 잡는 것이 필요하다.
+
+data: const void * : 이벤트를 배치할 때, read 의 경우 const 이면 동작하지 않는다. 그렇기 때문에
+const 를 없애야 한다. 또한 WRITE 의 경우 const 이어야 한다. 두가지를 모두 담을 수 있는 그릇이 필요하다. 만약에 데이터가 stream 이라면 어떨까?
+event 에 따른 data 타입의 정의가 필요하다,
+
+| TYPE      | CLASS                     |
+| --------- | ------------------------- |
+| void      | xnil                      |
+| open      | `<<callback>> function`   |
+| in        | `<<reference>> stream`    |
+| out       | `<<reference>> stream`    |
+| exception | `<<reference>> errorcode` |
+| close     | `<<callback>> function`   |
+
+size: int64: buffer 의 경우 의미가 있지만, 그렇지 않은 경우 의미가 없다.
+
+
 ----
 
 

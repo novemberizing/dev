@@ -41,16 +41,19 @@ struct xdescriptor
     xuint32 mask;
     xuint32 status;
     xsync * sync;
-    xint64  (*on)(xdescriptor *, xuint32, const void *, xuint64, xint64);
-    xint64  (*process)(xdescriptor *, xuint32, const void *, xuint64);
+    xint64  (*on)(xdescriptor *, xuint32, void *, xint64);
+    xint64  (*process)(xdescriptor *, xuint32, void *);
+    xint32  (*need)(xdescriptor *, xuint32);
 };
 
-extern xint64 xdescriptorevent_dispatch(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size);
-extern xint64 xdescriptorevent_process(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size);
-extern xint64 xdescriptorevent_finish(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size, xint64 result);
-extern xint32 xdescriptorexist_out(xdescriptor * descriptor);
-// xdescriptorevent_dispatch
-// xdescriptorevent_process
-// xdescriptorevent_quit
+extern xint32 xdescriptorneed(xdescriptor * descriptor, xuint32 event);
+
+// 아래의 세 함수는 x/descriptor/event.h 로 옮긴다.
+extern xint64 xdescriptorevent_dispatch(xdescriptor * descriptor, xuint32 event, void * parameter);
+extern xint64 xdescriptorevent_process(xdescriptor * descriptor, xuint32 event, void * parameter);
+extern xint64 xdescriptorevent_finish(xdescriptor * descriptor, xuint32 event, void * parameter, xint64 result);
+
+extern xint32 xdescriptorneed(xdescriptor * descriptor, xuint32 event);
+
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__H__

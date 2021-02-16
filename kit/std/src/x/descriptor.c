@@ -2,7 +2,7 @@
 #include "descriptor/subscription.h"
 #include "descriptor/event/generator.h"
 
-static inline xint64 xdescriptorevent_finish_close(xdescriptor * descriptor, const void * data, xuint64 size, xint64 result)
+static inline xint64 xdescriptorevent_finish_close(xdescriptor * descriptor, void * parameter, xint64 result)
 {
     /** 
      * 이미 프로세스에서 제네레이터에서 삭제하고 모든 것을 끝냈을 것이다.
@@ -18,7 +18,7 @@ static inline xint64 xdescriptorevent_finish_close(xdescriptor * descriptor, con
     return result;
 }
 
-static inline xint64 xdescriptorevent_finish_exception(xdescriptor * descriptor, const void * data, xuint64 size, xint64 result)
+static inline xint64 xdescriptorevent_finish_exception(xdescriptor * descriptor, void * parameter, xint64 result)
 {
     /** 
      * 이미 프로세스에서 제네레이터에서 삭제하고 모든 것을 끝냈을 것이다.
@@ -33,7 +33,7 @@ static inline xint64 xdescriptorevent_finish_exception(xdescriptor * descriptor,
  * @details     이 함수를 호출하기 전에 result 값에 따라서 예외를 처리하기 때문에,
  *              이 곳에서의 result 변수 값은 항상 성공을 뜻하는 값입니다.
  */
-static inline xint64 xdescriptorevent_finish_in(xdescriptor * descriptor, const void * data, xuint64 size, xint64 result)
+static inline xint64 xdescriptorevent_finish_in(xdescriptor * descriptor, void * parameter, xint64 result)
 {
     /**
      * 이 함수는 이미 성공적인 이벤트 수행을 마친 것이다.
@@ -53,7 +53,7 @@ static inline xint64 xdescriptorevent_finish_in(xdescriptor * descriptor, const 
         {
             if(xdescriptorevent_subscription_renewal(descriptor->subscription)!=xsuccess)
             {
-                xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil, 0);
+                xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil);
                 return xfail;
             }
         }
@@ -61,14 +61,14 @@ static inline xint64 xdescriptorevent_finish_in(xdescriptor * descriptor, const 
     return result;
 }
 
-static inline xint64 xdescriptorevent_finish_out(xdescriptor * descriptor, const void * data, xuint64 size, xint64 result)
+static inline xint64 xdescriptorevent_finish_out(xdescriptor * descriptor, void * parameter, xint64 result)
 {
     /**
      * 이 함수는 이미 성공적인 이벤트 수행을 마친 것이다.
      */
     if(descriptor->status & xdescriptor_status_out)
     {
-        if(descriptor->subscription && xdescriptorexist_out(descriptor))
+        if(descriptor->subscription && xdescriptorneed(descriptor, xdescriptor_event_out))
         {
             xeventengine * engine = descriptor->subscription->enginenode.engine;
             xeventengine_event_push(engine, xeventcategory_descriptor, xdescriptor_event_in, descriptor);
@@ -81,7 +81,7 @@ static inline xint64 xdescriptorevent_finish_out(xdescriptor * descriptor, const
         {
             if(xdescriptorevent_subscription_renewal(descriptor->subscription)!=xsuccess)
             {
-                xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil, 0);
+                xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil);
                 return xfail;
             }
         }
@@ -89,11 +89,11 @@ static inline xint64 xdescriptorevent_finish_out(xdescriptor * descriptor, const
     return result;
 }
 
-static inline xint64 xdescriptorevent_finish_open(xdescriptor * descriptor, const void * data, xuint64 size, xint64 result)
+static inline xint64 xdescriptorevent_finish_open(xdescriptor * descriptor, void * parameter, xint64 result)
 {
-    if(xdescriptorexist_out(descriptor))
+    if(xdescriptorneed(descriptor, xdescriptor_event_out))
     {
-        xint64 ret = xdescriptorevent_dispatch(descriptor, xdescriptor_event_out, xnil, 0);
+        xint64 ret = xdescriptorevent_dispatch(descriptor, xdescriptor_event_out, xnil);
         if(ret != xsuccess)
         {
             return ret;
@@ -104,45 +104,65 @@ static inline xint64 xdescriptorevent_finish_open(xdescriptor * descriptor, cons
         if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
         {
             descriptor->status |= xdescriptor_status_exception;
-            xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil, 0);
+            xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil);
         }
         return xfail;
     }
     return result;
 }
 
-extern xint64 xdescriptorevent_dispatch(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size)
+extern xint64 xdescriptorevent_dispatch(xdescriptor * descriptor, xuint32 event, void * parameter)
 {
-    xint64 ret = xdescriptorevent_process(descriptor, event, data, size);
-    return xdescriptorevent_finish(descriptor, event, data, size, ret);
+    xint64 ret = xdescriptorevent_process(descriptor, event, parameter);
+    return xdescriptorevent_finish(descriptor, event, parameter, ret);
 }
 
-extern xint64 xdescriptorevent_process(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size)
+extern xint64 xdescriptorevent_process(xdescriptor * descriptor, xuint32 event, void * parameter)
 {
-    xint64 ret = descriptor->process(descriptor, event, data, size);
-    return descriptor->on(descriptor, event, data, size, ret);
+    xint64 ret = descriptor->process(descriptor, event, parameter);
+    return descriptor->on(descriptor, event, parameter, ret);
 }
 
-extern xint64 xdescriptorevent_finish(xdescriptor * descriptor, xuint32 event, const void * data, xuint64 size, xint64 result)
+extern xint64 xdescriptorevent_finish(xdescriptor * descriptor, xuint32 event, void * parameter, xint64 result)
 {
     if(result < 0)
     {
         if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
         {
             descriptor->status |= xdescriptor_status_exception;
-            xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil, 0);
+            xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil);
         }
     }
     else
     {
         switch(event)
         {
-            case xdescriptor_event_in:          return xdescriptorevent_finish_in(descriptor, data, size, result);
-            case xdescriptor_event_out:         return xdescriptorevent_finish_out(descriptor, data, size, result);
-            case xdescriptor_event_open:        return xdescriptorevent_finish_open(descriptor, data, size, result);
-            case xdescriptor_event_close:       return xdescriptorevent_finish_close(descriptor, data, size, result);
-            case xdescriptor_event_exception:   return xdescriptorevent_finish_exception(descriptor, data, size, result);
+            case xdescriptor_event_in:          return xdescriptorevent_finish_in(descriptor, parameter, result);
+            case xdescriptor_event_out:         return xdescriptorevent_finish_out(descriptor, parameter, result);
+            case xdescriptor_event_open:        return xdescriptorevent_finish_open(descriptor, parameter, result);
+            case xdescriptor_event_close:       return xdescriptorevent_finish_close(descriptor, parameter, result);
+            case xdescriptor_event_exception:   return xdescriptorevent_finish_exception(descriptor, parameter, result);
         }
     }
     return result;
+}
+
+/**
+ * @fn      extern xint32 xdescriptorneed(xdescriptor * descriptor, xuint32 event)
+ * @brief   디스크립터에 특정 이벤트를 수행할 필요가 있는지 체크합니다.
+ * @details
+ * 
+ * @param   descriptor  | xdescriptor * | in | 디스크립터 객체 |
+ * @param   event       | xuint32       | in | 이벤트 |
+ * 
+ * @return  | boolean | 디스크립터의 이벤트 수행 필요성 |
+ * 
+ *              0 (FALSE): 이벤트 수행 불필요
+ *              1 (TRUE): 이벤트 수행 필요
+ * 
+ * @todo    매크로로 정의할 필요도 있어 보인다.
+ */
+extern xint32 xdescriptorneed(xdescriptor * descriptor, xuint32 event)
+{
+    return descriptor->need(descriptor, event);
 }
