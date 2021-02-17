@@ -1,3 +1,7 @@
+20210218
+
+1. EVENT OBJECT > DESCRIPTOR > SOCKET > CLIENT SOCKET, SERVER SOCKET, SESSION SOCKT 을 도식화하고 중요한 함수들을 구현하자.
+
 20210217
 
 1. 현재까지의 구현을 설계한다.

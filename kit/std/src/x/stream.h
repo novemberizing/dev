@@ -5,4 +5,6 @@ struct xstream
 {
 };
 
+typedef struct xstream xstream;
+
 #endif // __NOVEMBERIZING_X__STREAM__H__

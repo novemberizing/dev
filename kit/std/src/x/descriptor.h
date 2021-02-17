@@ -2,6 +2,7 @@
 #define   __NOVEMBERIZING_X__DESCRIPTOR__H__
 
 #include <x/event.h>
+#include <x/event/object.h>
 
 #define xdescriptor_event_void          (0x00000000u)
 #define xdescriptor_event_open          (0x00000001u)
@@ -33,27 +34,40 @@ typedef xint64 (*xdescriptor_event_processor)(xdescriptor *, xuint32);
 struct xdescriptor
 {
     xdescriptorsub * subscription;
+    xsync *          sync;
+    xuint32          mask;
+    xuint32          status;
+
     union
     {
-        int f;
+        int    f;
         void * v;
     } handle;
-    xuint32 mask;
-    xuint32 status;
-    xsync * sync;
-    xint64  (*on)(xdescriptor *, xuint32, void *, xint64);
-    xint64  (*process)(xdescriptor *, xuint32, void *);
-    xint32  (*need)(xdescriptor *, xuint32);
+
+    xint64 (*on)(xdescriptor *, xuint32, void *, xint64);
+    xint64 (*process)(xdescriptor *, xuint32, void *);
+    xint32 (*need)(xdescriptor *, xuint32);
 };
 
-extern xint32 xdescriptorneed(xdescriptor * descriptor, xuint32 event);
+#define xdescriptorlock(o)                                      xeventobject_lock(o)
+#define xdescriptorunlock(o)                                    xeventobject_unlock(o)
+#define xdescriptorwait(o, second, nanosecond)                  xeventobject_wait(o, second, nanosecond)
+#define xdescriptorwakeup(o, all)                               xeventobject_wakeup(o, all)
 
-// 아래의 세 함수는 x/descriptor/event.h 로 옮긴다.
-extern xint64 xdescriptorevent_dispatch(xdescriptor * descriptor, xuint32 event, void * parameter);
-extern xint64 xdescriptorevent_process(xdescriptor * descriptor, xuint32 event, void * parameter);
-extern xint64 xdescriptorevent_finish(xdescriptor * descriptor, xuint32 event, void * parameter, xint64 result);
+#define xdescriptorstatus_has(o, status)                        xeventobject_status_has(o, status)
+#define xdescriptorstatus_add(o, status)                        xeventobject_status_add(o, status)
+#define xdescriptorstatus_del(o, status)                        xeventobject_status_del(o, status)
 
-extern xint32 xdescriptorneed(xdescriptor * descriptor, xuint32 event);
+#define xdescriptormask_has(o, mask)                            xeventobject_mask_has(o, mask)
+#define xdescriptormask_add(o, mask)                            xeventobject_mask_add(o, mask)
+#define xdescriptormask_del(o, mask)                            xeventobject_mask_del(o, mask)
 
+#define xdescriptorprocess(descriptor, event, parameter)        descriptor->process(descriptor, event, parameter)
+#define xdescriptoron(descriptor, event, parameter, result)     descriptor->on(descriptor, event, parameter, result)
+#define xdescriptorneed(descriptor, event)                      descriptor->need(descriptor, event)
+
+extern xint32 xdescriptoralive(xdescriptor * descriptor);
+
+extern xdescriptor * xdescriptornew(xuint64 size);
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__H__

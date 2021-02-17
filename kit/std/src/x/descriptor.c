@@ -1,168 +1,33 @@
 #include "descriptor.h"
-#include "descriptor/subscription.h"
-#include "descriptor/event/generator.h"
-
-static inline xint64 xdescriptorevent_finish_close(xdescriptor * descriptor, void * parameter, xint64 result)
-{
-    /** 
-     * 이미 프로세스에서 제네레이터에서 삭제하고 모든 것을 끝냈을 것이다.
-     * 다만, 디스크립터가 서버인 경우 다시 바인딩하고 리슨을 수행하고
-     * 클라이언트의 경우 다시 다시 접속하고, 세션의 경우 릴리즈한다.
-     * 
-     * 종료 이벤트는 사용자 요청에 의해서만 발생한다.
-     * 그 외의 이벤트들은 엔진에서의 종료는 예외를 통해서만 이루어진다.
-     * 
-     * CLOSE 이벤트가 발생했다는 것은 사용자가 close 를 호출하였기 때문이다.
-     * 그렇기 때문에, 모두 종료하고 서브스크립션을 삭제한다.
-     */
-    return result;
-}
-
-static inline xint64 xdescriptorevent_finish_exception(xdescriptor * descriptor, void * parameter, xint64 result)
-{
-    /** 
-     * 이미 프로세스에서 제네레이터에서 삭제하고 모든 것을 끝냈을 것이다.
-     * 다만, 디스크립터가 서버인 경우 다시 바인딩하고 리슨을 수행하고
-     * 클라이언트의 경우 다시 다시 접속하고, 세션의 경우 릴리즈한다.
-     */
-    return result;
-}
 
 /**
- * 
- * @details     이 함수를 호출하기 전에 result 값에 따라서 예외를 처리하기 때문에,
- *              이 곳에서의 result 변수 값은 항상 성공을 뜻하는 값입니다.
- */
-static inline xint64 xdescriptorevent_finish_in(xdescriptor * descriptor, void * parameter, xint64 result)
-{
-    /**
-     * 이 함수는 이미 성공적인 이벤트 수행을 마친 것이다.
-     */
-    if(descriptor->status & xdescriptor_status_in)
-    {
-        if(descriptor->subscription)
-        {
-            xeventengine * engine = descriptor->subscription->enginenode.engine;
-            xeventengine_event_push(engine, xeventcategory_descriptor, xdescriptor_event_in, descriptor);
-        }
-    }
-    else
-    {
-        // 디스크립터 이벤트 제네레이터에 등록합니다.
-        if(descriptor->subscription)
-        {
-            if(xdescriptorevent_subscription_renewal(descriptor->subscription)!=xsuccess)
-            {
-                xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil);
-                return xfail;
-            }
-        }
-    }
-    return result;
-}
-
-static inline xint64 xdescriptorevent_finish_out(xdescriptor * descriptor, void * parameter, xint64 result)
-{
-    /**
-     * 이 함수는 이미 성공적인 이벤트 수행을 마친 것이다.
-     */
-    if(descriptor->status & xdescriptor_status_out)
-    {
-        if(descriptor->subscription && xdescriptorneed(descriptor, xdescriptor_event_out))
-        {
-            xeventengine * engine = descriptor->subscription->enginenode.engine;
-            xeventengine_event_push(engine, xeventcategory_descriptor, xdescriptor_event_in, descriptor);
-        }
-    }
-    else
-    {
-        // 디스크립터 이벤트 제네레이터에 등록합니다.
-        if(descriptor->subscription)
-        {
-            if(xdescriptorevent_subscription_renewal(descriptor->subscription)!=xsuccess)
-            {
-                xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil);
-                return xfail;
-            }
-        }
-    }
-    return result;
-}
-
-static inline xint64 xdescriptorevent_finish_open(xdescriptor * descriptor, void * parameter, xint64 result)
-{
-    if(xdescriptorneed(descriptor, xdescriptor_event_out))
-    {
-        xint64 ret = xdescriptorevent_dispatch(descriptor, xdescriptor_event_out, xnil);
-        if(ret != xsuccess)
-        {
-            return ret;
-        }
-    }
-    if(xdescriptorevent_subscription_open(descriptor->subscription) != xsuccess)
-    {
-        if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
-        {
-            descriptor->status |= xdescriptor_status_exception;
-            xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil);
-        }
-        return xfail;
-    }
-    return result;
-}
-
-extern xint64 xdescriptorevent_dispatch(xdescriptor * descriptor, xuint32 event, void * parameter)
-{
-    xint64 ret = xdescriptorevent_process(descriptor, event, parameter);
-    return xdescriptorevent_finish(descriptor, event, parameter, ret);
-}
-
-extern xint64 xdescriptorevent_process(xdescriptor * descriptor, xuint32 event, void * parameter)
-{
-    xint64 ret = descriptor->process(descriptor, event, parameter);
-    return descriptor->on(descriptor, event, parameter, ret);
-}
-
-extern xint64 xdescriptorevent_finish(xdescriptor * descriptor, xuint32 event, void * parameter, xint64 result)
-{
-    if(result < 0)
-    {
-        if((descriptor->status & xdescriptor_status_exception) == xdescriptor_status_void)
-        {
-            descriptor->status |= xdescriptor_status_exception;
-            xdescriptorevent_dispatch(descriptor, xdescriptor_event_exception, xnil);
-        }
-    }
-    else
-    {
-        switch(event)
-        {
-            case xdescriptor_event_in:          return xdescriptorevent_finish_in(descriptor, parameter, result);
-            case xdescriptor_event_out:         return xdescriptorevent_finish_out(descriptor, parameter, result);
-            case xdescriptor_event_open:        return xdescriptorevent_finish_open(descriptor, parameter, result);
-            case xdescriptor_event_close:       return xdescriptorevent_finish_close(descriptor, parameter, result);
-            case xdescriptor_event_exception:   return xdescriptorevent_finish_exception(descriptor, parameter, result);
-        }
-    }
-    return result;
-}
-
-/**
- * @fn      extern xint32 xdescriptorneed(xdescriptor * descriptor, xuint32 event)
- * @brief   디스크립터에 특정 이벤트를 수행할 필요가 있는지 체크합니다.
- * @details
+ * @fn      extern xint32 xdescriptoralive(xdescriptor * descriptor)
+ * @brief   디스크립터의 오픈 상태 여부를 체크합니다.
+ * @details 디스크립터의 상태 변수와 별개로 단순히 디스크립터의 값을 바탕으로 체크하는 함수입니다.
  * 
  * @param   descriptor  | xdescriptor * | in | 디스크립터 객체 |
- * @param   event       | xuint32       | in | 이벤트 |
  * 
- * @return  | boolean | 디스크립터의 이벤트 수행 필요성 |
+ * @return  | boolean | 디스크립터의 오픈 상태 |
  * 
- *              0 (FALSE): 이벤트 수행 불필요
- *              1 (TRUE): 이벤트 수행 필요
+ *              1(TRUE):  소켓은 열린 상태입니다.
+ *              0(FALSE): 소켓은 닫힌 상태입니다.
  * 
- * @todo    매크로로 정의할 필요도 있어 보인다.
  */
-extern xint32 xdescriptorneed(xdescriptor * descriptor, xuint32 event)
+extern xint32 xdescriptoralive(xdescriptor * descriptor)
 {
-    return descriptor->need(descriptor, event);
+    return descriptor->handle.f >= 0;
+}
+
+
+
+
+extern xdescriptor * xdescriptornew(xuint64 size)
+{
+    xassertion(size < sizeof(xdescriptor), "");
+
+    xdescriptor * descriptor = (xdescriptor *) calloc(size, 1);
+
+    descriptor->handle.f = xinvalid;
+
+    return descriptor;
 }
