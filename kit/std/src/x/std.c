@@ -8,3 +8,13 @@ extern void * xobjectnew(const void * data, xuint64 size)
 
     return memcpy(o, data, size);
 }
+
+extern void * xobjectrem(void * o)
+{
+    if(o)
+    {
+        free(o);
+    }
+    
+    return xnil;
+}

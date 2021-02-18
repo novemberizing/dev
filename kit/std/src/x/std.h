@@ -8,6 +8,9 @@
 #define xtrue               (1)
 #define xfalse              (0)
 
+#define xvalueof(o)         (*(o))
+#define xaddressof(o)       (&(o))
+
 typedef __INT8_TYPE__   xint8;
 typedef __INT16_TYPE__  xint16;
 typedef __INT32_TYPE__  xint32;
@@ -30,5 +33,6 @@ typedef __UINT64_TYPE__ xuint64;
 } while(0)
 
 extern void * xobjectnew(const void * data, xuint64 size);
+extern void * xobjectrem(void * o);
 
 #endif // __NOVEMBERIZING_X__STD__H__
