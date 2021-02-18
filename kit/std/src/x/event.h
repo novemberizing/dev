@@ -10,7 +10,7 @@ struct xeventqueue;
 struct xeventengine;
 struct xeventgenerator;
 struct xeventprocessor;
-struct xeventobject;
+
 struct xeventsubscription;
 
 struct xsubscription;
@@ -21,7 +21,7 @@ typedef struct xeventqueue xeventqueue;
 typedef struct xeventengine xeventengine;
 typedef struct xeventgenerator xeventgenerator;
 typedef struct xeventprocessor xeventprocessor;
-typedef struct xeventobject xeventobject;
+
 typedef struct xeventsubscription xeventsubscription;
 
 typedef struct xsubscription xsubscription;
@@ -44,10 +44,6 @@ struct xeventqueue
     xevent * tail;
     xuint64  size;
     xsync *  sync;
-};
-
-struct xeventobject
-{
 };
 
 #endif // __NOVEMBERIZING_X__EVENT__H__

@@ -1,6 +1,16 @@
 20210218
 
+
+
+완료
+
 1. EVENT OBJECT > DESCRIPTOR > SOCKET > CLIENT SOCKET, SERVER SOCKET, SESSION SOCKT 을 도식화하고 중요한 함수들을 구현하자.
+
+xdescriptorsub 를 xdescriptorsubscription 으로 변경하자. - 고민스러움
+
+
+
+
 
 20210217
 

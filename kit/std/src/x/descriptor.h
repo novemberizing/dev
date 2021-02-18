@@ -1,6 +1,7 @@
 #ifndef   __NOVEMBERIZING_X__DESCRIPTOR__H__
 #define   __NOVEMBERIZING_X__DESCRIPTOR__H__
 
+#include <x/stream.h>
 #include <x/event.h>
 #include <x/event/object.h>
 
