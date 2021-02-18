@@ -1,5 +1,7 @@
 #include "object.h"
 
+// REMOVE THIS
+
 /**
  * @fn      extern xeventobject * xeventobjectnew(xuint64 size)
  * @brief   메모리 공간에 이벤트 타겟 객체를 생성합니다.

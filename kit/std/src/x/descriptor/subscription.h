@@ -3,7 +3,11 @@
 
 #include <x/descriptor.h>
 
-struct xdescriptorsub
+struct xdescriptorsubscription;
+
+typedef struct xdescriptorsubscription xdescriptorsubscription;
+
+struct xdescriptorsubscription
 {
     struct
     {
@@ -14,8 +18,8 @@ struct xdescriptorsub
 
     struct
     {
-        xdescriptorsub * prev;
-        xdescriptorsub * next;
+        xdescriptorsubscription * prev;
+        xdescriptorsubscription * next;
         xdescriptorsubs * cntr;
         xdescriptoreventgen * generator;
     } generatornode;

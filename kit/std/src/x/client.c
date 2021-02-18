@@ -56,7 +56,6 @@ extern xclient * xclientnew(xuint64 size)
 
 extern xclient * xclientrem(xclient * client)
 {
-
-
+    
     return client;
 }

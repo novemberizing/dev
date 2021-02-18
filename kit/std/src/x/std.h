@@ -26,18 +26,4 @@ typedef __UINT16_TYPE__ xuint16;
 typedef __UINT32_TYPE__ xuint32;
 typedef __UINT64_TYPE__ xuint64;
 
-
-struct xsync;
-
-typedef struct xsync xsync;
-
-struct xsync
-{
-    xint32 (*lock)(xsync *);
-    xint32 (*unlock)(xsync *);
-    xint32 (*wait)(xsync *, xint64, xint64);
-    xint32 (*wakeup)(xsync *, xint32);
-};
-
-
 #endif // __NOVEMBERIZING_X__STD__H__

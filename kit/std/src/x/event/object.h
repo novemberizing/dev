@@ -1,7 +1,15 @@
+/**
+ * @file    x/event/object.h
+ * @brief   이벤트 타겟 객체를 정의한 헤더 파일입니다.
+ * 
+ * // REMOVE THIS
+ * 
+ */
 #ifndef   __NOVEMBERIZING_X__EVENT_OBJECT__H__
 #define   __NOVEMBERIZING_X__EVENT_OBJECT__H__
 
 #include <x/subscription.h>
+#include <x/sync.h>
 
 #define xeventobjectmask_void   (0x00000000u)
 #define xeventobjectstatus_void (0x00000000u)
