@@ -15,15 +15,15 @@ typedef void (*xthreadfunc)(xthread *);
 extern xthread * xthreadnew(xthreadfunc func, xuint64 size);
 extern xthread * xthreadrem(xthread * o);
 
-extern xint32 xthreadcheck_removable(xthread * o);
-extern void xthreadcancel(xthread * o, xthreadfunc cancel);
+extern xint32 xthreadremovable(xthread * o);
+extern void xthreadcancel(xthread * o, xthreadfunc callback);
 extern void xthreadrun(xthread * o);
 
 /** internal definition */
 
 struct xthread
 {
-    void *      handle;
+    xhandle     handle;
     xthreadfunc func;
     xuint32     status;
     xthreadfunc cancel;

@@ -11,6 +11,7 @@ typedef struct xthreadposix xthreadposix;
 
 typedef void (*xthreadposixfunc)(xthreadposix *);
 
+/** TODO: 사용자가 재정의할 수 있도록 해야 한다. */
 struct xthreadposix
 {
     pthread_t *      handle;
