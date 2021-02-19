@@ -9,14 +9,15 @@ struct xeventprocessorpool
     xeventprocessor * head;
     xeventprocessor * tail;
     xuint64           size;
-    xsync *           sync;
     xeventengine *    engine;
 };
 
-extern xeventprocessorpool * xeventprocessorpool_new(xuint64 n);
-extern xeventprocessorpool * xeventprocessorpool_rem(xeventprocessorpool * o);
+extern xeventprocessorpool * xeventprocessorpool_new(xeventengine * engine, xuint64 n);
+extern xeventprocessorpool * xeventprocessorpool_rem(xeventprocessorpool * pool);
 
-extern void xeventprocessorpoll_add(xeventprocessorpool * o, xuint64 n);
-extern void xeventprocessorpoll_del(xuint64 n);
+extern void xeventprocessorpool_add(xeventprocessorpool * pool, xuint64 n);
+extern void xeventprocessorpool_del(xeventprocessorpool * pool, xuint64 n);
+
+extern xint32 xeventprocessorpool_removable(xeventprocessorpool * pool);
 
 #endif // __NOVEMBERIZING_X__EVENT__PROCESSOR_POOL__H__
