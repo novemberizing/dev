@@ -10,6 +10,7 @@
 
 #define xvalueof(o)         (*(o))
 #define xaddressof(o)       (&(o))
+#define xobjectof(o)        ((void *) o)
 
 typedef __INT8_TYPE__   xint8;
 typedef __INT16_TYPE__  xint16;
