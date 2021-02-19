@@ -4,11 +4,23 @@
 #include <x/event.h>
 #include <x/event/queue.h>
 
+#include <x/descriptor.h>
+
+#include <x/descriptor/event/generator.h>
+
 struct xeventengine
 {
-    xeventqueue * queue;
-    xeventqueue * main;
+    xeventqueue *                                      queue;
+    xeventqueue *                                      main;
+    struct { xeventsubscription * head;
+             xeventsubscription * tail;
+             xsync * sync;
+             xuint64 size;                           } subscriptions;
+    struct { xdescriptoreventgenerator * descriptor; } generators;
+    
 };
+
+extern xeventsubscription * xeventengine_register_descriptor(xeventengine * engine, xdescriptor * descriptor);
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event);
 extern xevent * xeventengine_main_pop(xeventengine * engine);
