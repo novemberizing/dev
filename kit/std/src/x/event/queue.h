@@ -15,7 +15,7 @@ struct xeventqueue
 extern xeventqueue * xeventqueue_new(void);
 extern xeventqueue * xeventqueue_rem(xeventqueue * queue);
 
-extern xevent * xeventqueue_push(xeventqueue * queue, xevent * event);
+extern void xeventqueue_push(xeventqueue * queue, xevent * event);
 extern xevent * xeventqueue_pop(xeventqueue * queue);
 
 #endif // __NOVEMBERIZING_X__EVENT__QUEUE__H__
