@@ -1,5 +1,20 @@
 #include "queue.h"
 
+/**
+ * @fn          extern xeventqueue * xeventqueue_new(void)
+ * @brief       이벤트 큐를 생성합니다.
+ * @details     이벤트 큐의 생성 시에 동기화 객체는 생성하지 않습니다.
+ * 
+ * @return      | xeventqueue * | 이벤트 큐 |
+ * 
+ * @see         xeventqueue,
+ *              calloc
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 19.
+ * 
+ * @exception   | `queue == xnil` | 생성된 이벤트 큐가 널이면 예외를 발생시킵니다. |
+ */
 extern xeventqueue * xeventqueue_new(void)
 {
     xeventqueue * queue = (xeventqueue *) calloc(sizeof(xeventqueue), 1);
@@ -9,24 +24,58 @@ extern xeventqueue * xeventqueue_new(void)
     return queue;
 }
 
+/**
+ * @fn          extern xeventqueue * xeventqueue_rem(xeventqueue * queue)
+ * @brief       이벤트 큐를 메모리 상에서 삭제합니다.
+ * @details     이벤트 큐의 삭제 시에 이벤트 큐의 데이터가 존재하면 안됩니다.
+ * 
+ * @param       queue   | xeventqueue * | in | 이벤트 큐 |
+ * @return      | xeventqueue * | 삭제된 이벤트 큐 객체로 항상 널을 리턴합니다. |
+ * 
+ * @see         xsyncrem,
+ *              xeventqueue
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 19.
+ * 
+ * @exception   | `queue->size > 0` | 큐에 아이템이 존재하면 예외를 발생시킵니다. |
+ */
 extern xeventqueue * xeventqueue_rem(xeventqueue * queue)
 {
     if(queue)
     {
-        xassertion(queue->size == 0, "");
+        xassertion(queue->size > 0, "");
 
         queue->sync = xsyncrem(queue->sync);
     }
     return xnil;
 }
 
+/**
+ * @fn          extern void xeventqueue_push(xeventqueue * queue, xevent * event)
+ * @brief       이벤트를 큐에 삽입합니다.
+ * @details     스레드 세이프티를 보장하려면 외부에서 LOCK/UNLOCK 을 호출해야 합니다.
+ * 
+ * @param       queue   | xeventqueue * | 이벤트 큐 |
+ * @param       event   | xevent *      | 이벤트 |
+ * 
+ * @see         xeventqueue,
+ *              xevent
+ *              
+ * @version     0.0.1
+ * @date        2021. 02. 19.
+ * 
+ * @exception   | `queue == xnil`        |
+ *              | `event == xnil`        |
+ *              | `event->queue != xnil` |
+ *              | `event->prev != xnil`  |
+ *              | `event->next != xnil`  |
+ */
 extern void xeventqueue_push(xeventqueue * queue, xevent * event)
 {
     xassertion(queue == xnil || event == xnil, "");
 
     xassertion(event->queue || event->prev || event->next, "");
-
-    xsynclock(queue->sync);
 
     event->prev = queue->tail;
     if(event->prev)
@@ -39,12 +88,45 @@ extern void xeventqueue_push(xeventqueue * queue, xevent * event)
     }
     queue->tail = event;
     queue->size = queue->size + 1;
-
-    xsyncwakeup(queue->sync, xfalse);
-
-    xsyncunlock(queue->sync);
 }
 
+/**
+ * @fn          extern xevent * xeventqueue_pop(xeventqueue * queue)
+ * @brief       이벤트 큐에서 데이터를 가지고 옮닙다.
+ * @details     스레드 세이프티를 보장하려면, 이 함수를 호출 하는 곳에서 LOCK/UNLOCK
+ *              을 호출해야 합니다.
+ * 
+ * @param       queue | xeventqueue * | in | 이벤트 큐 |
+ * @return      | xevent * | 이벤트 |
+ *              
+ *                  이벤트가 존재하지 않으면 널을 리턴합니다.
+ * 
+ * @see         xevent,
+ *              xeventqueue
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 19.
+ */
 extern xevent * xeventqueue_pop(xeventqueue * queue)
 {
+    xevent * event = queue->head;
+
+    if(event)
+    {
+        queue->head = event->next;
+        if(queue->head)
+        {
+            queue->head->prev = xnil;
+        }
+        else
+        {
+            queue->tail = xnil;
+        }
+        queue->size = queue->size - 1;
+
+        event->next  = xnil;
+        event->queue = xnil;
+    }
+
+    return event;
 }
