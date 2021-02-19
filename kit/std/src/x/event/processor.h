@@ -24,4 +24,7 @@ extern xeventprocessor * xeventprocessor_rem(xeventprocessor * processor);
 
 extern void xeventprocessor_cancel(xeventprocessor * processor);
 
+extern void xeventprocessor_wakeup(xeventengine * engine, xint32 all);
+
+
 #endif // __NOVEMBERIZING_X__EVENT__PROCESSOR__H__

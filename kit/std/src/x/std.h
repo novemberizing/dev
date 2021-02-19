@@ -19,6 +19,8 @@ typedef __UINT8_TYPE__  xuint8;
 typedef __UINT16_TYPE__ xuint16;
 typedef __UINT32_TYPE__ xuint32;
 typedef __UINT64_TYPE__ xuint64;
+typedef void *          xhandle;
+typedef void *          xobject;
 
 #define xassertion(condition, format, ...) do { \
     if(condition) {                             \
@@ -32,7 +34,7 @@ typedef __UINT64_TYPE__ xuint64;
     }                                           \
 } while(0)
 
-extern void * xobjectnew(const void * data, xuint64 size);
-extern void * xobjectrem(void * o);
+extern xobject xobjectnew(const xobject data, xuint64 size);
+extern xobject xobjectrem(xobject o);
 
 #endif // __NOVEMBERIZING_X__STD__H__

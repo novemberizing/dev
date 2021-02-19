@@ -1,9 +1,12 @@
 #include "processor.h"
-#include "processor/pool.h"
+
 #include "engine.h"
 
+#include "processor/pool.h"
+#include "processor/event.h"
+
 static void xeventprocessor_loop(xeventprocessor * processor);
-static void xeventprocessor_dispatch_exit(xeventprocessor * processor);
+static void xeventprocessor_exit(xeventprocessor * processor);
 
 /**
  * @fn      extern xeventprocessor * xeventprocessor_new(xeventprocessorpool * pool)
@@ -61,10 +64,10 @@ extern xeventprocessor * xeventprocessor_new(xeventprocessorpool * pool)
  * @param       processor | xeventprocessor * | in | 이벤트 프로세서 객체 |
  * @return      | xeventprocessor * | 항상 널을 리턴합니다. |
  * 
- * @exception   `xthreadcheck_removable(processor) == xfalse`
+ * @exception   `xthreadremovable(processor) == xfalse`
  *              `processor == xnil`
  * 
- * @see         xthreadcheck_removable,
+ * @see         xthreadremovable,
  *              xthreadrem,
  *              xeventprocessorpool,
  *              xeventprocessor,
@@ -76,7 +79,7 @@ extern xeventprocessor * xeventprocessor_new(xeventprocessorpool * pool)
 extern xeventprocessor * xeventprocessor_rem(xeventprocessor * processor)
 {
     xassertion(processor == xnil, "");
-    xassertion(xthreadcheck_removable((xthread *) processor) == xfalse, "");
+    xassertion(xthreadremovable((xthread *) processor) == xfalse, "");
 
     xeventprocessorpool * pool = processor->pool;
 
@@ -122,16 +125,68 @@ extern xeventprocessor * xeventprocessor_rem(xeventprocessor * processor)
  * @date        2021. 02. 18.
  * 
  * @see         xeventprocessor,
- *              xeventprocessor_dispatch_exit
+ *              xeventprocessor_exit
  */
 extern void xeventprocessor_cancel(xeventprocessor * processor)
 {
     if(processor->handle)
     {
-        processor->cancel = xeventprocessor_dispatch_exit;
+        processor->cancel = xeventprocessor_exit;
     }
 }
 
+/**
+ * @fn          extern void xeventprocessor_wakeup(xeventengine * engine, xint32 all)
+ * @brief       이벤트 프로세스를 깨웁니다.
+ * @details     처리할 이벤트가 존재하지 않아서, 종료 중인 이벤트 프로세스가 존재하면
+ *              이벤트 프로세스를 깨웁니다.
+ * 
+ * @param       engine | xeventengine * | in | 이벤트 엔진 객체 |
+ * @param       all    | xint32         | in | 단일 혹은 전체 프로세서 시그널 전송 파라미터 |
+ * 
+ * @see         xeventengine,
+ *              xsynclock,
+ *              xsyncwakeup,
+ *              xsyncunlock
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 19.
+ * 
+ * @exception   | `engine == xnil` | 엔진 객체가 널이면 예외를 발생시킵니다. |
+ */
+extern void xeventprocessor_wakeup(xeventengine * engine, xint32 all)
+{
+    xassertion(engine == xnil, "");
+
+    xsynclock(engine->queue.sync);
+    xsyncwakeup(engine->queue.sync, all);
+    xsyncunlock(engine->queue.sync);
+}
+
+/**
+ * @fn      static void xeventprocessor_loop(xeventprocessor * processor)
+ * @brief   이벤트 프로세서의 루프 함수입니다.
+ * @details 이벤트 프로세서의 루프함수는 프로세스가 취소 상태가 아니면
+ *          큐에서 이벤트를 꺼내서 처리하는 로직을 계속 수행합니다.
+ *          큐에 이벤트가 존재하지 않으면 이벤트가 존재할 때까지 대기 상태에 머무르게 됩니다.
+ * 
+ * @param   processor   | xeventprocessor * | 이벤트 프로세스 객체 |
+ * 
+ *              이벤트 프로세스 객체의 멤버로 이벤트 프로세서가 속한
+ *              프로세스 풀과 이벤트 엔진의 참조가 멤버로 속해 있습니다.
+ * 
+ * @see     xeventprocessor,
+ *          xeventprocessorpool,
+ *          xeventengine,
+ *          xeventqueue,
+ *          xsynclock,
+ *          xsyncwait,
+ *          xsyncunlock,
+ *          xeventqueue_pop,
+ *          
+ * @version 0.0.1
+ * @date    2021. 02. 18.
+ */
 static void xeventprocessor_loop(xeventprocessor * processor)
 {
     xeventprocessorpool * pool = processor->pool;
@@ -159,8 +214,28 @@ static void xeventprocessor_loop(xeventprocessor * processor)
     }
 }
 
-static void xeventprocessor_dispatch_exit(xeventprocessor * processor)
+/**
+ * @fn      static void xeventprocessor_exit(xeventprocessor * processor)
+ * @brief   이벤트 프로세서 객체의 종료 이벤트를 이벤트 엔진의 메인 큐에 삽입합니다.
+ * @details 이벤트 포로세서의 종료는 항상 메인에서 수행되어야 합니다.
+ *          
+ * @param   processor | xeventprocessor * | 이벤트 프로세서 객체 |
+ * 
+ * @see     xeventprocessorpool,
+ *          xeventengine,
+ *          xeventprocessor_event,
+ *          xeventprocessor_event_new,
+ *          xeventprocessor_event_handler_rem,
+ *          xeventengine_main_push
+ * 
+ * @version 0.0.1
+ * @date    2021. 02. 19.
+ */
+static void xeventprocessor_exit(xeventprocessor * processor)
 {
-    // xeventprocessor_exit_event;
-    // ENGINE 의 큐에 스레드 종료를 호출하도록 합니다.
+    xeventprocessorpool *    pool = processor->pool;
+    xeventengine *         engine = pool->engine;
+    xeventprocessor_event * event = xeventprocessor_event_new(xeventprocessor_event_handler_rem, processor);
+
+    xeventengine_main_push(event);
 }

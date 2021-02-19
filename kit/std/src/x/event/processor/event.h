@@ -20,7 +20,7 @@ struct xeventprocessor_event
     xeventprocessor *             processor;
 };
 
-extern void xeventprocessor_event_exit(xeventprocessor_event * event);
+extern void xeventprocessor_event_handler_rem(xeventprocessor_event * event);
 
 extern xeventprocessor_event * xeventprocessor_event_new(xeventprocessor_event_handler handler, xeventprocessor * processor);
 
