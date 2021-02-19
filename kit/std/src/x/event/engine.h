@@ -6,11 +6,10 @@
 
 struct xeventengine
 {
-    struct
-    {
-        xeventqueue main;
-        xeventqueue all;
-    } queue;
-}
+    xeventqueue queue;
+    xeventqueue main;
+};
+
+extern void xeventengine_processor_wakeup(xeventengine * engine, xint32 all);
 
 #endif // __NOVEMBERIZING_X__EVENT__ENGINE__H__
