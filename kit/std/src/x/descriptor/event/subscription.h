@@ -11,13 +11,16 @@
 
 struct xdescriptoreventsubscription
 {
-    xdescriptor *                                                      descriptor;
+    xdescriptor *                                                descriptor;
     struct { xeventsubscription * prev;
              xeventsubscription * next;
-             xeventengine * engine;                                  } enginenode;
+             xeventengine * engine;                            } enginenode;
     struct { xdescriptoreventsubscription * prev;
              xdescriptoreventsubscription * next;
              xdescriptoreventgenerator * generator;
-             xdescriptoreventgeneratorsubscriptions * subscriptions; } generatornode;
+             xdescriptoreventgeneratorsubscriptionlist * list; } generatornode;
 };
+
+extern xdescriptoreventsubscription * xdescriptoreventsubscription_link(xdescriptoreventgenerator * generator, xdescriptoreventsubscription * subscription);
+
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__SUBSCRIPTION__H__

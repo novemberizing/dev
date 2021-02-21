@@ -2,6 +2,32 @@
 
 #include "descriptor.h"
 
+#include "event/engine.h"
+
+extern void xdescriptorevent_dispatch_in(xdescriptor * descriptor)
+{
+    xassertion(descriptor == xnil || descriptor->subscription == xnil, "");
+
+    // 여러 디스크립터 이벤트 제네레이터에서 수행이 가능하도록
+    xeventengine * engine = descriptor->subscription->enginenode.engine;
+    if(xeventengine_processor_pool_size(engine) > 0)
+    {
+        xeventengine_queue_push(engine, (xevent *) descriptor);
+    }
+    else
+    {
+        // INERNAL READ ...
+    }
+    // engine->
+}
+
+extern void xdescriptorevent_dispatch_out(xdescriptor * descriptor)
+{
+    xassertion(descriptor == xnil || descriptor->subscription == xnil, "");
+
+    // 여러 디스크립터 이벤트 제네레이터에서 수행이 가능하도록
+}
+
 extern void xdescriptorevent_dispatch_close(xdescriptor * descriptor)
 {
     // subscription 이 존재하면 main event queue 에 삽입한다.

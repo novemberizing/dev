@@ -6,29 +6,13 @@ extern xeventsubscription * xeventengine_register_descriptor(xeventengine * engi
 {
     xassertion(engine == xnil || descriptor == xnil, "");
 
-    xassertion(descriptor->subscription, "");
+    xassertion(descriptor->subscription, "");   // 이 로직은 어떻게 처리해야 할까?
 
-    xsynclock(engine->subscriptions.sync);
+    xeventsubscription * subscription = xeventsubscription_new(engine, (xeventtarget *) descriptor, sizeof(xdescriptoreventsubscription));
 
-    xdescriptoreventsubscription * subscription = xdescriptoreventsubscription_new();
+    xdescriptoreventgenerator_register(engine->generators.descriptor, (xdescriptoreventsubscription *) subscription);
 
-    subscription->descriptor = descriptor;
-    subscription->enginenode.engine = engine;
-
-    subscription->enginenode.prev = engine->subscriptions.tail;
-    if(subscription->enginenode.prev)
-    {
-        subscription->enginenode.prev->enginenode.next = subscription;
-    }
-    else
-    {
-        engine->subscriptions.head = subscription;
-    }
-    engine->subscriptions.size = engine->subscriptions.size + 1;
-
-    xsyncunlock(engine->subscriptions.sync);
-
-    return (xeventsubscription *) xdescriptoreventgenerator_register(engine->generators.descriptor, descriptor);
+    return subscription;
 }
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event)

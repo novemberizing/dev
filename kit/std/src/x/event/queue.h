@@ -8,8 +8,8 @@ struct xeventqueue
 {
     xevent * head;
     xevent * tail;
-    xsync *  sync;
     xuint64  size;
+    xsync *  sync;
 };
 
 extern xeventqueue * xeventqueue_new(void);

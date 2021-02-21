@@ -5,7 +5,7 @@
 #include <sys/epoll.h>
 
 #include <x/descriptor/event/generator.h>
-#include <x/descriptor/event/generator/subscriptions.h>
+#include <x/descriptor/event/generator/subscription/list.h>
 
 struct xdescriptoreventgenerator_epoll;
 
@@ -14,14 +14,16 @@ typedef struct xdescriptoreventgenerator_epoll xdescriptoreventgenerator_epoll;
 struct xdescriptoreventgenerator_epoll
 {
     /** INHERITED DESCRIPTOR EVENT GENERATOR */
-    xdescriptoreventgeneratorsubscriptions * alive;
-    xdescriptoreventgeneratorsubscriptions * queue;
-    xeventengine *                           engine;
+    xdescriptoreventgeneratorsubscriptionlist * alive;
+    xdescriptoreventgeneratorsubscriptionlist * queue;
+    xeventengine *                              engine;
     /** MEMBER */
-    xint32                                   f;
-    xint32                                   max;
-    xint32                                   millisecond;
-    struct epoll_event *                     events;
+    xint32                                      f;
+    xint32                                      max;
+    xint32                                      millisecond;
+    struct epoll_event *                        events;
 };
+
+
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__EVENT_GENERATOR_EPOLL__H__

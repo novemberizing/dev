@@ -17,8 +17,10 @@ struct xeventengine
              xsync * sync;
              xuint64 size;                           } subscriptions;
     struct { xdescriptoreventgenerator * descriptor; } generators;
-    
+    xeventprocessorpool *                              processors;
 };
+
+extern xuint64 xeventengine_processor_pool_size(xeventengine * engine);
 
 extern xeventsubscription * xeventengine_register_descriptor(xeventengine * engine, xdescriptor * descriptor);
 

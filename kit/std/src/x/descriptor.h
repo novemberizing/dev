@@ -7,6 +7,10 @@
 #include <x/descriptor/handle.h>
 #include <x/descriptor/event/subscription.h>
 
+struct xdescriptorevent;
+
+typedef struct xdescriptorevent xdescriptorevent;
+
 typedef xint64 (*xdescriptorprocessor)(xdescriptor *, xuint32, void *);
 typedef xint64 (*xdescriptorsubscriber)(xdescriptor *, xuint32, void *, xint64);
 typedef xint32 (*xdescriptorstatuschecker)(xdescriptor *, xuint32);
@@ -24,12 +28,15 @@ struct xdescriptor
     xdescriptorprocessor           process;
     xdescriptorstatuschecker       check;
     xdescriptorsubscriber          on;
+    // xdescriptorevent               event;
 };
 
 extern xint64 xdescriptorclose(xdescriptor * descriptor);
 extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 size);
 extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 len);
 
+extern void xdescriptorevent_dispatch_in(xdescriptor * descriptor);
+extern void xdescriptorevent_dispatch_out(xdescriptor * descriptor);
 extern void xdescriptorevent_dispatch_close(xdescriptor * descriptor);
 extern void xdescriptorevent_dispatch_exception(xdescriptor * descriptor, void * data, xint64 result);
 
