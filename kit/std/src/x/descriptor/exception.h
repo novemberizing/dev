@@ -17,7 +17,10 @@ struct xdescriptorexception
 #define xdescriptorexceptioncode_read_fail                      (0x00000003u)
 #define xdescriptorexceptioncode_write_fail                     (0x00000004u)
 #define xdescriptorexceptioncode_generator_register_fail        (0x00000005u)
-#define xdescriptorexceptioncode_generator_dispatch_exception   (0x00000006u)
+#define xdescriptorexceptioncode_generator_update_fail          (0x00000006u)
+#define xdescriptorexceptioncode_generator_unupdate_fail        (0x00000007u)
+#define xdescriptorexceptioncode_generator_dispatch_exception   (0x00000008u)
+
 
 extern const xdescriptorexception descriptorexceptioncodes[];
 

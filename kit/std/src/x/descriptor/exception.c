@@ -7,5 +7,7 @@ extern const xdescriptorexception descriptorexceptioncodes[] = {
     { xexceptioncode_descriptor | xdescriptorexceptioncode_read_fail, "descriptor exception read fail" },
     { xexceptioncode_descriptor | xdescriptorexceptioncode_write_fail, "descriptor exception write fail" },
     { xexceptioncode_descriptor | xdescriptorexceptioncode_generator_register_fail, "descriptor exception generator register fail" },
+    { xexceptioncode_descriptor | xdescriptorexceptioncode_generator_update_fail, "descriptor exception generator update fail" },
+    { xexceptioncode_descriptor | xdescriptorexceptioncode_generator_unupdate_fail, "descriptor exception generator unregister fail" },
     { xexceptioncode_descriptor | xdescriptorexceptioncode_generator_dispatch_exception, "descriptor exception generator dispatch exception" }
 };

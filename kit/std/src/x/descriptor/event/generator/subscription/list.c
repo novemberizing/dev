@@ -3,9 +3,23 @@
 #include "../subscription.h"
 #include "../subscription/list.h"
 
+/**
+ * @fn          extern xdescriptoreventgeneratorsubscriptionlist * xdescriptoreventgeneratorsubscriptionlist_new(void)
+ * @brief       디스크립터 이벤트 제네레이터 서브스크립션 리스트를 생성합니다.
+ * @details     
+ * 
+ * @return      | xdescriptoreventgeneratorsubscriptionlist * | 디스크립터 이벤트 제네레이터 서브스크립션 리스트 |
+ * 
+ * @see         xdescriptoreventgeneratorsubscriptionlist
+ *              calloc
+ */
 extern xdescriptoreventgeneratorsubscriptionlist * xdescriptoreventgeneratorsubscriptionlist_new(void)
 {
-    return (xdescriptoreventgeneratorsubscriptionlist *) calloc(sizeof(xdescriptoreventgeneratorsubscriptionlist), 1);
+    xdescriptoreventgeneratorsubscriptionlist * list = calloc(sizeof(xdescriptoreventgeneratorsubscriptionlist), 1);
+
+    xassertion(list == xnil, "");
+
+    return list;
 }
 
 extern xdescriptoreventgeneratorsubscriptionlist * xdescriptoreventgeneratorsubscriptionlist_rem(xdescriptoreventgeneratorsubscriptionlist * list)
@@ -40,9 +54,11 @@ extern xdescriptoreventsubscription * xdescriptoreventgeneratorsubscriptionlist_
 {
     xassertion(subscription == xnil || subscription->generatornode.generator == xnil || subscription->generatornode.list == xnil, "");
 
+    xdescriptoreventgeneratorsubscriptionlist * list = subscription->generatornode.list;
+
+    xsynclock(list->sync);
     xdescriptoreventsubscription *              prev = subscription->generatornode.prev;
     xdescriptoreventsubscription *              next = subscription->generatornode.next;
-    xdescriptoreventgeneratorsubscriptionlist * list = subscription->generatornode.list;
 
     if(prev)
     {
@@ -64,6 +80,8 @@ extern xdescriptoreventsubscription * xdescriptoreventgeneratorsubscriptionlist_
     }
     list->size = list->size - 1;
     subscription->generatornode.list = xnil;
+
+    xsyncunlock(list->sync);
 
     return next;
 }
