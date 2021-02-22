@@ -7,7 +7,13 @@
  * @date        2021. 02. 22.
  * 
  */
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "std.h"
+#include "thread.h"
 
 /**
  * @fn          extern xobject xobjectnew(const xobject data, xuint64 size)

@@ -1,8 +1,4 @@
 
-SUBDIRS = x       \
-          example
+SUBDIRS = x
 
-nobase_include_HEADERS = x/std.h    \
-                         x/io.h     \
-                         x/socket.h \
-                         x/client.h
+nobase_include_HEADERS = x/std.h
