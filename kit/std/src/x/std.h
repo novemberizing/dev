@@ -6,6 +6,8 @@
  * @version     0.0.1
  * @date        2021. 02. 22.
  * 
+ * @todo        클래스 다이터그램 업데이터
+ * 
  */
 #ifndef   __NOVEMBERIZING_X__STD__H__
 #define   __NOVEMBERIZING_X__STD__H__
