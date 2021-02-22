@@ -1,31 +1,64 @@
+/**
+ * @file        x/std.h
+ * @brief       표준 라이브러리의 헤더입니다.
+ * @details     이 라이브러리의 가장 기본적으로 사용되는 타입, 함수, 매크로 등을 정의한 파일입니다.
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 22.
+ * 
+ */
 #ifndef   __NOVEMBERIZING_X__STD__H__
 #define   __NOVEMBERIZING_X__STD__H__
 
-#define xinvalid            (-1)
-#define xsuccess            (0)
-#define xfail               (-1)
-#define xnil                ((void *) 0)
-#define xtrue               (1)
-#define xfalse              (0)
+#define xinvalid            (-1)                /**!< 유효하지 않은 값을 나타냅니다. 특히 디스크립터가 유요하지 않음을 나타냅니다. */
+#define xsuccess            (0)                 /**!< 어떤 프로세스의 수행이 성공하였음을 나타냅니다. */
+#define xfail               (-1)                /**!< 어떤 프로세서의 수행이 실패하였음을 나타냅니다. */
+#define xnil                ((void *) 0)        /**!< 널을 의미합니다. */
+#define xtrue               (1)                 /**!< 참을 의미합니다. */
+#define xfalse              (0)                 /**!< 거짓을 의미합니다. */
 
-#define xvalueof(o)         (*(o))
-#define xaddressof(o)       (&(o))
-#define xobjectof(o)        ((void *) o)
+#define xvalueof(o)         (*(o))              /**!< 특정 포인터에 저장된 값을 리턴합니다. */
+#define xaddressof(o)       (&(o))              /**!< 특정 변수의 주소 값을 리턴합니다.  */
+#define xobjectof(o)        ((void *) o)        /**!< 변수를 객체로 취급합니다. 강제적인 형변환입니다. */
 
-typedef __INT8_TYPE__   xint8;
-typedef __INT16_TYPE__  xint16;
-typedef __INT32_TYPE__  xint32;
-typedef __INT64_TYPE__  xint64;
-typedef __UINT8_TYPE__  xuint8;
-typedef __UINT16_TYPE__ xuint16;
-typedef __UINT32_TYPE__ xuint32;
-typedef __UINT64_TYPE__ xuint64;
-typedef void *          xhandle;
-typedef void *          xobject;
+typedef __INT8_TYPE__       xint8;              /**!< 8 비트 정수형입니다. */
+typedef __INT16_TYPE__      xint16;             /**!< 16 비트 정수형입니다. */
+typedef __INT32_TYPE__      xint32;             /**!< 32 비트 정수형입니다.  */
+typedef __INT64_TYPE__      xint64;             /**!< 64 비트 정수형입니디. */
+typedef __UINT8_TYPE__      xuint8;             /**!< 8 비트 양의 정수형입니다. */
+typedef __UINT16_TYPE__     xuint16;            /**!< 16 비트 양의 정수형입니다. */
+typedef __UINT32_TYPE__     xuint32;            /**!< 32 비트 양의 정수형입니다. */
+typedef __UINT64_TYPE__     xuint64;            /**!< 64 비트 양의 정수형입니다. */
 
-#define xassertion(condition, format, ...) do { \
+typedef void *              xhandle;            /**!< 핸들 타입입니다. */
+typedef void *              xobject;            /**!< 객체 타입입니다. */
+
+/**
+ * @def         xcheck(condition, format, ...)
+ * @brief       디버그를 위한 함수로 컨디션에 따라서 특정 포맷 형태로 콘솔에 출력합니다.
+ * @details     
+ * 
+ * @param       condition | boolean        | in | 조건 |
+ * @param       format    | const char *   | in | 출력할 포맷 문자열 |
+ * @param       ...       | parameter list | in | 파라미터 리스트 |
+ * 
+ * @see         printf
+ *              xthreadid
+ *              __FILE__
+ *              __LINE__
+ *              __func__
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 22.
+ * 
+ * @todo        로그 패키지 업데이트
+ *              
+ *                  1. 파일 디스크립터 함수를 통하여 현재 로그 파일을 남기기 위한 파일 혹은 콘솔의 디스크립터를 입력 또는 선택할 수 있도록 해야 합니다.
+ * 
+ */
+#define xcheck(condition, format, ...) do {     \
     if(condition) {                             \
-        printf("[%s:%d] %s:%lu => "             \
+        printf("[check:%s:%d] %s:%lu => "       \
                format "\n",                     \
                __FILE__,                        \
                __LINE__,                        \
@@ -35,7 +68,40 @@ typedef void *          xobject;
     }                                           \
 } while(0)
 
-extern xobject xobjectnew(const xobject data, xuint64 size);
+/**
+ * @def         xassertion(condition, format, ...)
+ * @brief       반드시 거짓이어야 하는 어썰션의 표현식입니다.
+ * @details     ASSERTION 조건이 참이면 프로그램이 종료됩니다.
+ *              
+ * @param       condition | bool | in | 조건 |
+ * @param       format    | const char * | in | 포맷 문자열 |
+ * @param       ...       | -            | in | 파라미터 리스트 |
+ * 
+ * @see         printf
+ *              xthreadid
+ *              __FILE__
+ *              __LINE__
+ *              __func__
+ *              exit
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 22.
+ */
+#define xassertion(condition, format, ...) do { \
+    if(condition) {                             \
+        printf("[assertion:%s:%d] %s:%lu => "   \
+               format "\n",                     \
+               __FILE__,                        \
+               __LINE__,                        \
+               __func__,                        \
+               xthreadid(),                     \
+               ##__VA_ARGS__);                  \
+        exit(xinvalid);                         \
+    }                                           \
+} while(0)
+
+extern xobject xobjectdup(const xobject data, xuint64 size);
+extern xobject xobjectnew(xuint64 size);
 extern xobject xobjectrem(xobject o);
 
 #endif // __NOVEMBERIZING_X__STD__H__

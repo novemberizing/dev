@@ -1,49 +1,97 @@
+/**
+ * @file        x/std.c
+ * @brief       표준 라이브러리 구현 소스 파일입니다.
+ * @details     
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 22.
+ * 
+ */
 #include "std.h"
 
 /**
  * @fn          extern xobject xobjectnew(const xobject data, xuint64 size)
- * @brief       주어진 객체와 같은 데이터를 가진 객체를 생성합니다.
- * @details     주어진 크기의 객체를 생성 후에 메모리 카피를 수행합니다.
+ * @brief       새로운 객체를 생성합니다.
+ *              특정 크기의 초기화된 메모리 공간을 생성합니다.
  * 
- * @param       data | const xobject | 원본 |
- * @param       size | xuint64       | 객체의 크기 |
  * 
- * @return      | xobject | 카피한 객체 |
+ * @param       size | xuint64 | in | 메모리 공간의 크기 |
  * 
- * @see         xobject,
- *              malloc,
- *              memcpy
+ * @return      | xobject | 메모리 공간의 주소 |
+ * 
+ * @see         xobject
+ *              calloc
+ * 
+ * @exception   | `size == 0` | 사이즈가 존재하지 않으면 예외를 발생시킵니다. |
+ * 
+ *                  SIZE 가 0 이면 널을 리턴하게 하는 것을 어떨까?
+ * 
+ *              | `o == xnil` | 메모리 할당에 실패하면 예외를 발생시킵나다. |
  * 
  * @version     0.0.1
- * @date        2021. 02. 18.
- * 
- * @exception   | `data == xnil` | 데이터가 널일 경우 예외가 발생합니다. |
- *              | `size == 0`    | 크기가 0 일 경우 예외가 발생합니다.  |
+ * @date        2021. 02. 22.
  */
-extern xobject xobjectnew(const xobject data, xuint64 size)
+extern xobject xobjectnew(xuint64 size)
+{
+    xassertion(size == 0, "");
+
+    xobject o = calloc(size, 1);
+
+    xassertion(o == xnil, "");
+
+    return o;
+}
+
+/**
+ * @fn          extern xobject xobjectdup(const xobject data, xuint64 size)
+ * @brief       원본 객체와 동일한 객체를 메모리 공간에 생성하고 리턴합니다.
+ * @details     메모리 공간에 원본 데이터의 크기만큼의 공간을 할당하고,
+ *              원본 객체의 메모리를 카피하여 리턴합니다.
+ * 
+ * @param       data | const xobject | in | 원본 데이터 |
+ * @param       size | xuint64       | in | 원본 데이터의 크기 |
+ * 
+ * @return      | xobject | 복제된 메모리 공간의 주소 |
+ * 
+ * @see         xobject
+ *              malloc
+ *              memcpy
+ * 
+ * @exception   | `data == xnil || size == 0` | 원본 객체가 존재하지 않거나 복제하려는 크기가 0 인 경우 예외를 발생시킵니다. |
+ *              | `o == xnil`                 | 메모리 할당에 실패하면 예외를 발생시킵니다. |
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 22.
+ *                  
+ */
+extern xobject xobjectdup(const xobject data, xuint64 size)
 {
     xassertion(data == xnil || size == 0, "");
 
     void * o = malloc(size);
 
+    xassertion(o == xnil, "");
+
     return memcpy(o, data, size);
 }
 
 /**
- * @fn          extern void * xobjectrem(void * o)
- * @brief       객체를 제거합니다.
- * @details     객체가 널이 아니면 동작하도록 되어 있습니다.
- *              free 함수 역시 NULL 을 허용하지만,
- *              간헐적으로 혹은 오래된 API 의 경우 예외를 발생시킬 수 있습니다.
+ * @fn          extern xobject xobjectrem(xobject o)
+ * @brief       메모리 공간에 할당된 객체를 해제합니다.
+ * @details     객체의 주소가 존재할 경우만 해제합니다.
+ *              free 함수 역시 파라미터 값이 널일 경우 예외를 발생시키지 않지만,
+ *              간헐적으로 널일 경우 예외를 발생시키는 케이스가 존재하기 때문에,
+ *              널 체크를 하도록 하였습니다.
  * 
- * @param       o | xobject | 객체 |
- * @return      | xobject | 항상 널을 리턴합니다. |
+ * @param       o | xobject | in | 객체 |
  * 
- * @see         free,
+ * @return      | xobject | 객체 |
+ * 
+ * @see         free
  *              xobject
  * 
  * @version     0.0.1
- * @date        2021. 02. 18.
+ * @date        2020. 02. 22.
  */
 extern xobject xobjectrem(xobject o)
 {

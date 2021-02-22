@@ -6,6 +6,8 @@
 #define xthreadstatus_void      (0x00000000u)
 #define xthreadstatus_on        (0x00000001u)
 
+extern xuint64 xthreadid(void);
+
 struct xthread;
 
 typedef struct xthread xthread;
