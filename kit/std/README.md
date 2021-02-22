@@ -1,3 +1,19 @@
+
+```
+generating build information using aclocal, autoheader, automake and autoconf
+src/x/Makefile.am:6: warning: source file 'thread/posix.c' is in a subdirectory,
+src/x/Makefile.am:6: but option 'subdir-objects' is disabled
+automake: warning: possible forward-incompatibility.
+automake: At least a source file is in a subdirectory, but the 'subdir-objects'
+automake: automake option hasn't been enabled.  For now, the corresponding output
+automake: object file(s) will be placed in the top-level directory.  However,
+automake: this behaviour will change in future Automake versions: they will
+automake: unconditionally cause object files to be placed in the same subdirectory
+automake: of the corresponding sources.
+automake: You are advised to start using 'subdir-objects' option throughout your
+automake: project, to avoid future incompatibilities.
+````
+
 __20210219__
 ============
 
