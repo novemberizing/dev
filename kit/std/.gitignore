@@ -9,5 +9,5 @@ Makefile
 .libs
 *.o
 *.a
-
+.dirstamp
 .vscode

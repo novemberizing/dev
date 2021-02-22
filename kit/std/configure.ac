@@ -25,7 +25,7 @@ CFLAGS=-g
 dnl ----------------------------------------------------------
 dnl AUTOMAKE
 dnl ----------------------------------------------------------
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 #AC_PROG_RANLIB
 AC_PROG_CC
 

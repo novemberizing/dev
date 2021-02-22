@@ -3,33 +3,52 @@
 
 #include <x/std.h>
 
+#define xthreadstatus_void      (0x00000000u)   /**!< 스레드 상태: 공허함 */
+#define xthreadstatus_on        (0x00000001u)   /**!< 스레드 상태: 동작중 */
+
 struct xthread;
 
 typedef struct xthread xthread;
 
-#define xthreadstatus_void      (0x00000000u)
-#define xthreadstatus_on        (0x00000001u)
-
-extern xuint64 xthreadid(void);
-
-
-typedef void (*xthreadfunc)(xthread *);
+typedef void (*xthreadfunc)(xthread *);         /**!< 기본 스레드 함수 타입 */
 
 extern xthread * xthreadnew(xthreadfunc func, xuint64 size);
 extern xthread * xthreadrem(xthread * o);
 
-extern xint32 xthreadremovable(xthread * o);
 extern void xthreadcancel(xthread * o, xthreadfunc callback);
 extern void xthreadrun(xthread * o);
 
-/** internal definition */
+extern xuint64 xthreadid(void);
+extern xint32 xthreadremovable(xthread * o);
 
+/**
+ * @struct      xthread
+ * @brief       스레드 구조체
+ * @details     사용자가 스레드를 커스터마이즈 하려면
+ *              아래의 구조체를 상속하여 사용하면 됩니다.
+ * 
+ *              ```
+ *              struct xcustomizethread
+ *              {
+ *                  xhandle     handle;
+ *                  void (*func)(struct xcustomizethread *);
+ *                  xuint32     status;
+ *                  void (*cancel)(struct xcustomizethread *);
+ *                  
+ *                  ...
+ *              };
+ *              struct xcustomizethread * o = xthreadnew((xthreadfunc) userthreadfunc, sizeof(struct xcustomizethread));
+ *              o->userparam = ...;
+ *              xthreadrun((xthread) o);
+ *              ...
+ *              ```
+ */
 struct xthread
 {
-    xhandle     handle;
-    xthreadfunc func;
-    xuint32     status;
-    xthreadfunc cancel;
+    xhandle     handle; /**!< 스레드 핸들 */
+    xthreadfunc func;   /**!< 사용자 스레드 함수 */
+    xuint32     status; /**!< 스레드 상태 */
+    xthreadfunc cancel; /**!< 스레드 취소 함수로 스레드 취소 상태를 나타냅니다. 즉, 이 변수가 널이 아니면 스레드는 종료되어져야 합니다. 사용자는 이 변수의 상태를 보고 스레드 함수를 종료시키도록 해야 합니다. */
 };
 
 #endif // __NOVEMBERIZING_X__THREAD__H__
