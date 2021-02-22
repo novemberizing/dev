@@ -24,6 +24,5 @@ extern xint64 xdescriptoreventgenerator_descriptor_unregister(xdescriptoreventge
 
 extern void xdescriptoreventgenerator_register(xdescriptoreventgenerator * o, xdescriptoreventsubscription * subscription);
 extern void xdescriptoreventgenerator_unregister(xdescriptoreventgenerator * o, xdescriptoreventsubscription * subscription);
-extern void xdescriptoreventgenerator_update(xdescriptoreventsubscription * subscription);
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__EVENT_GENERATOR__H__

@@ -216,6 +216,7 @@ extern void xdescriptoreventgenerator_register(xdescriptoreventgenerator * o, xd
 
     if(descriptor->handle.f >= 0)
     {
+        xdescriptorset_nonblock(descriptor, xtrue);
         if((descriptor->status & xdescriptorstatus_exception) == xdescriptorstatus_void)
         {
             if((descriptor->status & xdescriptorstatus_close) == xdescriptorstatus_void)
@@ -254,30 +255,6 @@ extern void xdescriptoreventgenerator_unregister(xdescriptoreventgenerator * o, 
         }
     }
     xdescriptoreventgeneratorsubscriptionlist_del(subscription);
-}
-
-extern void xdescriptoreventgenerator_update(xdescriptoreventsubscription * subscription)
-{
-    xdescriptoreventgenerator_epoll * generator = (xdescriptoreventgenerator_epoll *) subscription->generatornode.generator;
-
-    xdescriptor * descriptor = subscription->descriptor;
-
-    if(descriptor->handle.f >= 0)
-    {
-        if(descriptor->status & xdescriptorstatus_exception)
-        {
-            return;
-        }
-        if(descriptor->status & xdescriptorstatus_close)
-        {
-            return;
-        }
-        int ret = xdescriptoreventgenerator_epoll_update(generator->f, subscription);
-        if(ret != xsuccess)
-        {
-            xdescriptorevent_dispatch_exception(descriptor, xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_generator_update_fail]), xerrorval(ret));
-        }
-    }
 }
 
 extern void xdescriptoreventgenerator_once(xdescriptoreventgenerator * o)

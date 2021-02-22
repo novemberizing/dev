@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fcntl.h>
 
 #include "descriptor.h"
 
@@ -18,10 +19,6 @@ extern xint32 xdescriptorcheck_open(xdescriptor * descriptor)
     return xdescriptorcheck_close(descriptor) == xfalse && (descriptor->status & xdescriptorstatus_open);
 }
 
-extern xint64 xdescriptorclose(xdescriptor * descriptor);
-extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 size);
-extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 len);
-
 extern xint64 xdescriptorevent_process_on(xdescriptor * descriptor)
 {
     xassertion(descriptor == xnil, "");
@@ -29,7 +26,7 @@ extern xint64 xdescriptorevent_process_on(xdescriptor * descriptor)
     if(xdescriptorcheck_close(descriptor))
     {
         xdescriptorevent_processor_unregister(descriptor);
-        return xdescriptor_process_close(descriptor);
+        return xdescriptorevent_processor_close(descriptor);
     }
     else if((descriptor->status & xdescriptorstatus_open) == xdescriptorstatus_void)
     {
@@ -42,7 +39,7 @@ extern xint64 xdescriptorevent_process_on(xdescriptor * descriptor)
     if(xdescriptorcheck_close(descriptor))
     {
         xdescriptorevent_processor_unregister(descriptor);
-        xdescriptor_process_close(descriptor);
+        xdescriptorevent_processor_close(descriptor);
         return xfail;
     }
     return xsuccess;
@@ -86,6 +83,7 @@ extern xint64 xdescriptorevent_processor_close(xdescriptor * descriptor)
         xdescriptoreventgeneratorsubscriptionlist_del(descriptor->subscription);
     }
 
+    
     xint64 n = descriptor->process(descriptor, xdescriptoreventmask_close, xnil);
     n = descriptor->on(descriptor, xdescriptoreventmask_close, xnil, n);
 
@@ -286,14 +284,14 @@ extern xint64 xdescriptorevent_dispatch_rem(xdescriptor * descriptor)
     return xfail;
 }
 
-extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor, void * code, xint64 number)
+extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor, void * func, xint64 number)
 {
     xdescriptoreventsubscription * subscription = descriptor->subscription;
 
     if((descriptor->status & xdescriptorstatus_exception) == xdescriptorstatus_void)
     {
         descriptor->status |= xdescriptorstatus_exception;
-        descriptor->exception.code = code;
+        descriptor->exception.func = func;
         descriptor->exception.number = number;
         if(subscription)
         {
@@ -338,7 +336,7 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
             else if(n == 0)
             {
                 descriptor->status |= xdescriptorstatus_exception;
-                descriptor->exception.code = xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_read_return_zero]);
+                descriptor->exception.func = read;
                 descriptor->exception.number = 0;
                 return xfail;
             }
@@ -347,7 +345,7 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
                 if(errno != EAGAIN)
                 {
                     descriptor->status |= xdescriptorstatus_exception;
-                    descriptor->exception.code = xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_read_fail]);
+                    descriptor->exception.func = read;
                     descriptor->exception.number = errno;
                     return xfail;
                 }
@@ -385,7 +383,7 @@ extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 le
                 if(errno != EAGAIN)
                 {
                     descriptor->status |= xdescriptorstatus_exception;
-                    descriptor->exception.code = xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_write_fail]);
+                    descriptor->exception.func = write;
                     descriptor->exception.number = errno;
                     return xfail;
                 }
@@ -398,4 +396,34 @@ extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 le
         }
     }
     return xfail;
+}
+
+extern xint32 xdescriptorset_nonblock(xdescriptor * descriptor, xint32 on)
+{
+    xassertion(descriptor == xnil || descriptor->handle.f < 0, "");
+
+    int mask = fcntl(descriptor->handle.f, F_GETFL, 0);
+    if(mask < 0)
+    {
+        descriptor->exception.func   = fcntl;
+        descriptor->exception.number = errno;
+        descriptor->status          |= xdescriptorstatus_exception;
+        return xfail;
+    }
+    if(on)
+    {
+        mask |= O_NONBLOCK;
+    }
+    else
+    {
+        mask &= (~O_NONBLOCK);
+    }
+    if(fcntl(descriptor->handle.f, F_SETFL, mask) != xsuccess)
+    {
+        descriptor->exception.func   = fcntl;
+        descriptor->exception.number = errno;
+        descriptor->status          |= xdescriptorstatus_exception;
+        return xfail;
+    }
+    return xsuccess;
 }

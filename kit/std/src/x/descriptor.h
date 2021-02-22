@@ -3,6 +3,7 @@
 
 #include <x/io.h>
 #include <x/sync.h>
+#include <x/exception.h>
 
 #include <x/descriptor/handle.h>
 #include <x/descriptor/event.h>
@@ -28,8 +29,7 @@ struct xdescriptor
     xdescriptorstatuscheck                  check;          /**!< descriptor status checker  */
     xdescriptorsubscriber                   on;             /**!< descriptor event subscriber */
     xdescriptorevent                        event;          /**!< descriptor default event */
-    struct { xint64 number;
-             xdescriptorexception * code; } exception;
+    xexception                              exception;      /**!< descriptor exception */
 };
 
 extern xint64 xdescriptorclose(xdescriptor * descriptor);
@@ -39,6 +39,8 @@ extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 le
 extern xint32 xdescriptorcheck_rem(xdescriptor * descriptor);
 extern xint32 xdescriptorcheck_close(xdescriptor * descriptor);
 extern xint32 xdescriptorcheck_open(xdescriptor * descriptor);
+
+extern xint32 xdescriptorset_nonblock(xdescriptor * descriptor, xint32 on);
 
 extern xint64 xdescriptorevent_dispatch_on(xdescriptor * descriptor);
 extern xint64 xdescriptorevent_dispatch_open(xdescriptor * descriptor);
