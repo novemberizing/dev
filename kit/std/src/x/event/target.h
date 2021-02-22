@@ -4,6 +4,10 @@
 #include <x/event.h>
 #include <x/sync.h>
 
+/**
+ * @struct          xeventtarget
+ *
+ */
 struct xeventtarget
 {
     xeventtargetdestructor rem;

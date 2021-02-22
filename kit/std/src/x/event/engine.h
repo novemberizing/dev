@@ -22,7 +22,9 @@ struct xeventengine
 
 extern xuint64 xeventengine_processor_pool_size(xeventengine * engine);
 
-extern xeventsubscription * xeventengine_register_descriptor(xeventengine * engine, xdescriptor * descriptor);
+extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engine, xdescriptor * descriptor);
+extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * engine, xdescriptor * descriptor);
+
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event);
 extern xevent * xeventengine_main_pop(xeventengine * engine);

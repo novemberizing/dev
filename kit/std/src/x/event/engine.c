@@ -2,7 +2,7 @@
 
 #include "descriptor/event/subscription.h"
 
-extern xeventsubscription * xeventengine_register_descriptor(xeventengine * engine, xdescriptor * descriptor)
+extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engine, xdescriptor * descriptor)
 {
     xassertion(engine == xnil || descriptor == xnil, "");
 
@@ -11,6 +11,49 @@ extern xeventsubscription * xeventengine_register_descriptor(xeventengine * engi
     xeventsubscription * subscription = xeventsubscription_new(engine, (xeventtarget *) descriptor, sizeof(xdescriptoreventsubscription));
 
     xdescriptoreventgenerator_register(engine->generators.descriptor, (xdescriptoreventsubscription *) subscription);
+
+    return subscription;
+}
+
+extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * engine, xdescriptor * descriptor)
+{
+    xeventsubscription * subscription = descriptor->subscription;
+
+    if(subscription->enginenode.engine == engine)
+    {
+        xdescriptoreventgenerator_unregister(engine->generators.descriptor, descriptor);    
+
+        xeventsubscription * prev = subscription->enginenode.prev;
+        xeventsubscription * next = subscription->enginenode.next;
+
+        if(prev)
+        {
+            prev->enginenode.next = next;
+            subscription->enginenode.prev = xnil;
+        }
+        else
+        {
+            engine->subscriptions.head = next;
+        }
+
+        if(next)
+        {
+            next->enginenode.prev = prev;
+            subscription->enginenode.next = xnil;
+        }
+        else
+        {
+            engine->subscriptions.tail = prev;
+        }
+
+        engine->subscriptions.size = engine->subscriptions.size - 1;
+
+        subscription->enginenode.engine = xnil;
+    }
+    else
+    {
+        xassertion(subscription->enginenode.engine != engine ,"");
+    }
 
     return subscription;
 }

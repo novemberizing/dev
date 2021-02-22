@@ -10,7 +10,9 @@ struct xeventprocessor;
 struct xeventprocessorpool;
 struct xeventengine;
 struct xeventqueue;
+struct xdescriptorevent;
 
+typedef struct xdescriptorevent xdescriptorevent;
 typedef struct xevent xevent;
 typedef struct xeventtarget xeventtarget;
 typedef struct xeventsubscription xeventsubscription;

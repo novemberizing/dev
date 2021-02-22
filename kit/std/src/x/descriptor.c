@@ -4,138 +4,358 @@
 
 #include "event/engine.h"
 
-extern void xdescriptorevent_dispatch_in(xdescriptor * descriptor)
+extern xint32 xdescriptorcheck_rem(xdescriptor * descriptor)
 {
-    xassertion(descriptor == xnil || descriptor->subscription == xnil, "");
+    return (descriptor->status & xdescriptorstatus_rem) && descriptor->handle.f >= 0 && descriptor->event.queue == xnil;
+}
+extern xint32 xdescriptorcheck_close(xdescriptor * descriptor)
+{
+    return descriptor->status & (xdescriptorstatus_close | xdescriptorstatus_exception | xdescriptorstatus_rem);
+}
 
-    // 여러 디스크립터 이벤트 제네레이터에서 수행이 가능하도록
-    xeventengine * engine = descriptor->subscription->enginenode.engine;
-    if(xeventengine_processor_pool_size(engine) > 0)
+extern xint32 xdescriptorcheck_open(xdescriptor * descriptor)
+{
+    return xdescriptorcheck_close(descriptor) == xfalse && (descriptor->status & xdescriptorstatus_open);
+}
+
+extern xint64 xdescriptorclose(xdescriptor * descriptor);
+extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 size);
+extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 len);
+
+extern xint64 xdescriptorevent_process_on(xdescriptor * descriptor)
+{
+    xassertion(descriptor == xnil, "");
+
+    if(xdescriptorcheck_close(descriptor))
     {
-        xeventengine_queue_push(engine, (xevent *) descriptor);
+        xdescriptorevent_processor_unregister(descriptor);
+        return xdescriptor_process_close(descriptor);
+    }
+    else if((descriptor->status & xdescriptorstatus_open) == xdescriptorstatus_void)
+    {
+        xdescriptorevent_processor_open(descriptor);
+    }
+
+    xdescriptorevent_processor_out(descriptor);
+    xdescriptorevent_processor_in(descriptor);
+    xdescriptorevent_processor_register(descriptor);
+    if(xdescriptorcheck_close(descriptor))
+    {
+        xdescriptorevent_processor_unregister(descriptor);
+        xdescriptor_process_close(descriptor);
+        return xfail;
+    }
+    return xsuccess;
+}
+
+extern xint64 xdescriptorevent_processor_open(xdescriptor * descriptor)
+{
+    xassertion(xdescriptorcheck_open(descriptor) == xfalse, "");
+
+    xint64 n = descriptor->process(descriptor, xdescriptoreventmask_open, xnil);
+    return descriptor->on(descriptor, xdescriptoreventmask_open, xnil, n);
+}
+
+extern xint64 xdescriptorevent_processor_out(xdescriptor * descriptor)
+{
+    if(xdescriptorcheck_open(descriptor))
+    {
+        xint64 n = descriptor->process(descriptor, xdescriptoreventmask_out, xnil);
+        return descriptor->on(descriptor, xdescriptoreventmask_out, xnil, n);
+    }
+    return xfail;
+}
+
+extern xint64 xdescriptorevent_processor_in(xdescriptor * descriptor)
+{
+    if(xdescriptorcheck_open(descriptor))
+    {
+        xint64 n = descriptor->process(descriptor, xdescriptoreventmask_in, xnil);
+        return descriptor->on(descriptor, xdescriptoreventmask_in, xnil, n);
+    }
+    return xfail;
+}
+
+extern xint64 xdescriptorevent_processor_close(xdescriptor * descriptor)
+{
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+    xdescriptoreventgenerator * generator = subscription->generatornode.generator;
+
+    if(subscription->generatornode.list == generator->alive)
+    {
+        xdescriptoreventgeneratorsubscriptionlist_del(descriptor->subscription);
+    }
+
+    xint64 n = descriptor->process(descriptor, xdescriptoreventmask_close, xnil);
+    n = descriptor->on(descriptor, xdescriptoreventmask_close, xnil, n);
+
+    if(subscription->generatornode.list != generator->queue)
+    {
+        xdescriptoreventgeneratorsubscriptionlist_push(generator->queue, subscription);
+    }
+
+    return xsuccess;
+}
+
+extern xint64 xdescriptorevent_processor_register(xdescriptor * descriptor)
+{
+    if(xdescriptorcheck_open(descriptor))
+    {
+        xdescriptoreventsubscription * subscription = descriptor->subscription;
+        xdescriptoreventgenerator * generator = subscription->generatornode.generator;
+        xint64 n = xdescriptoreventgenerator_descriptor_register(generator, descriptor);
+        return descriptor->on(descriptor, xdescriptoreventmask_register, xnil, n == xsuccess);
+    }
+    return xfail;
+}
+
+extern xint64 xdescriptorevent_processor_unregister(xdescriptor * descriptor)
+{
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+    xdescriptoreventgenerator * generator = subscription->generatornode.generator;
+    xdescriptoreventgenerator_descriptor_unregister(generator, descriptor);
+    descriptor->on(descriptor, xdescriptoreventmask_register, xnil, xfalse);
+    return xsuccess;
+}
+
+extern xint64 xdescriptorevent_processor_rem(xdescriptor * descriptor)
+{
+    if(xdescriptorcheck_rem(descriptor))
+    {
+        xdescriptoreventsubscription * subscription = descriptor->subscription;
+        xeventengine * engine = subscription->enginenode.engine;
+
+        xeventengine_descriptor_unregister(engine, descriptor);
+
+        descriptor->on(descriptor, xdescriptoreventmask_rem, xnil, 0);
+
+        descriptor = descriptor->rem(descriptor);
     }
     else
     {
-        // INERNAL READ ...
+        xassertion((descriptor->status & xdescriptorstatus_rem) == xdescriptorstatus_void, "");
+
+        xdescriptoreventsubscription * subscription = descriptor->subscription;
+        xdescriptoreventgenerator * generator = subscription->generatornode.generator;
+        xdescriptoreventgeneratorsubscriptionlist_push(generator, subscription);
     }
-    // engine->
+    return xsuccess;
 }
 
-extern void xdescriptorevent_dispatch_out(xdescriptor * descriptor)
+extern xint64 xdescriptorevent_dispatch_on(xdescriptor * descriptor)
 {
-    xassertion(descriptor == xnil || descriptor->subscription == xnil, "");
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
 
-    // 여러 디스크립터 이벤트 제네레이터에서 수행이 가능하도록
-}
-
-extern void xdescriptorevent_dispatch_close(xdescriptor * descriptor)
-{
-    // subscription 이 존재하면 main event queue 에 삽입한다.
-    if(descriptor->subscription)
+    if(subscription)
     {
-        if(descriptor->handle.f >= 0)
+        if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
         {
-            // 디스크립터 제네레이터에 등록이 되어 있다면, GENERATOR 에서 삭제한다.
-
+            return xdescriptorevent_process_on(descriptor);
         }
-        // 이 상황은 항상 클로우즈 상황으로 이 상황이 발생하면 두번 호출된 케이스이다.
-        xassertion(xtrue, "");
         return xsuccess;
     }
     else
     {
-        return xdescriptorclose(descriptor);
+        return xdescriptorevent_process_on(descriptor);
     }
 }
 
-extern void xdescriptorevent_dispatch_exception(xdescriptor * descriptor, void * data, xint64 result)
+extern xint64 xdescriptorevent_dispatch_open(xdescriptor * descriptor)
 {
-    // subscription 이 존재하면 main event queue 에 삽입한다.
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+
+    if(xdescriptorcheck_close(descriptor) == xfalse)
+    {
+        if((descriptor->status & xdescriptorstatus_open) == xdescriptorstatus_void)
+        {
+            if(subscription)
+            {
+                if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+                {
+                    return xdescriptorevent_processor_open(descriptor);
+                }
+                return xsuccess;
+            }
+            else
+            {
+                return xdescriptorevent_processor_open(descriptor);
+            }
+        }
+        // 두번 오픈이 호출된 것이다. 큰 문제는 없지만, 체크는 할 필요가 있다.
+        // 이것을 호출한 것은 불필요한 로직이 호출된 것이다.
+        return xsuccess;
+    }
+    return xfail;
+}
+extern xint64 xdescriptorevent_dispatch_in(xdescriptor * descriptor)
+{
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+
+    if(xdescriptorcheck_open(descriptor))
+    {
+        if(subscription)
+        {
+            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            {
+                return xdescriptorevent_processor_in(descriptor);
+            }
+            return xsuccess;
+        }
+        else
+        {
+            return xdescriptorevent_processor_in(descriptor);
+        }
+    }
+    return xfail;
+}
+extern xint64 xdescriptorevent_dispatch_out(xdescriptor * descriptor)
+{
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+
+    if(xdescriptorcheck_open(descriptor))
+    {
+        if(subscription)
+        {
+            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            {
+                return xdescriptorevent_processor_out(descriptor);
+            }
+            return xsuccess;
+        }
+        else
+        {
+            return xdescriptorevent_processor_out(descriptor);
+        }
+    }
+    return xfail;
 }
 
-static xint64 xdescriptorevent_on_close(xdescriptor * descriptor, void * data, xuint64 result)
+extern xint64 xdescriptorevent_dispatch_close(xdescriptor * descriptor)
 {
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+
     if((descriptor->status & xdescriptorstatus_close) == xdescriptorstatus_void)
     {
         descriptor->status |= xdescriptorstatus_close;
-        return descriptor->on(descriptor, xdescriptoreventmask_close, xnil, result);
+        if(subscription)
+        {
+            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            {
+                return xdescriptorevent_processor_close(descriptor);
+            }
+            return xsuccess;
+        }
+        else
+        {
+            return xdescriptorevent_processor_close(descriptor);
+        }    
     }
-    return result;
+    
+    return xfail;
 }
 
-static xint64 xdescriptorevent_on_exception(xdescriptor * descriptor, void * data, xuint64 result)
+/**
+ * 
+ * 이 함수는 메인 함수에서 불려야 한다.
+ */
+extern xint64 xdescriptorevent_dispatch_rem(xdescriptor * descriptor)
 {
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+
+    if((descriptor->status & xdescriptorstatus_rem) == xdescriptorstatus_void)
+    {
+        descriptor->status |= xdescriptorstatus_rem;
+        if(subscription)
+        {
+            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            {
+                xdescriptorevent_processor_unregister(descriptor);
+                xdescriptorevent_processor_close(descriptor);
+                return xdescriptorevent_processor_rem(descriptor);
+            }
+            return xsuccess;
+        }
+        else
+        {
+            xdescriptorevent_processor_unregister(descriptor);
+            xdescriptorevent_processor_close(descriptor);
+            return xdescriptorevent_processor_rem(descriptor);
+        }    
+    }
+    
+    return xfail;
+}
+
+extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor, void * code, xint64 number)
+{
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+
     if((descriptor->status & xdescriptorstatus_exception) == xdescriptorstatus_void)
     {
-        if(descriptor->subscription)
-        {
-            xassertion(xtrue, "implement this");
-        }
         descriptor->status |= xdescriptorstatus_exception;
-        return descriptor->on(descriptor, xdescriptoreventmask_exception, xnil, result);
+        descriptor->exception.code = code;
+        descriptor->exception.number = number;
+        if(subscription)
+        {
+            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            {
+                return xdescriptorevent_processor_exception(descriptor);
+            }
+            return xsuccess;
+        }
+        else
+        {
+            return xdescriptorevent_processor_exception(descriptor);
+        }    
     }
-    return result;
+    
+    return xfail;
 }
 
 extern xint64 xdescriptorclose(xdescriptor * descriptor)
 {
-    // 이 함수는 SUBSCRIPTION 에 GENERATOR 노드가 등록되어 있다면,
-    // 즉, 등록된 상태라면 동작하지 않아야 한다. 즉, 상태를 UNREGISTER 상태여야만 한다.
-    xassertion(descriptor == xnil, "");
-
     if(descriptor->handle.f >= 0)
     {
-        xassertion(descriptor->status & xdescriptorstatus_register, "");
-
         int ret = close(descriptor->handle.f);
-
+        xassertion(ret != xsuccess, "");
         descriptor->handle.f = xinvalid;
-
-        if(ret == xsuccess)
-        {
-            return xdescriptorevent_on_close(descriptor, xnil, 0);
-        }
-        else
-        {
-            return xdescriptorevent_on_close(descriptor, xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_close_fail]), errno);
-        }
     }
     return xsuccess;
 }
 
 extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 size)
 {
-    xassertion(descriptor == xnil, "");
-
-    if(descriptor->handle.f >= 0)
+    if(xdescriptorcheck_open(descriptor))
     {
-        if(!xdescriptorstatus_has(xdescriptorstatus_exception))
+        if(buffer && size)
         {
-            if(buffer && size)
+            xint64 n = read(descriptor->handle.f, buffer, size);
+            if(n > 0)
             {
-                xint64 n = read(descriptor->handle.f, buffer, size);
-                if(n > 0)
-                {
-                    descriptor->status |= xdescriptorstatus_in;
-                    return  descriptor->on(descriptor, xdescriptoreventmask_in, buffer, n);
-                }
-                else if(n == 0)
-                {
-                    // 다른 이벤트가 등록되어 있을 수 있기 때문에, DISPATCH 를 수행해야 한다.
-                    descriptor->status &= (~xdescriptorstatus_in);
-                    xdescriptorevent_dispatch_exception(descriptor, xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_read_return_zero]), 0);
-                }
-                else
-                {
-                    descriptor->status &= (~xdescriptorstatus_in);
-                    if(errno == EAGAIN)
-                    {
-                        return descriptor->on(descriptor, xdescriptoreventmask_in, xnil, 0);
-                    }
-                    xdescriptorevent_dispatch_exception(descriptor, xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_read_fail]), errno);
-                }
+                descriptor->status |= xdescriptorstatus_in;
+                return n;
+            }
+            else if(n == 0)
+            {
+                descriptor->status |= xdescriptorstatus_exception;
+                descriptor->exception.code = xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_read_return_zero]);
+                descriptor->exception.number = 0;
                 return xfail;
             }
+            else
+            {
+                if(errno != EAGAIN)
+                {
+                    descriptor->status |= xdescriptorstatus_exception;
+                    descriptor->exception.code = xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_read_fail]);
+                    descriptor->exception.number = errno;
+                    return xfail;
+                }
+                return xsuccess;
+            }
+        }
+        else
+        {
             return xsuccess;
         }
     }
@@ -144,39 +364,36 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
 
 extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 len)
 {
-    xassertion(descriptor == xnil, "");
-
-    if(descriptor->handle.f >= 0)
+    if(xdescriptorcheck_open(descriptor))
     {
-        if(!xdescriptorstatus_has(xdescriptorstatus_exception))
+        if(data && len)
         {
-            if(data && len)
+            xint64 n = write(descriptor->handle.f, data, len);
+
+            if(n > 0)
             {
-                xint64 n = write(descriptor->handle.f, data, len);
-                if(n > 0)
-                {
-                    descriptor->status |= xdescriptorstatus_out;
-                    return descriptor->on(descriptor, xdescriptoreventmask_out, data, n);
-                }
-                else if(n == 0)
-                {
-                    xassertion(xtrue, "check this");
-                    /**
-                     * 이 상황에 대해서 매뉴얼 페이지를 보고 어떤 상황인지 확인해보자.
-                     */
-                    return descriptor->on(descriptor, xdescriptoreventmask_out, xnil, 0);
-                }
-                else
-                {
-                    descriptor->status &= (~xdescriptorstatus_out);
-                    if(errno == EAGAIN)
-                    {
-                        return descriptor->on(descriptor, xdescriptoreventmask_out, xnil, 0);
-                    }
-                    xdescriptorevent_dispatch_exception(descriptor, xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_write_fail]), errno);
-                }
-                return xfail;
+                descriptor->status |= xdescriptorstatus_out;
+                return n;
             }
+            else if(n == 0)
+            {
+                xassertion(n == 0, "check this");
+                return xsuccess;
+            }
+            else
+            {
+                if(errno != EAGAIN)
+                {
+                    descriptor->status |= xdescriptorstatus_exception;
+                    descriptor->exception.code = xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_write_fail]);
+                    descriptor->exception.number = errno;
+                    return xfail;
+                }
+                return xsuccess;
+            }
+        }
+        else
+        {
             return xsuccess;
         }
     }

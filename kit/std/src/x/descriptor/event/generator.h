@@ -19,6 +19,9 @@ extern xdescriptoreventgenerator * xdescriptoreventgenerator_rem(xdescriptoreven
 extern void xdescriptoreventgenerator_once(xdescriptoreventgenerator * o);
 extern void xdescriptoreventgenerator_queue_once(xdescriptoreventgenerator * o);
 
+extern xint64 xdescriptoreventgenerator_descriptor_register(xdescriptoreventgenerator * o, xdescriptor * descriptor);
+extern xint64 xdescriptoreventgenerator_descriptor_unregister(xdescriptoreventgenerator * o, xdescriptor * descriptor);
+
 extern void xdescriptoreventgenerator_register(xdescriptoreventgenerator * o, xdescriptoreventsubscription * subscription);
 extern void xdescriptoreventgenerator_unregister(xdescriptoreventgenerator * o, xdescriptoreventsubscription * subscription);
 extern void xdescriptoreventgenerator_update(xdescriptoreventsubscription * subscription);

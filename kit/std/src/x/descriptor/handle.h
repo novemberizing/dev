@@ -10,7 +10,7 @@ typedef union xdescriptorhandle xdescriptorhandle;
 union xdescriptorhandle
 {
     xint32 f;
-    void * v;
+    xhandle v;
 };
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__HANDLE__H__

@@ -38,6 +38,7 @@ typedef xdescriptor * (*xdescriptordestructor)(xdescriptor *);
 #define xdescriptoreventmask_exception  (0x00000010u)
 #define xdescriptoreventmask_rem        (0x00000020u)
 #define xdescriptoreventmask_register   (0x00000040u)
+#define xdescriptoreventmask_link       (0x00000080u)
 
 #define xdescriptorstatus_void          xdescriptoreventmask_void
 #define xdescriptorstatus_open          xdescriptoreventmask_open
@@ -47,6 +48,7 @@ typedef xdescriptor * (*xdescriptordestructor)(xdescriptor *);
 #define xdescriptorstatus_exception     xdescriptoreventmask_exception
 #define xdescriptorstatus_rem           xdescriptoreventmask_rem
 #define xdescriptorstatus_register      xdescriptoreventmask_register
+#define xdescriptorstatus_link          xdescriptoreventmask_link
 
 #include <x/descriptor/exception.h>
 
