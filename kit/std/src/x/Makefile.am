@@ -7,4 +7,6 @@ libnovemberizing_a_SOURCES = std.c              \
                              thread.c           \
                              thread/posix.c     \
                              sync.c             \
-                             sync/posix/mutex.c
+                             sync/posix/mutex.c \
+                             stream.c           \
+                             stream/buffer.c

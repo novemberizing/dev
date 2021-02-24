@@ -34,6 +34,7 @@ typedef __UINT64_TYPE__     xuint64;            /**!< 64 비트 양의 정수형
 
 typedef void *              xhandle;            /**!< 핸들 타입입니다. */
 typedef void *              xobject;            /**!< 객체 타입입니다. */
+typedef unsigned char       xbyte;              /**!< 바이트 타입 */
 
 /**
  * @def         xcheck(condition, format, ...)

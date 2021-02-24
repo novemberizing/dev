@@ -165,8 +165,14 @@ static xint64 xclientsocketprocessor_tcp_in(xclientsocket * o)
     if(xdescriptorcheck_close((xdescriptor *) o) == xfalse)
     {
         // TODO: 적절한 TCP 버그 크기를 구한다.
+        xstreamadjust(o->stream.in, xfalse);
         xstreamcapacity_set(o->stream.in, xstreamcapacity_get(o->stream.in) + 8192);
-        return xdescriptorread((xdescriptor *) o, xstreamback(o->stream.in), xstreamremain(o->stream.in));
+        xint64 n = xdescriptorread((xdescriptor *) o, xstreamback(o->stream.in), xstreamremain(o->stream.in));
+        if(n > 0)
+        {
+            xstreamsize_set(o->stream.in, xstreamsize_get(o->stream.in) + n);
+        }
+        return n;
     }
     return xfail;
 }
@@ -177,7 +183,13 @@ static xint64 xclientsocketprocessor_tcp_out(xclientsocket * o)
     {
         // TODO: 적절한 TCP 버그 크기를 구한다.
         xstreamcapacity(o->stream.in, 8192);
-        return xdescriptorwrite((xdescriptor *) o, xstreamfront(o->stream.in), xstreamlen(o->stream.in));
+        xint64 n = xdescriptorwrite((xdescriptor *) o, xstreamfront(o->stream.in), xstreamlen(o->stream.in));
+        if(n > 0)
+        {
+            xstreampos_set(o->stream.out, xstreampos_get(o->stream.out) + n);
+            xstreamadjust(o->stream.out, xfalse);
+        }
+        return n;
     }
     return xfail;
 }

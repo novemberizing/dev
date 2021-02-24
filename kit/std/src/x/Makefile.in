@@ -140,7 +140,8 @@ libnovemberizing_a_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) thread.$(OBJEXT) \
 	thread/posix.$(OBJEXT) sync.$(OBJEXT) \
-	sync/posix/mutex.$(OBJEXT)
+	sync/posix/mutex.$(OBJEXT) stream.$(OBJEXT) \
+	stream/buffer.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -157,8 +158,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/std.Po ./$(DEPDIR)/sync.Po \
-	./$(DEPDIR)/thread.Po sync/posix/$(DEPDIR)/mutex.Po \
+am__depfiles_remade = ./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po \
+	./$(DEPDIR)/sync.Po ./$(DEPDIR)/thread.Po \
+	stream/$(DEPDIR)/buffer.Po sync/posix/$(DEPDIR)/mutex.Po \
 	thread/$(DEPDIR)/posix.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -334,7 +336,9 @@ libnovemberizing_a_SOURCES = std.c              \
                              thread.c           \
                              thread/posix.c     \
                              sync.c             \
-                             sync/posix/mutex.c
+                             sync/posix/mutex.c \
+                             stream.c           \
+                             stream/buffer.c
 
 all: all-am
 
@@ -416,6 +420,14 @@ sync/posix/$(DEPDIR)/$(am__dirstamp):
 	@: > sync/posix/$(DEPDIR)/$(am__dirstamp)
 sync/posix/mutex.$(OBJEXT): sync/posix/$(am__dirstamp) \
 	sync/posix/$(DEPDIR)/$(am__dirstamp)
+stream/$(am__dirstamp):
+	@$(MKDIR_P) stream
+	@: > stream/$(am__dirstamp)
+stream/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) stream/$(DEPDIR)
+	@: > stream/$(DEPDIR)/$(am__dirstamp)
+stream/buffer.$(OBJEXT): stream/$(am__dirstamp) \
+	stream/$(DEPDIR)/$(am__dirstamp)
 
 libnovemberizing.a: $(libnovemberizing_a_OBJECTS) $(libnovemberizing_a_DEPENDENCIES) $(EXTRA_libnovemberizing_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libnovemberizing.a
@@ -424,6 +436,7 @@ libnovemberizing.a: $(libnovemberizing_a_OBJECTS) $(libnovemberizing_a_DEPENDENC
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f stream/*.$(OBJEXT)
 	-rm -f sync/posix/*.$(OBJEXT)
 	-rm -f thread/*.$(OBJEXT)
 
@@ -431,8 +444,10 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@stream/$(DEPDIR)/buffer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@sync/posix/$(DEPDIR)/mutex.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@thread/$(DEPDIR)/posix.Po@am__quote@ # am--include-marker
 
@@ -590,6 +605,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f stream/$(DEPDIR)/$(am__dirstamp)
+	-rm -f stream/$(am__dirstamp)
 	-rm -f sync/posix/$(DEPDIR)/$(am__dirstamp)
 	-rm -f sync/posix/$(am__dirstamp)
 	-rm -f thread/$(DEPDIR)/$(am__dirstamp)
@@ -605,8 +622,10 @@ clean-am: clean-generic clean-libLIBRARIES clean-libtool \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/std.Po
+	-rm -f ./$(DEPDIR)/stream.Po
 	-rm -f ./$(DEPDIR)/sync.Po
 	-rm -f ./$(DEPDIR)/thread.Po
+	-rm -f stream/$(DEPDIR)/buffer.Po
 	-rm -f sync/posix/$(DEPDIR)/mutex.Po
 	-rm -f thread/$(DEPDIR)/posix.Po
 	-rm -f Makefile
@@ -655,8 +674,10 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/std.Po
+	-rm -f ./$(DEPDIR)/stream.Po
 	-rm -f ./$(DEPDIR)/sync.Po
 	-rm -f ./$(DEPDIR)/thread.Po
+	-rm -f stream/$(DEPDIR)/buffer.Po
 	-rm -f sync/posix/$(DEPDIR)/mutex.Po
 	-rm -f thread/$(DEPDIR)/posix.Po
 	-rm -f Makefile
