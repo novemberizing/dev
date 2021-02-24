@@ -139,6 +139,20 @@ extern void xthreadrun(xthread * o)
     xthreadposix_run((xthreadposix *) o);
 }
 
+/**
+ * @fn          extern xuint64 xthreadid(void)
+ * @brief       현재 스레드의 스레드 아이디를 리턴합니다.
+ * @details     리눅스 스레드는 64 BIT UNSIGNED INTEGER 형틀 리턴합니다.
+ *              다른 OS 들에 대해서도 유사하도록 구현해야 합니다.
+ * 
+ * @return      | xuint64 | 스레드 아이디 |
+ * 
+ * @see         xthreadposix_id
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 22.
+ * 
+ */
 extern xuint64 xthreadid(void)
 {
     return xthreadposix_id();

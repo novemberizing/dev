@@ -3,6 +3,8 @@ ACLOCAL_AMFLAGS = -I m4
 
 lib_LIBRARIES = libnovemberizing.a
 
-libnovemberizing_a_SOURCES = std.c      \
-                             thread.c   \
-                             thread/posix.c
+libnovemberizing_a_SOURCES = std.c              \
+                             thread.c           \
+                             thread/posix.c     \
+                             sync.c             \
+                             sync/posix/mutex.c
