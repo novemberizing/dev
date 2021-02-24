@@ -5,7 +5,7 @@
 #include <x/sync.h>
 
 struct xdescriptoreventgeneratorsubscriptionlist;
-typedef xdescriptoreventgeneratorsubscriptionlist xdescriptoreventgeneratorsubscriptionlist;
+typedef struct xdescriptoreventgeneratorsubscriptionlist xdescriptoreventgeneratorsubscriptionlist;
 
 struct xdescriptoreventgeneratorsubscriptionlist
 {

@@ -5,6 +5,8 @@
 #include <x/event.h>
 #include <x/event/subscription.h>
 
+#include <x/descriptor/event/generator/subscription/list.h>
+
 // struct xdescriptorsubscription;
 
 // typedef struct xdescriptorsubscription xdescriptorsubscription;

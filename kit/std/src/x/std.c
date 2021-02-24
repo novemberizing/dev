@@ -108,3 +108,8 @@ extern xobject xobjectrem(xobject o)
     
     return xnil;
 }
+
+extern xint32 xerrorret(xint32 number)
+{
+    return -number;
+}

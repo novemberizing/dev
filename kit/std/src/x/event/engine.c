@@ -1,6 +1,188 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+
 #include "engine.h"
 
+#include "thread.h"
+#include "descriptor.h"
+
+#include "descriptor/event/generator.h"
+
+#include "processor/pool.h"
+
 #include "descriptor/event/subscription.h"
+
+static void xeventenginecallback_internal(xeventengine * engine, xuint32 status);
+
+extern xeventengine * xeventengine_new(void)
+{
+    xeventengine * engine = (xeventengine *) calloc(sizeof(xeventengine), 1);
+
+    engine->main  = xeventqueue_new();
+    engine->queue = xeventqueue_new();
+
+    return engine;
+}
+
+extern xint32 xeventengine_run(xeventengine * engine)
+{
+    xassertion(engine == xnil, "");
+    if(engine->on == xnil)
+    {
+        engine->on = xeventenginecallback_internal;
+        engine->generators.descriptor = xdescriptoreventgenerator_new(engine);
+
+        xeventengine_sync(engine, xeventengine_processor_pool_size(engine));
+
+        xsynclock(engine->sync);
+        xeventengine_generators_on(engine);
+        xeventengine_processors_on(engine);
+        while(engine->cancel == xnil)
+        {
+            // 어느 시점에 ENGINE SYNC 의 UNLOCK/LOCK 을 수행해야 하는지 확인할 필요가 있다.
+            xsyncunlock(engine->sync);
+
+            xeventengine_main_consume(engine);
+            xeventengine_queue_consume(engine);
+            xeventengine_generators_once(engine);
+            xeventengine_main_process(engine);
+
+            xsynclock(engine->sync);
+        }
+        xeventengine_generators_off(engine);
+        xeventengine_queue_clear(engine);
+        xeventengine_main_clear(engine);
+        engine->on(engine, xeventenginestatus_off);
+        engine->on = xnil;
+        xsyncunlock(engine->sync);
+        xeventengine_sync(engine, xfalse);
+    }
+
+    return xsuccess;
+}
+
+extern void xeventengine_main_consume(xeventengine * engine)
+{
+    xassertion(engine == xnil, "");
+
+    xsynclock(engine->main->sync);
+    xuint64 total = engine->main->size;
+    for(xuint64 i = 0; i < total; i++)
+    {
+        xevent * event = xeventqueue_pop(engine->main);
+        if(event)
+        {
+            xsyncunlock(engine->main->sync);
+            event->on(event);
+            xsynclock(engine->main->sync);
+        }
+        break;
+    }
+    xsyncunlock(engine->main->sync);
+}
+
+extern void xeventengine_queue_consume(xeventengine * engine)
+{
+    xassertion(engine == xnil, "");
+
+    xsynclock(engine->queue->sync);
+    xuint64 total = engine->queue->size;
+    for(xuint64 i = 0; i < total; i++)
+    {
+        xevent * event = xeventqueue_pop(engine->queue);
+        if(event)
+        {
+            xsyncunlock(engine->queue->sync);
+            event->on(event);
+            xsynclock(engine->queue->sync);
+        }
+        break;
+    }
+    xsyncunlock(engine->queue->sync);
+}
+
+extern void xeventengine_generators_once(xeventengine * engine)
+{
+    xassertion(engine == xnil, "");
+
+    xdescriptoreventgenerator_once(engine->generators.descriptor);
+
+    // TODO: THE OTHER GENERATOR ONCE ...
+}
+
+extern void xeventengine_processors_on(xeventengine * engine)
+{
+    if(engine)
+    {
+        xeventengine_processor_pool_on(engine->processors);
+    }
+}
+
+extern void xeventengine_generators_on(xeventengine * engine)
+{
+    if(engine)
+    {
+        xdescriptoreventgenerator_on(engine->generators.descriptor);
+        // TODO: THE OTHER ...
+    }
+}
+
+extern void xeventengine_main_process(xeventengine * engine)
+{
+    // TODO:
+    if(engine)
+    {
+    }
+}
+
+extern xuint64 xeventengine_processor_pool_size(xeventengine * engine)
+{
+    return engine && engine->processors ? engine->processors->size : 0;
+}
+
+extern void xeventengine_sync(xeventengine * engine, xint32 on)
+{
+    if(on)
+    {
+        if(engine->sync == xnil)
+        {
+            engine->sync = xsyncnew(xsynctype_default);
+        }
+    }
+    else
+    {
+        xassertion(xeventprocessorpool_size(engine->processors) > 0, "");
+        engine->sync = xsyncrem(engine->sync);
+    }
+    xsynclock(engine->sync);
+
+    xeventprocessorpool_sync(engine->processors, on);
+    xdescriptoreventgenerator_sync(engine->generators.descriptor, on);
+    if(on)
+    {
+        if(engine->subscriptions.sync == xnil)
+        {
+            engine->subscriptions.sync = xsyncnew(xsynctype_default);
+        }
+        if(engine->queue->sync == xnil)
+        {
+            engine->queue->sync = xsynccondinit(xsyncnew(xsynctype_default));
+        }
+        if(engine->main->sync == xnil)
+        {
+            engine->main->sync = xsyncnew(xsynctype_default);
+        }
+    }
+    else
+    {
+        engine->subscriptions.sync = xsyncrem(engine->subscriptions.sync);
+        engine->queue->sync = xsyncrem(engine->queue->sync);
+        engine->main->sync = xsyncrem(engine->main->sync);
+    }
+
+    xsyncunlock(engine->sync);
+}
 
 extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engine, xdescriptor * descriptor)
 {
@@ -17,11 +199,11 @@ extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engi
 
 extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * engine, xdescriptor * descriptor)
 {
-    xeventsubscription * subscription = descriptor->subscription;
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
 
     if(subscription->enginenode.engine == engine)
     {
-        xdescriptoreventgenerator_unregister(engine->generators.descriptor, descriptor);    
+        xdescriptoreventgenerator_unregister(engine->generators.descriptor, subscription);
 
         xeventsubscription * prev = subscription->enginenode.prev;
         xeventsubscription * next = subscription->enginenode.next;
@@ -55,7 +237,7 @@ extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * en
         xassertion(subscription->enginenode.engine != engine ,"");
     }
 
-    return subscription;
+    return (xeventsubscription *) subscription;
 }
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event)
@@ -105,4 +287,48 @@ extern xevent * xeventengine_queue_pop(xeventengine * engine)
     xsyncunlock(engine->queue->sync);
 
     return event;
+}
+
+static void xeventenginecallback_internal(xeventengine * engine, xuint32 status)
+{
+    // TODO: 
+}
+
+extern void xeventengine_main_clear(xeventengine * engine)
+{
+    xsynclock(engine->main->sync);
+    while(engine->main->size > 0)
+    {
+        xevent * event = xeventqueue_pop(engine->main);
+        xsyncunlock(engine->main->sync);
+        if(event)
+        {
+            event->on(event);
+        }
+        xsynclock(engine->main->sync);
+    }
+    xsyncunlock(engine->main->sync);
+}
+
+extern void xeventengine_queue_clear(xeventengine * engine)
+{
+    xsynclock(engine->queue->sync);
+    while(engine->queue->size > 0)
+    {
+        xevent * event = xeventqueue_pop(engine->queue);
+        xsyncunlock(engine->queue->sync);
+        if(event)
+        {
+            event->on(event);
+        }
+        xsynclock(engine->queue->sync);
+    }
+    xsyncunlock(engine->queue->sync);
+}
+
+extern void xeventengine_generators_off(xeventengine * engine)
+{
+    xassertion(engine == xnil, "");
+
+    xdescriptoreventgenerator_off(engine->generators.descriptor);
 }

@@ -1,9 +1,13 @@
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "epoll.h"
 #include "subscription/list.h"
 
 #include "../subscription.h"
+#include "../../../thread.h"
 #include "../../../descriptor.h"
 
 static inline xint32 xdescriptoreventgenerator_epoll_register(int epollfd, xdescriptoreventsubscription * subscrption, xint32 force)
@@ -53,9 +57,16 @@ static inline xint32 xdescriptoreventgenerator_epoll_register(int epollfd, xdesc
                         }
                     }
                 }
-                return ret == xsuccess ? xsuccess : xerrorret(errno);
+                if(ret != xsuccess)
+                {
+                    xdescriptorevent_dispatch_exception(descriptor, epoll_ctl, errno);
+                    return xfail;
+                }
+                return xsuccess;
             }
         }
+        // TODO: 예외를 발생시킬 때 참조할 수 있는 것을 설정하도록 한다.
+        descriptor->status |= xdescriptorstatus_exception;
         return xfail;
     }
     return xsuccess;
@@ -216,7 +227,7 @@ extern void xdescriptoreventgenerator_register(xdescriptoreventgenerator * o, xd
 
     if(descriptor->handle.f >= 0)
     {
-        xdescriptorset_nonblock(descriptor, xtrue);
+        xdescriptornonblock_set(descriptor, xtrue);
         if((descriptor->status & xdescriptorstatus_exception) == xdescriptorstatus_void)
         {
             if((descriptor->status & xdescriptorstatus_close) == xdescriptorstatus_void)
@@ -228,10 +239,6 @@ extern void xdescriptoreventgenerator_register(xdescriptoreventgenerator * o, xd
                     {
                         xdescriptorevent_dispatch_register(descriptor, xnil, xtrue);
                         xdescriptoreventgeneratorsubscriptionlist_push(generator->alive, subscription);
-                    }
-                    else
-                    {
-                        xdescriptorevent_dispatch_exception(descriptor, xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_generator_register_fail]), xerrorval(ret));
                     }
                     return;
                 }
@@ -328,4 +335,84 @@ extern void xdescriptoreventgenerator_queue_once(xdescriptoreventgenerator * o)
         break;
     }
     xsyncunlock(generator->queue->sync);
+}
+
+extern void xdescriptoreventgenerator_sync(xdescriptoreventgenerator * o, xint32 on)
+{
+    xdescriptoreventgenerator_epoll * generator = (xdescriptoreventgenerator_epoll *) o;
+
+    if(on)
+    {
+        if(generator->alive->sync)
+        {
+            generator->alive->sync = xsyncnew(xsynctype_default);
+        }
+        if(generator->queue->sync)
+        {
+            generator->queue->sync = xsyncnew(xsynctype_default);
+        }
+        
+    }
+    else
+    {
+        generator->alive->sync = xsyncrem(generator->alive->sync);
+        generator->queue->sync = xsyncrem(generator->queue->sync);
+    }
+}
+
+extern void xdescriptoreventgenerator_on(xdescriptoreventgenerator * o)
+{
+    xdescriptoreventgenerator_epoll * generator = (xdescriptoreventgenerator_epoll *) o;
+
+    xdescriptoreventgenerator_epoll_open(generator);
+}
+
+extern void xdescriptoreventgenerator_off(xdescriptoreventgenerator * o)
+{
+    xdescriptoreventgenerator_epoll * generator = (xdescriptoreventgenerator_epoll *) o;
+
+    if(generator->f)
+    {
+        int ret = close(generator->f);
+        xassertion(ret != xsuccess, "");
+        generator->f = xinvalid;
+    }
+
+    generator->events = xobjectrem(generator->events);
+    // alive session unregister set
+
+    xdescriptoreventgenerator_alive_clear(o);
+    xdescriptoreventgenerator_queue_clear(o);
+}
+
+extern void xdescriptoreventgenerator_alive_clear(xdescriptoreventgenerator * generator)
+{
+    xdescriptoreventsubscription * subscription = generator->alive->head;
+    while(subscription)
+    {
+        xdescriptoreventsubscription * next = xdescriptoreventgeneratorsubscriptionlist_pop(generator->alive);
+
+        xdescriptor * descriptor = subscription->descriptor;
+        descriptor->status &= (~xdescriptorstatus_register);
+        descriptor->on(descriptor, xdescriptoreventmask_register, xnil, xfalse);
+
+        subscription->generatornode.generator = xnil;
+        
+        subscription = next;
+    }
+}
+
+extern void xdescriptoreventgenerator_queue_clear(xdescriptoreventgenerator * generator)
+{
+    xdescriptoreventsubscription * subscription = generator->alive->head;
+    while(subscription)
+    {
+        xdescriptoreventsubscription * next = xdescriptoreventgeneratorsubscriptionlist_pop(generator->alive);
+
+        xdescriptor * descriptor = subscription->descriptor;
+
+        subscription->generatornode.generator = xnil;
+        
+        subscription = next;
+    }
 }

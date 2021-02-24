@@ -103,6 +103,8 @@ typedef unsigned char       xbyte;              /**!< 바이트 타입 */
     }                                           \
 } while(0)
 
+extern xint32 xerrorret(xint32 number);
+
 extern xobject xobjectdup(const xobject data, xuint64 size);
 extern xobject xobjectnew(xuint64 size);
 extern xobject xobjectrem(xobject o);

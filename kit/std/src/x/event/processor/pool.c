@@ -141,3 +141,13 @@ extern xint32 xeventprocessorpool_removable(xeventprocessorpool * pool)
 {
     return pool == xnil || (pool->size == 0);
 }
+
+extern xuint64 xeventprocessorpool_size(xeventprocessorpool * pool)
+{
+    return pool ? pool->size : 0;
+}
+
+extern void xeventengine_processor_pool_on(xeventprocessorpool * pool)
+{
+    // 프로세서는 생성과 동시에 실행이 된다.
+}

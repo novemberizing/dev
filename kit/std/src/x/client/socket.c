@@ -130,7 +130,7 @@ static xint64 xclientsocketprocessor_tcp_open(xclientsocket * o)
                     }
                 }
             }
-            xdescriptorset_nonblock((xdescriptor *) o, xtrue);
+            xdescriptornonblock_set((xdescriptor *) o, xtrue);
             xint32 ret = connect(o->handle.f, o->addr, o->addrlen);
             if(ret == xsuccess)
             {

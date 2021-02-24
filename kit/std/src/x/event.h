@@ -2,20 +2,25 @@
 #define   __NOVEMBERIZING_X__EVENT__H__
 
 #include <x/std.h>
+#include <x/sync.h>
 
-struct xevent;
-struct xeventtarget;
-struct xeventsubscription;
-struct xeventprocessor;
-struct xeventprocessorpool;
-struct xeventengine;
-struct xeventqueue;
-struct xdescriptorevent;
+struct xevent;                  /**!< expose - all */
+
+struct xeventtarget;            /**!< expose - all */
+struct xeventsubscription;      /**!< expose - type */
+struct xeventprocessor;         /**!< expose - type */
+struct xeventprocessorpool;     /**!< expose - type */
+struct xeventengine;            /**!< expose - type */
+struct xeventqueue;             /**!< hidden */
+struct xdescriptorevent;        /**!< hidden */
+
+typedef struct xevent xevent;
 
 typedef struct xdescriptorevent xdescriptorevent;
-typedef struct xevent xevent;
+
 typedef struct xeventtarget xeventtarget;
 typedef struct xeventsubscription xeventsubscription;
+
 typedef struct xeventprocessor xeventprocessor;
 typedef struct xeventprocessorpool xeventprocessorpool;
 typedef struct xeventengine xeventengine;
@@ -24,14 +29,30 @@ typedef struct xeventqueue xeventqueue;
 typedef xeventtarget * (*xeventtargetdestructor)(xeventtarget *);
 typedef void (*xeventhandler)(xevent *);
 
+/**
+ * @struct      xevent
+ * @brief       이벤트 구조체
+ * 
+ */
 struct xevent
 {
-    xevent *      prev;
-    xevent *      next;
-    xeventqueue * queue;
-    xeventhandler on;
+    xevent *      prev;     /**!< 이벤트 큐에서 이전 이벤트 - 이것을 은닉시키고 싶다. */
+    xevent *      next;     /**!< 이벤트 큐에서 다음 이벤트 - 이것을 은닉시키고 싶다. */
+    xeventqueue * queue;    /**!< 이벤트 큐 */
+    xeventhandler on;       /**!< 이벤트 핸들러 */
 };
 
-// 이벤트가 생성되면, 이벤트 큐에 삽입하고, 이벤트 타겟에 등록한다.
+/**
+ * @def         xeventon(o)
+ * @brief       이벤트를 수행합니다.
+ * @details
+ * 
+ * @param       o | xevent * | in | 이벤트 객체 |
+ */
+#define xeventon(o) do {    \
+    if(o) {                 \
+        o->on(o);           \
+    }                       \
+} while(0)
 
 #endif // __NOVEMBERIZING_X__EVENT__H__

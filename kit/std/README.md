@@ -1,4 +1,13 @@
 
+nobase_include_HEADERS
+
+가 설치 시에 사용되어지는 것인가 아니면 ...
+
+이것은 프로그램을 다 만든 후에 정리한번 하자.
+
+이벤트 마스크 역시 정리한번 하자.
+
+
 ```
 generating build information using aclocal, autoheader, automake and autoconf
 src/x/Makefile.am:6: warning: source file 'thread/posix.c' is in a subdirectory,

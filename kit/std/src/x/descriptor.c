@@ -398,7 +398,7 @@ extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 le
     return xfail;
 }
 
-extern xint32 xdescriptorset_nonblock(xdescriptor * descriptor, xint32 on)
+extern xint32 xdescriptornonblock_set(xdescriptor * descriptor, xint32 on)
 {
     xassertion(descriptor == xnil || descriptor->handle.f < 0, "");
 

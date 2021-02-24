@@ -2,12 +2,17 @@
 #define   __NOVEMBERIZING_X__IO__H__
 
 #include <x/std.h>
+#include <x/sync.h>
+
+struct xdescriptor;
+
+typedef struct xdescriptor xdescriptor;
 
 struct xclient;
 struct xserver;
 struct xsession;
 struct xsocket;
-struct xdescriptor;
+
 struct xdescriptorexception;
 struct xdescriptoreventgenerator;
 struct xdescriptoreventgeneratorsubscriptions;
@@ -22,7 +27,8 @@ typedef struct xclient xclient;
 typedef struct xserver xserver;
 typedef struct xsession xsession;
 typedef struct xsocket xsocket;
-typedef struct xdescriptor xdescriptor;
+
+
 
 typedef xsocket * (*xsocketdestructor)(xsocket *);
 typedef xdescriptor * (*xdescriptordestructor)(xdescriptor *);

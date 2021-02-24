@@ -1,4 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "queue.h"
+
+#include "../thread.h"
 
 /**
  * @fn          extern xeventqueue * xeventqueue_new(void)

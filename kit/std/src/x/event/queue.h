@@ -4,12 +4,18 @@
 #include <x/event.h>
 #include <x/sync.h>
 
+/**
+ * @struct      xeventqueue
+ * @brief       이벤트 큐 객체
+ * 
+ * 
+ */
 struct xeventqueue
 {
-    xevent * head;
-    xevent * tail;
-    xuint64  size;
-    xsync *  sync;
+    xevent * head;      /**!< 이벤트 큐의 헤드 이벤트 */
+    xevent * tail;      /**!< 이벤트 큐의 마지막 이벤트 */
+    xuint64  size;      /**!< 이벤트 큐의 사이즈 */
+    xsync *  sync;      /**!< 이벤트 큐의 동기화 객체 */
 };
 
 extern xeventqueue * xeventqueue_new(void);
