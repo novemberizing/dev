@@ -1,3 +1,7 @@
+/**
+ * @todo        문서화
+ *              외부/내부 소스를 나누자.
+ */
 #ifndef   __NOVEMBERIZING_X__IO__H__
 #define   __NOVEMBERIZING_X__IO__H__
 
