@@ -1,7 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "list.h"
 
-#include "../subscription.h"
-#include "../subscription/list.h"
+#include "../../subscription.h"
+
+#include "../../../../thread.h"
 
 /**
  * @fn          extern xdescriptoreventgeneratorsubscriptionlist * xdescriptoreventgeneratorsubscriptionlist_new(void)

@@ -145,7 +145,8 @@ am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) thread.$(OBJEXT) \
 	event/processor.$(OBJEXT) event/subscription.$(OBJEXT) \
 	event/engine.$(OBJEXT) event/processor/pool.$(OBJEXT) \
 	descriptor.$(OBJEXT) descriptor/event/generator.$(OBJEXT) \
-	descriptor/event/generator/epoll.$(OBJEXT)
+	descriptor/event/generator/epoll.$(OBJEXT) \
+	descriptor/event/generator/subscription/list.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -166,6 +167,7 @@ am__depfiles_remade = ./$(DEPDIR)/descriptor.Po ./$(DEPDIR)/std.Po \
 	./$(DEPDIR)/stream.Po ./$(DEPDIR)/sync.Po \
 	./$(DEPDIR)/thread.Po descriptor/event/$(DEPDIR)/generator.Po \
 	descriptor/event/generator/$(DEPDIR)/epoll.Po \
+	descriptor/event/generator/subscription/$(DEPDIR)/list.Po \
 	event/$(DEPDIR)/engine.Po event/$(DEPDIR)/processor.Po \
 	event/$(DEPDIR)/queue.Po event/$(DEPDIR)/subscription.Po \
 	event/processor/$(DEPDIR)/pool.Po stream/$(DEPDIR)/buffer.Po \
@@ -342,21 +344,22 @@ ACLOCAL_AMFLAGS = -I m4
 lib_LIBRARIES = libnovemberizing.a
 
 # TODO: 디스크립터 이벤트 제네레이터를 OS 에 알맞는 소스를 링크하도록 한다.
-libnovemberizing_a_SOURCES = std.c                              \
-                             thread.c                           \
-                             thread/posix.c                     \
-                             sync.c                             \
-                             sync/posix/mutex.c                 \
-                             stream.c                           \
-                             stream/buffer.c                    \
-                             event/queue.c                      \
-                             event/processor.c                  \
-                             event/subscription.c               \
-                             event/engine.c                     \
-                             event/processor/pool.c             \
-                             descriptor.c                       \
-                             descriptor/event/generator.c       \
-                             descriptor/event/generator/epoll.c
+libnovemberizing_a_SOURCES = std.c                                          \
+                             thread.c                                       \
+                             thread/posix.c                                 \
+                             sync.c                                         \
+                             sync/posix/mutex.c                             \
+                             stream.c                                       \
+                             stream/buffer.c                                \
+                             event/queue.c                                  \
+                             event/processor.c                              \
+                             event/subscription.c                           \
+                             event/engine.c                                 \
+                             event/processor/pool.c                         \
+                             descriptor.c                                   \
+                             descriptor/event/generator.c                   \
+                             descriptor/event/generator/epoll.c             \
+                             descriptor/event/generator/subscription/list.c
 
 all: all-am
 
@@ -486,6 +489,15 @@ descriptor/event/generator/$(DEPDIR)/$(am__dirstamp):
 descriptor/event/generator/epoll.$(OBJEXT):  \
 	descriptor/event/generator/$(am__dirstamp) \
 	descriptor/event/generator/$(DEPDIR)/$(am__dirstamp)
+descriptor/event/generator/subscription/$(am__dirstamp):
+	@$(MKDIR_P) descriptor/event/generator/subscription
+	@: > descriptor/event/generator/subscription/$(am__dirstamp)
+descriptor/event/generator/subscription/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) descriptor/event/generator/subscription/$(DEPDIR)
+	@: > descriptor/event/generator/subscription/$(DEPDIR)/$(am__dirstamp)
+descriptor/event/generator/subscription/list.$(OBJEXT):  \
+	descriptor/event/generator/subscription/$(am__dirstamp) \
+	descriptor/event/generator/subscription/$(DEPDIR)/$(am__dirstamp)
 
 libnovemberizing.a: $(libnovemberizing_a_OBJECTS) $(libnovemberizing_a_DEPENDENCIES) $(EXTRA_libnovemberizing_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libnovemberizing.a
@@ -496,6 +508,7 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f descriptor/event/*.$(OBJEXT)
 	-rm -f descriptor/event/generator/*.$(OBJEXT)
+	-rm -f descriptor/event/generator/subscription/*.$(OBJEXT)
 	-rm -f event/*.$(OBJEXT)
 	-rm -f event/processor/*.$(OBJEXT)
 	-rm -f stream/*.$(OBJEXT)
@@ -512,6 +525,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@descriptor/event/$(DEPDIR)/generator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@descriptor/event/generator/$(DEPDIR)/epoll.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@descriptor/event/generator/subscription/$(DEPDIR)/list.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@event/$(DEPDIR)/engine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@event/$(DEPDIR)/processor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@event/$(DEPDIR)/queue.Po@am__quote@ # am--include-marker
@@ -679,6 +693,8 @@ distclean-generic:
 	-rm -f descriptor/event/$(am__dirstamp)
 	-rm -f descriptor/event/generator/$(DEPDIR)/$(am__dirstamp)
 	-rm -f descriptor/event/generator/$(am__dirstamp)
+	-rm -f descriptor/event/generator/subscription/$(DEPDIR)/$(am__dirstamp)
+	-rm -f descriptor/event/generator/subscription/$(am__dirstamp)
 	-rm -f event/$(DEPDIR)/$(am__dirstamp)
 	-rm -f event/$(am__dirstamp)
 	-rm -f event/processor/$(DEPDIR)/$(am__dirstamp)
@@ -706,6 +722,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f descriptor/event/$(DEPDIR)/generator.Po
 	-rm -f descriptor/event/generator/$(DEPDIR)/epoll.Po
+	-rm -f descriptor/event/generator/subscription/$(DEPDIR)/list.Po
 	-rm -f event/$(DEPDIR)/engine.Po
 	-rm -f event/$(DEPDIR)/processor.Po
 	-rm -f event/$(DEPDIR)/queue.Po
@@ -766,6 +783,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/thread.Po
 	-rm -f descriptor/event/$(DEPDIR)/generator.Po
 	-rm -f descriptor/event/generator/$(DEPDIR)/epoll.Po
+	-rm -f descriptor/event/generator/subscription/$(DEPDIR)/list.Po
 	-rm -f event/$(DEPDIR)/engine.Po
 	-rm -f event/$(DEPDIR)/processor.Po
 	-rm -f event/$(DEPDIR)/queue.Po
