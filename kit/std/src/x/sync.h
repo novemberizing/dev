@@ -1,17 +1,24 @@
+/**
+ * @file        x/sync.h
+ * @brief       동기화 객체의 타입, 메서드, 구조체를 정의한 헤더 파일입니다.
+ * @details
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 25.
+ */
 #ifndef   __NOVEMBERIZING_X__SYNC__H__
 #define   __NOVEMBERIZING_X__SYNC__H__
 
 #include <x/std.h>
 
-#define xsynctype_mutex         (0)
-#define xsynctype_spinlock      (1)
+#define xsynctype_mutex         (0)                 /**!< 뮤텍스 동기화 객체 타입 */
+#define xsynctype_spinlock      (1)                 /**!< 스핀락 동기화 객체 타입  */
 
-#define xsynctype_default       xsynctype_mutex
+#define xsynctype_default       xsynctype_mutex     /**!< 기본 동기화 객체 타입: 뮤텍스 동기화 객체 타입 */
 
+struct xsync;                                       /**!< 동기화 구조체 */
 
-struct xsync;
-
-typedef struct xsync xsync;
+typedef struct xsync xsync;                         /**!< 동기화 객체 타입 */
 
 typedef xsync * (*xsyncdestructor)(xsync *);        /**!< 동기화 객체의 소멸자로 동기화 객체의 타입을 의미합니다. */
 
