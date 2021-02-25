@@ -1,3 +1,13 @@
+/**
+ * @fn          x/thread.c
+ * @brief       스레드 표준 라이브러리 구현 파일입니다.
+ * @details     스레드의 구현은 운영체제마다 상이하기 때문에,
+ *              운영체제별로 구현된 함수를 호출하도록 합니다.
+ *              현재는 POSIX 스레드로 구현이 되어 있습니다.
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 25.
+ */
 #include <stdlib.h>
 #include <stdio.h>
 

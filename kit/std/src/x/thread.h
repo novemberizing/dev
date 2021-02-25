@@ -1,3 +1,11 @@
+/**
+ * @file        x/thread.h
+ * @brief       스레드 표준 라이브러리 헤더 파일입니다.
+ * @details
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 25.
+ */
 #ifndef   __NOVEMBERIZING_X__THREAD__H__
 #define   __NOVEMBERIZING_X__THREAD__H__
 
