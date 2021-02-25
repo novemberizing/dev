@@ -2,6 +2,7 @@
 #define   __NOVEMBERIZING_X__CONSOLE__H__
 
 #include <x/std.h>
+#include <x/descriptor.h>
 
 struct xconsole;
 struct xconsoledescriptor;
