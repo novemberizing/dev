@@ -105,7 +105,7 @@ extern xint64 xdescriptorevent_processor_register(xdescriptor * descriptor)
     {
         xdescriptoreventsubscription * subscription = descriptor->subscription;
         xdescriptoreventgenerator * generator = subscription->generatornode.generator;
-        xint64 n = xdescriptoreventgenerator_descriptor_register(generator, descriptor);
+        xint64 n = xdescriptoreventgenerator_descriptor_update(generator, descriptor);
         return descriptor->on(descriptor, xdescriptoreventmask_register, xnil, n == xsuccess);
     }
     return xfail;
