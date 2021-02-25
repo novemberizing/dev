@@ -3,9 +3,11 @@
 
 #include "event.h"
 
-#include "descriptor.h"
+#include "../engine.h"
 #include "../processor.h"
 #include "../processor/pool.h"
+#include "../../descriptor.h"
+#include "../../thread.h"
 
 /**
  * @fn          extern xeventprocessor_event * xeventprocessor_event_new(xeventprocessor_event_handler handler, xeventprocessor * processor)
@@ -59,6 +61,6 @@ extern void xeventprocessor_event_handler_rem(xeventprocessor_event * event)
     {
         xeventprocessorpool * pool = processor->pool;
         xeventengine * engine = pool->engine;
-        xeventengine_main_push(event);
+        xeventengine_main_push(engine, (xevent *) event);
     }
 }

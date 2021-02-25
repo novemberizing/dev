@@ -144,7 +144,8 @@ am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) thread.$(OBJEXT) \
 	stream/buffer.$(OBJEXT) event/queue.$(OBJEXT) \
 	event/processor.$(OBJEXT) event/subscription.$(OBJEXT) \
 	event/engine.$(OBJEXT) event/processor/pool.$(OBJEXT) \
-	descriptor.$(OBJEXT) descriptor/event/generator.$(OBJEXT) \
+	event/processor/event.$(OBJEXT) descriptor.$(OBJEXT) \
+	descriptor/event/generator.$(OBJEXT) \
 	descriptor/event/generator/epoll.$(OBJEXT) \
 	descriptor/event/generator/subscription/list.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
@@ -170,6 +171,7 @@ am__depfiles_remade = ./$(DEPDIR)/descriptor.Po ./$(DEPDIR)/std.Po \
 	descriptor/event/generator/subscription/$(DEPDIR)/list.Po \
 	event/$(DEPDIR)/engine.Po event/$(DEPDIR)/processor.Po \
 	event/$(DEPDIR)/queue.Po event/$(DEPDIR)/subscription.Po \
+	event/processor/$(DEPDIR)/event.Po \
 	event/processor/$(DEPDIR)/pool.Po stream/$(DEPDIR)/buffer.Po \
 	sync/posix/$(DEPDIR)/mutex.Po thread/$(DEPDIR)/posix.Po
 am__mv = mv -f
@@ -356,6 +358,7 @@ libnovemberizing_a_SOURCES = std.c                                          \
                              event/subscription.c                           \
                              event/engine.c                                 \
                              event/processor/pool.c                         \
+                             event/processor/event.c                        \
                              descriptor.c                                   \
                              descriptor/event/generator.c                   \
                              descriptor/event/generator/epoll.c             \
@@ -471,6 +474,8 @@ event/processor/$(DEPDIR)/$(am__dirstamp):
 	@: > event/processor/$(DEPDIR)/$(am__dirstamp)
 event/processor/pool.$(OBJEXT): event/processor/$(am__dirstamp) \
 	event/processor/$(DEPDIR)/$(am__dirstamp)
+event/processor/event.$(OBJEXT): event/processor/$(am__dirstamp) \
+	event/processor/$(DEPDIR)/$(am__dirstamp)
 descriptor/event/$(am__dirstamp):
 	@$(MKDIR_P) descriptor/event
 	@: > descriptor/event/$(am__dirstamp)
@@ -530,6 +535,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@event/$(DEPDIR)/processor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@event/$(DEPDIR)/queue.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@event/$(DEPDIR)/subscription.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@event/processor/$(DEPDIR)/event.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@event/processor/$(DEPDIR)/pool.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@stream/$(DEPDIR)/buffer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@sync/posix/$(DEPDIR)/mutex.Po@am__quote@ # am--include-marker
@@ -727,6 +733,7 @@ distclean: distclean-am
 	-rm -f event/$(DEPDIR)/processor.Po
 	-rm -f event/$(DEPDIR)/queue.Po
 	-rm -f event/$(DEPDIR)/subscription.Po
+	-rm -f event/processor/$(DEPDIR)/event.Po
 	-rm -f event/processor/$(DEPDIR)/pool.Po
 	-rm -f stream/$(DEPDIR)/buffer.Po
 	-rm -f sync/posix/$(DEPDIR)/mutex.Po
@@ -788,6 +795,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f event/$(DEPDIR)/processor.Po
 	-rm -f event/$(DEPDIR)/queue.Po
 	-rm -f event/$(DEPDIR)/subscription.Po
+	-rm -f event/processor/$(DEPDIR)/event.Po
 	-rm -f event/processor/$(DEPDIR)/pool.Po
 	-rm -f stream/$(DEPDIR)/buffer.Po
 	-rm -f sync/posix/$(DEPDIR)/mutex.Po
