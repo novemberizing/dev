@@ -56,13 +56,13 @@ static xint64 xclientsocketprocessor_tcp_on(xclientsocket * o, xuint32 event, vo
 {
     switch(event)
     {
-        case xdescriptoreventmask_open:         return xclientsocketprocessor_tcp_open(o);
-        case xdescriptoreventmask_in:           return xclientsocketprocessor_tcp_in(o);
-        case xdescriptoreventmask_out:          return xclientsocketprocessor_tcp_out(o);
-        case xdescriptoreventmask_close:        return xclientsocketprocessor_tcp_close(o);
-        case xdescriptoreventmask_exception:    return xclientsocketprocessor_tcp_close(o);
+        case xdescriptoreventtype_open:         return xclientsocketprocessor_tcp_open(o);
+        case xdescriptoreventtype_in:           return xclientsocketprocessor_tcp_in(o);
+        case xdescriptoreventtype_out:          return xclientsocketprocessor_tcp_out(o);
+        case xdescriptoreventtype_close:        return xclientsocketprocessor_tcp_close(o);
+        case xdescriptoreventtype_exception:    return xclientsocketprocessor_tcp_close(o);
         // REMOVE LOGIC 은 살펴 보자.
-        case xdescriptoreventmask_rem:          return xclientsocketprocessor_tcp_close(o);
+        case xdescriptoreventtype_rem:          return xclientsocketprocessor_tcp_close(o);
     }
     xassertion(event, "");
 }
@@ -110,7 +110,7 @@ static xint64 xclientsocketprocessor_tcp_open(xclientsocket * o)
                         {
                             o->status |= (xdescriptorstatus_connect | xdescriptorstatus_bind);
                             o->status &= (~xdescriptorstatus_connecting);
-                            o->on(o, xdescriptoreventmask_connect, xnil, 0);
+                            o->on(o, xdescriptoreventtype_connect, xnil, 0);
                             return xsuccess;
                         }
                         else
@@ -135,7 +135,7 @@ static xint64 xclientsocketprocessor_tcp_open(xclientsocket * o)
             if(ret == xsuccess)
             {
                 o->status |= (xdescriptorstatus_connect | xdescriptorstatus_bind);
-                o->on(o, xdescriptoreventmask_connect, xnil, 0);
+                o->on(o, xdescriptoreventtype_connect, xnil, 0);
                 return xsuccess;
             }
             else
@@ -198,7 +198,7 @@ static xint64 xclientsocketprocessor_tcp_close(xclientsocket * o)
 {
     if(o->exception.func)
     {
-        o->on(o, xdescriptoreventmask_exception, xaddressof(o->exception), 0);
+        o->on(o, xdescriptoreventtype_exception, xaddressof(o->exception), 0);
         xexceptioninit(xaddressof(o->exception));
 
     }
@@ -210,7 +210,7 @@ static xint64 xclientsocketprocessor_tcp_close(xclientsocket * o)
         {
             o->exception.func   = close;
             o->exception.number = errno;
-            o->on(o, xdescriptoreventmask_exception, xaddressof(o->exception), 0);
+            o->on(o, xdescriptoreventtype_exception, xaddressof(o->exception), 0);
             xexceptioninit(xaddressof(o->exception));
         }
         o->status   |= xdescriptorstatus_close;
@@ -222,7 +222,7 @@ static xint64 xclientsocketprocessor_tcp_close(xclientsocket * o)
 
 static xint32 xclientsocketstatuscheck_tcp(xclientsocket * o, xuint32 event)
 {
-    if(event == xdescriptoreventmask_out)
+    if(event == xdescriptoreventtype_out)
     {
         return xstreamlen(o->stream.out) > 0;
     }
@@ -234,12 +234,12 @@ static xint64 xclientsocketsubscriber_tcp(xclientsocket * o, xuint32 event, void
 {
     switch(event)
     {
-        case xdescriptoreventmask_in:           return o->client->on(o->client, event, o->stream.in, val);
-        case xdescriptoreventmask_out:          return o->client->on(o->client, event, o->stream.out, val);
-        case xdescriptoreventmask_exception:    return o->client->on(o->client, event, xaddressof(o->exception), 0);
-        case xdescriptoreventmask_close:        return o->client->on(o->client, event, xnil, 0);
-        case xdescriptoreventmask_rem:          return o->client->on(o->client, event, xnil, 0);
-        case xdescriptoreventmask_register:     return o->client->on(o->client, event, xnil, val);
+        case xdescriptoreventtype_in:           return o->client->on(o->client, event, o->stream.in, val);
+        case xdescriptoreventtype_out:          return o->client->on(o->client, event, o->stream.out, val);
+        case xdescriptoreventtype_exception:    return o->client->on(o->client, event, xaddressof(o->exception), 0);
+        case xdescriptoreventtype_close:        return o->client->on(o->client, event, xnil, 0);
+        case xdescriptoreventtype_rem:          return o->client->on(o->client, event, xnil, 0);
+        case xdescriptoreventtype_register:     return o->client->on(o->client, event, xnil, val);
     }
     return o->client->on(o->client, event, data, val);
 }

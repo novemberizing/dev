@@ -24,7 +24,7 @@ typedef struct xdescriptoreventsubscription xdescriptoreventsubscription;
 
 typedef xint64 (*xdescriptorprocessor)(xdescriptor *, xuint32, void *);             /**!< 디스크립터 이벤트 프로세서 */
 typedef xint64 (*xdescriptorsubscriber)(xdescriptor *, xuint32, void *, xint64);    /**!< 디스크립터 이벤트 서브스크리라이버 */
-typedef xint32 (*xdescriptorstatuscheck)(xdescriptor *, xuint32);                   /**!< 디스크립터 이벤트 체크 함수 타입 */
+typedef xint32 (*xdescriptorcheck)(xdescriptor *, xuint32);                   /**!< 디스크립터 이벤트 체크 함수 타입 */
 
 /**
  * @struct      xdescriptor
@@ -44,7 +44,7 @@ struct xdescriptor
     /** DESCRIPTOR EVENT HANDLE */
     xdescriptorhandle                       handle;         /**!< descriptor handle */
     xdescriptorprocessor                    process;        /**!< descriptor process function */
-    xdescriptorstatuscheck                  check;          /**!< descriptor status checker  */
+    xdescriptorcheck                        check;          /**!< descriptor status checker  */
     xdescriptorsubscriber                   on;             /**!< descriptor event subscriber */
     xdescriptorevent                        event;          /**!< descriptor default event */
     xexception                              exception;      /**!< descriptor exception */

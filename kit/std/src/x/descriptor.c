@@ -53,16 +53,16 @@ extern xint64 xdescriptorevent_processor_open(xdescriptor * descriptor)
 {
     xassertion(xdescriptorcheck_open(descriptor) == xfalse, "");
 
-    xint64 n = descriptor->process(descriptor, xdescriptoreventmask_open, xnil);
-    return descriptor->on(descriptor, xdescriptoreventmask_open, xnil, n);
+    xint64 n = descriptor->process(descriptor, xdescriptoreventtype_open, xnil);
+    return descriptor->on(descriptor, xdescriptoreventtype_open, xnil, n);
 }
 
 extern xint64 xdescriptorevent_processor_out(xdescriptor * descriptor)
 {
     if(xdescriptorcheck_open(descriptor))
     {
-        xint64 n = descriptor->process(descriptor, xdescriptoreventmask_out, xnil);
-        return descriptor->on(descriptor, xdescriptoreventmask_out, xnil, n);
+        xint64 n = descriptor->process(descriptor, xdescriptoreventtype_out, xnil);
+        return descriptor->on(descriptor, xdescriptoreventtype_out, xnil, n);
     }
     return xfail;
 }
@@ -71,8 +71,8 @@ extern xint64 xdescriptorevent_processor_in(xdescriptor * descriptor)
 {
     if(xdescriptorcheck_open(descriptor))
     {
-        xint64 n = descriptor->process(descriptor, xdescriptoreventmask_in, xnil);
-        return descriptor->on(descriptor, xdescriptoreventmask_in, xnil, n);
+        xint64 n = descriptor->process(descriptor, xdescriptoreventtype_in, xnil);
+        return descriptor->on(descriptor, xdescriptoreventtype_in, xnil, n);
     }
     return xfail;
 }
@@ -88,8 +88,8 @@ extern xint64 xdescriptorevent_processor_close(xdescriptor * descriptor)
     }
 
     
-    xint64 n = descriptor->process(descriptor, xdescriptoreventmask_close, xnil);
-    n = descriptor->on(descriptor, xdescriptoreventmask_close, xnil, n);
+    xint64 n = descriptor->process(descriptor, xdescriptoreventtype_close, xnil);
+    n = descriptor->on(descriptor, xdescriptoreventtype_close, xnil, n);
 
     if(subscription->generatornode.list != generator->queue)
     {
@@ -106,7 +106,7 @@ extern xint64 xdescriptorevent_processor_register(xdescriptor * descriptor)
         xdescriptoreventsubscription * subscription = descriptor->subscription;
         xdescriptoreventgenerator * generator = subscription->generatornode.generator;
         xint64 n = xdescriptoreventgenerator_descriptor_update(generator, descriptor);
-        return descriptor->on(descriptor, xdescriptoreventmask_register, xnil, n == xsuccess);
+        return descriptor->on(descriptor, xdescriptoreventtype_register, xnil, n == xsuccess);
     }
     return xfail;
 }
@@ -116,7 +116,7 @@ extern xint64 xdescriptorevent_processor_unregister(xdescriptor * descriptor)
     xdescriptoreventsubscription * subscription = descriptor->subscription;
     xdescriptoreventgenerator * generator = subscription->generatornode.generator;
     xdescriptoreventgenerator_descriptor_unregister(generator, descriptor);
-    descriptor->on(descriptor, xdescriptoreventmask_register, xnil, xfalse);
+    descriptor->on(descriptor, xdescriptoreventtype_register, xnil, xfalse);
     return xsuccess;
 }
 
@@ -129,7 +129,7 @@ extern xint64 xdescriptorevent_processor_rem(xdescriptor * descriptor)
 
         xeventengine_descriptor_unregister(engine, descriptor);
 
-        descriptor->on(descriptor, xdescriptoreventmask_rem, xnil, 0);
+        descriptor->on(descriptor, xdescriptoreventtype_rem, xnil, 0);
 
         descriptor = descriptor->rem(descriptor);
     }
@@ -149,16 +149,16 @@ extern xint64 xdescriptorevent_processor_exception(xdescriptor * descriptor)
     xdescriptoreventsubscription * subscription = descriptor->subscription;
     xdescriptoreventgenerator * generator = subscription->generatornode.generator;
 
-    xint64 n = descriptor->process(descriptor, xdescriptoreventmask_exception, xnil);
-    n = descriptor->on(descriptor, xdescriptoreventmask_exception, xnil, n);
+    xint64 n = descriptor->process(descriptor, xdescriptoreventtype_exception, xnil);
+    n = descriptor->on(descriptor, xdescriptoreventtype_exception, xnil, n);
 
     if(subscription->generatornode.list == generator->alive)
     {
         xdescriptoreventgeneratorsubscriptionlist_del(descriptor->subscription);
     }
     
-    n = descriptor->process(descriptor, xdescriptoreventmask_close, xnil);
-    n = descriptor->on(descriptor, xdescriptoreventmask_close, xnil, n);
+    n = descriptor->process(descriptor, xdescriptoreventtype_close, xnil);
+    n = descriptor->on(descriptor, xdescriptoreventtype_close, xnil, n);
 
     if(subscription->generatornode.list != generator->queue)
     {

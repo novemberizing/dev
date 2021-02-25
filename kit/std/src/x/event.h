@@ -1,3 +1,6 @@
+/**
+ * @todo        문서화 및 정리(내부/외부 정리)
+ */
 #ifndef   __NOVEMBERIZING_X__EVENT__H__
 #define   __NOVEMBERIZING_X__EVENT__H__
 
