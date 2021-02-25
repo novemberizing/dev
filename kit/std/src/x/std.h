@@ -7,7 +7,6 @@
  * @date        2021. 02. 22.
  * 
  * @todo        클래스 다이터그램 업데이터
- * 
  */
 #ifndef   __NOVEMBERIZING_X__STD__H__
 #define   __NOVEMBERIZING_X__STD__H__
@@ -19,9 +18,26 @@
 #define xtrue               (1)                 /**!< 참을 의미합니다. */
 #define xfalse              (0)                 /**!< 거짓을 의미합니다. */
 
-#define xvalueof(o)         (*(o))              /**!< 특정 포인터에 저장된 값을 리턴합니다. */
-#define xaddressof(o)       (&(o))              /**!< 특정 변수의 주소 값을 리턴합니다.  */
-#define xobjectof(o)        ((void *) o)        /**!< 변수를 객체로 취급합니다. 강제적인 형변환입니다. */
+/**
+ * @def         xvalueof(o)
+ * @brief       주소값 않에 저장된 값을 리턴합니다.
+ * @details
+ * 
+ * @param       o | ... | in | 변수 |
+ * @return      | ... | 저장된 데이터를 리턴합니다. |
+ */
+#define xvalueof(o)         (*(o))
+
+/**
+ * @def         xaddressof(o)
+ * @brief       변수의 주소값을 리턴합니다.
+ * @details
+ * 
+ * @param       o | ... | in | 변수 |
+ * 
+ * @return      | xobject | 객체의 주소 값 |
+ */
+#define xaddressof(o)       (&(o))
 
 typedef __INT8_TYPE__       xint8;              /**!< 8 비트 정수형입니다. */
 typedef __INT16_TYPE__      xint16;             /**!< 16 비트 정수형입니다. */
@@ -105,6 +121,15 @@ typedef unsigned char       xbyte;              /**!< 바이트 타입 */
 
 extern xint32 xerrorret(xint32 number);
 
+/**
+ * @def         xobjectof(o)
+ * @brief       강제적으로 객체형으로 변환합니다.
+ * 
+ * @param       o | - | in | 변수 |
+ * 
+ * @return      | xobject | 강제적으로 형변환된 객체 |
+ */
+#define        xobjectof(o)     ((void *) o)
 extern xobject xobjectdup(const xobject data, xuint64 size);
 extern xobject xobjectnew(xuint64 size);
 extern xobject xobjectrem(xobject o);
