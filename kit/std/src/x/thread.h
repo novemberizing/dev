@@ -3,7 +3,7 @@
 
 #include <x/std.h>
 
-#define xthreadstatus_void      (0x00000000u)   /**!< 스레드 상태: 공허함 */
+#define xthreadstatus_void      (0x00000000u)   /**!< 스레드 상태: 동작중이지 않음 */
 #define xthreadstatus_on        (0x00000001u)   /**!< 스레드 상태: 동작중 */
 
 struct xthread;
