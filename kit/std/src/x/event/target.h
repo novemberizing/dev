@@ -3,9 +3,6 @@
 
 #include <x/event.h>
 
-#define xeventtargeteventmask_void          (0x00000000u)   /**!< 이벤트 타겟의 마스크 */
-#define xeventtargeteventmask_rem           (0x00000001u)   /**!< 이벤트 타겟의 삭제 마스크 */
-
 /**
  * @struct      xeventtarget
  * @brief       이벤트 타겟 객체

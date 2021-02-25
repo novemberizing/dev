@@ -65,7 +65,7 @@ extern xsync * xsyncnew(xuint32 type)
  */
 extern xsync * xsyncrem(xsync * o)
 {
-    return o->rem(o);
+    return o ? o->rem(o) : xnil;
 }
 
 /**

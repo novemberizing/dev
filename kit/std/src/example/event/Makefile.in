@@ -88,7 +88,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = example-event-engine$(EXEEXT)
+noinst_PROGRAMS = example-event-engine$(EXEEXT) \
+	example-event-console$(EXEEXT)
 subdir = src/example/event
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -103,14 +104,17 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_example_event_engine_OBJECTS = engine.$(OBJEXT)
-example_event_engine_OBJECTS = $(am_example_event_engine_OBJECTS)
+am_example_event_console_OBJECTS = console.$(OBJEXT)
+example_event_console_OBJECTS = $(am_example_event_console_OBJECTS)
 am__DEPENDENCIES_1 = $(top_srcdir)/src/x/libnovemberizing.a
-example_event_engine_DEPENDENCIES = $(am__DEPENDENCIES_1)
+example_event_console_DEPENDENCIES = $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_example_event_engine_OBJECTS = engine.$(OBJEXT)
+example_event_engine_OBJECTS = $(am_example_event_engine_OBJECTS)
+example_event_engine_DEPENDENCIES = $(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -126,7 +130,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/engine.Po
+am__depfiles_remade = ./$(DEPDIR)/console.Po ./$(DEPDIR)/engine.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -146,8 +150,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(example_event_engine_SOURCES)
-DIST_SOURCES = $(example_event_engine_SOURCES)
+SOURCES = $(example_event_console_SOURCES) \
+	$(example_event_engine_SOURCES)
+DIST_SOURCES = $(example_event_console_SOURCES) \
+	$(example_event_engine_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -295,6 +301,8 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = -I$(top_srcdir)/src
 example_event_engine_SOURCES = engine.c
 example_event_engine_LDADD = $(LIBS)
+example_event_console_SOURCES = console.c
+example_event_console_LDADD = $(LIBS)
 all: all-am
 
 .SUFFIXES:
@@ -338,6 +346,10 @@ clean-noinstPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
+example-event-console$(EXEEXT): $(example_event_console_OBJECTS) $(example_event_console_DEPENDENCIES) $(EXTRA_example_event_console_DEPENDENCIES) 
+	@rm -f example-event-console$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(example_event_console_OBJECTS) $(example_event_console_LDADD) $(LIBS)
+
 example-event-engine$(EXEEXT): $(example_event_engine_OBJECTS) $(example_event_engine_DEPENDENCIES) $(EXTRA_example_event_engine_DEPENDENCIES) 
 	@rm -f example-event-engine$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(example_event_engine_OBJECTS) $(example_event_engine_LDADD) $(LIBS)
@@ -348,6 +360,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/console.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/engine.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -511,7 +524,8 @@ clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/engine.Po
+		-rm -f ./$(DEPDIR)/console.Po
+	-rm -f ./$(DEPDIR)/engine.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -557,7 +571,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/engine.Po
+		-rm -f ./$(DEPDIR)/console.Po
+	-rm -f ./$(DEPDIR)/engine.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

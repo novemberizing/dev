@@ -6,11 +6,9 @@
 
 #include "thread.h"
 #include "descriptor.h"
-
+#include "console/descriptor.h"
 #include "descriptor/event/generator.h"
-
 #include "processor/pool.h"
-
 #include "descriptor/event/subscription.h"
 
 static void xeventenginecallback_internal(xeventengine * engine, xuint32 status);
@@ -238,6 +236,16 @@ extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * en
     }
 
     return (xeventsubscription *) subscription;
+}
+
+extern xeventsubscription * xeventengine_console_descriptor_register(xeventengine * engine, xconsoledescriptor * descriptor)
+{
+    return xeventengine_descriptor_register(engine, (xdescriptor *) descriptor);
+}
+
+extern xeventsubscription * xeventengine_console_descriptor_unregister(xeventengine * engine, xconsoledescriptor * descriptor)
+{
+    return xeventengine_descriptor_unregister(engine, (xdescriptor *) descriptor);
 }
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event)

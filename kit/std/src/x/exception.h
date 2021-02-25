@@ -15,6 +15,8 @@ struct xexception
     const char * message;
 };
 
+#define xexception_void     ((xexception) { xnil, 0, 0, xnil })
+
 extern const char * xexceptionmessage_get(void * func, xuint32 type, xint32 number);
 
 #endif // __NOVEMBERIZING_X__EXCEPTION__H__

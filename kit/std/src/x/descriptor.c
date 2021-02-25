@@ -11,8 +11,9 @@
 
 extern xint32 xdescriptorcheck_rem(xdescriptor * descriptor)
 {
-    return (descriptor->status & xdescriptorstatus_rem) && descriptor->handle.f >= 0 && descriptor->event.queue == xnil;
+    return (descriptor->status & xdescriptorstatus_rem) && descriptor->handle.f < 0 && descriptor->event.queue == xnil;
 }
+
 extern xint32 xdescriptorcheck_close(xdescriptor * descriptor)
 {
     return descriptor->status & (xdescriptorstatus_close | xdescriptorstatus_exception | xdescriptorstatus_rem);
@@ -40,12 +41,14 @@ extern xint64 xdescriptorevent_process_on(xdescriptor * descriptor)
     xdescriptorevent_processor_out(descriptor);
     xdescriptorevent_processor_in(descriptor);
     xdescriptorevent_processor_register(descriptor);
+
     if(xdescriptorcheck_close(descriptor))
     {
         xdescriptorevent_processor_unregister(descriptor);
         xdescriptorevent_processor_close(descriptor);
         return xfail;
     }
+
     return xsuccess;
 }
 
@@ -79,17 +82,27 @@ extern xint64 xdescriptorevent_processor_in(xdescriptor * descriptor)
 
 extern xint64 xdescriptorevent_processor_close(xdescriptor * descriptor)
 {
+    xassertion(descriptor->event.queue, "");
+    xassertion(descriptor->status & xdescriptorstatus_register, "");
+
     xdescriptoreventsubscription * subscription = descriptor->subscription;
-    xdescriptoreventgenerator * generator = subscription->generatornode.generator;
+    xdescriptoreventgenerator *       generator = subscription->generatornode.generator;
+    xint64                                    n = xsuccess;
 
     if(subscription->generatornode.list == generator->alive)
     {
         xdescriptoreventgeneratorsubscriptionlist_del(descriptor->subscription);
     }
 
-    
-    xint64 n = descriptor->process(descriptor, xdescriptoreventtype_close, xnil);
+    n = descriptor->process(descriptor, xdescriptoreventtype_close, xnil);
     n = descriptor->on(descriptor, xdescriptoreventtype_close, xnil, n);
+    
+    /**
+     * 콘솔 입출력의 경우 핸들 값이 설정된 상태일 수 있다.
+     * 이 함수는 UNREGISTER 가 수행된 상태에서 호출이 된다.
+     */
+    descriptor->exception = xexception_void;
+    descriptor->status    = (descriptor->status & xdescriptorstatus_rem) ? xdescriptorstatus_rem : xdescriptorstatus_void;
 
     if(subscription->generatornode.list != generator->queue)
     {
@@ -147,9 +160,10 @@ extern xint64 xdescriptorevent_processor_rem(xdescriptor * descriptor)
 extern xint64 xdescriptorevent_processor_exception(xdescriptor * descriptor)
 {
     xdescriptoreventsubscription * subscription = descriptor->subscription;
-    xdescriptoreventgenerator * generator = subscription->generatornode.generator;
+    xdescriptoreventgenerator *       generator = subscription->generatornode.generator;
+    xint64                                    n = xsuccess;
 
-    xint64 n = descriptor->process(descriptor, xdescriptoreventtype_exception, xnil);
+    n = descriptor->process(descriptor, xdescriptoreventtype_exception, xnil);
     n = descriptor->on(descriptor, xdescriptoreventtype_exception, xnil, n);
 
     if(subscription->generatornode.list == generator->alive)

@@ -18,6 +18,7 @@
 #include <x/event/queue.h>
 
 #include <x/descriptor.h>
+#include <x/console.h>
 
 #include <x/descriptor/event/generator.h>
 
@@ -68,6 +69,9 @@ extern xint32 xengineengine_descriptor_dispatch(xdescriptor * descriptor);
 
 extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engine, xdescriptor * descriptor);
 extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * engine, xdescriptor * descriptor);
+
+extern xeventsubscription * xeventengine_console_descriptor_register(xeventengine * engine, xconsoledescriptor * descriptor);
+extern xeventsubscription * xeventengine_console_descriptor_unregister(xeventengine * engine, xconsoledescriptor * descriptor);
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event);
 extern xevent * xeventengine_main_pop(xeventengine * engine);

@@ -39,23 +39,10 @@ typedef void (*xeventhandler)(xevent *);
  */
 struct xevent
 {
-    xevent *      prev;     /**!< 이벤트 큐에서 이전 이벤트 - 이것을 은닉시키고 싶다. */
-    xevent *      next;     /**!< 이벤트 큐에서 다음 이벤트 - 이것을 은닉시키고 싶다. */
-    xeventqueue * queue;    /**!< 이벤트 큐 */
-    xeventhandler on;       /**!< 이벤트 핸들러 */
+    xevent *      prev;     /** 이벤트 큐에서 이전 이벤트 - 이것을 은닉시키고 싶다. */
+    xevent *      next;     /** 이벤트 큐에서 다음 이벤트 - 이것을 은닉시키고 싶다. */
+    xeventqueue * queue;    /** 이벤트 큐 */
+    xeventhandler on;       /** 이벤트 핸들러 */
 };
-
-/**
- * @def         xeventon(o)
- * @brief       이벤트를 수행합니다.
- * @details
- * 
- * @param       o | xevent * | in | 이벤트 객체 |
- */
-#define xeventon(o) do {    \
-    if(o) {                 \
-        o->on(o);           \
-    }                       \
-} while(0)
 
 #endif // __NOVEMBERIZING_X__EVENT__H__

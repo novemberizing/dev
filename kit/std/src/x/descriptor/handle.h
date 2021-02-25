@@ -13,4 +13,6 @@ union xdescriptorhandle
     xhandle v;
 };
 
+#define xdescriptorhandle_invalid ((xdescriptorhandle) { .f = xinvalid })
+
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__HANDLE__H__
