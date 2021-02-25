@@ -19,11 +19,11 @@ static void * xthreadposix_routine(void * o);
  * @return      | xthreadposix * | 언제나 널을 리턴합니다. | 
  * 
  * @exception   | `o == xnil` |
- *              | `xthreadremovable((xthread *) o) == xfalse` |
+ *              | `xthreadcheck_rem((xthread *) o) == xfalse` |
  *              | `pthread_join(...) != xsuccess` |
  * 
  * @see         xthreadposix
- *              xthreadremovable
+ *              xthreadcheck_rem
  *              pthread_join
  *              xvalueof
  *              xobjectrem
@@ -36,7 +36,7 @@ static void * xthreadposix_routine(void * o);
 extern xthreadposix * xthreadposix_rem(xthreadposix * o)
 {
     xassertion(o == xnil, "");
-    xassertion(xthreadremovable((xthread *) o) == xfalse, "");
+    xassertion(xthreadcheck_rem((xthread *) o) == xfalse, "");
 
     if(o->handle)
     {

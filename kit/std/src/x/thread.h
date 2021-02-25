@@ -27,7 +27,7 @@ extern void xthreadcancel(xthread * o, xthreadfunc callback);
 extern void xthreadrun(xthread * o);
 
 extern xuint64 xthreadid(void);
-extern xint32 xthreadremovable(xthread * o);
+extern xint32 xthreadcheck_rem(xthread * o);
 
 /**
  * @struct      xthread

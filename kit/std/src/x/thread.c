@@ -70,7 +70,7 @@ extern xthread * xthreadrem(xthread * o)
 }
 
 /**
- * @fn          extern xint32 xthreadremovable(xthread * o)
+ * @fn          extern xint32 xthreadcheck_rem(xthread * o)
  * @brief       스레드가 종료될 수 있음을 체크합니다.
  * @details     스레드는 그 상태가 OFF 이어야만 제거될 수 있습니다.
  *              
@@ -88,7 +88,7 @@ extern xthread * xthreadrem(xthread * o)
  * @version     0.0.1
  * @date        2021. 02. 22.
  */
-extern xint32 xthreadremovable(xthread * o)
+extern xint32 xthreadcheck_rem(xthread * o)
 {
     return (o->status & xthreadstatus_on) == xthreadstatus_void;
 }

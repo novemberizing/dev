@@ -51,7 +51,7 @@ extern void xeventprocessor_event_handler_rem(xeventprocessor_event * event)
 {
     xeventprocessor * processor = event->processor;
     
-    if(xthreadremovable((xthread *) processor))
+    if(xthreadcheck_rem((xthread *) processor))
     {
         xeventprocessor_rem(processor);
 

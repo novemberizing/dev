@@ -69,10 +69,10 @@ extern xeventprocessor * xeventprocessor_new(xeventprocessorpool * pool)
  * @param       processor | xeventprocessor * | in | 이벤트 프로세서 객체 |
  * @return      | xeventprocessor * | 항상 널을 리턴합니다. |
  * 
- * @exception   `xthreadremovable(processor) == xfalse`
+ * @exception   `xthreadcheck_rem(processor) == xfalse`
  *              `processor == xnil`
  * 
- * @see         xthreadremovable,
+ * @see         xthreadcheck_rem,
  *              xthreadrem,
  *              xeventprocessorpool,
  *              xeventprocessor,
@@ -84,7 +84,7 @@ extern xeventprocessor * xeventprocessor_new(xeventprocessorpool * pool)
 extern xeventprocessor * xeventprocessor_rem(xeventprocessor * processor)
 {
     xassertion(processor == xnil, "");
-    xassertion(xthreadremovable((xthread *) processor) == xfalse, "");
+    xassertion(xthreadcheck_rem((xthread *) processor) == xfalse, "");
 
     xeventprocessorpool * pool = processor->pool;
 
