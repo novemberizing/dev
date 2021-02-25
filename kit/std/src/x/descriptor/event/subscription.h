@@ -7,10 +7,6 @@
 
 #include <x/descriptor/event/generator/subscription/list.h>
 
-// struct xdescriptorsubscription;
-
-// typedef struct xdescriptorsubscription xdescriptorsubscription;
-
 struct xdescriptoreventsubscription
 {
     xdescriptor *                                                descriptor;
@@ -22,7 +18,5 @@ struct xdescriptoreventsubscription
              xdescriptoreventgenerator * generator;
              xdescriptoreventgeneratorsubscriptionlist * list; } generatornode;
 };
-
-extern xdescriptoreventsubscription * xdescriptoreventsubscription_link(xdescriptoreventgenerator * generator, xdescriptoreventsubscription * subscription);
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__SUBSCRIPTION__H__

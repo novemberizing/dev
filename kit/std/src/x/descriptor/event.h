@@ -15,6 +15,4 @@ struct xdescriptorevent
     xdescriptor *           descriptor;
 };
 
-
-
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__EVENT__H__
