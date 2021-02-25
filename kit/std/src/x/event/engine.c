@@ -115,7 +115,7 @@ extern void xeventengine_processors_on(xeventengine * engine)
 {
     if(engine)
     {
-        xeventengine_processor_pool_on(engine->processors);
+        xeventprocessorpool_on(engine->processors);
     }
 }
 
@@ -331,4 +331,24 @@ extern void xeventengine_generators_off(xeventengine * engine)
     xassertion(engine == xnil, "");
 
     xdescriptoreventgenerator_off(engine->generators.descriptor);
+}
+
+extern xint32 xengineengine_descriptor_dispatch(xdescriptor * descriptor)
+{
+    xassertion(descriptor == xnil, "");
+
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+    if(subscription)
+    {
+        xeventengine * engine = subscription->enginenode.engine;
+
+        xassertion(engine == xnil, "");
+        if(xeventprocessorpool_size(engine->processors) > 0)
+        {
+            xeventengine_queue_push(engine, (xevent *) xaddressof(descriptor->event));
+            return xsuccess;
+        }
+    }
+
+    return xfail;
 }

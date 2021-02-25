@@ -64,6 +64,8 @@ extern void xeventengine_generators_once(xeventengine * engine);
 extern void xeventengine_main_process(xeventengine * engine);
 extern void xeventengine_generators_off(xeventengine * engine);
 
+extern xint32 xengineengine_descriptor_dispatch(xdescriptor * descriptor);
+
 extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engine, xdescriptor * descriptor);
 extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * engine, xdescriptor * descriptor);
 

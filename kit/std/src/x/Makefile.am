@@ -12,6 +12,11 @@ libnovemberizing_a_SOURCES = std.c                              \
                              stream.c                           \
                              stream/buffer.c                    \
                              event/queue.c                      \
+                             event/processor.c                  \
+                             event/subscription.c               \
                              event/engine.c                     \
+                             event/processor/pool.c             \
+                             descriptor.c                       \
                              descriptor/event/generator.c       \
                              descriptor/event/generator/epoll.c
+

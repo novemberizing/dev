@@ -237,7 +237,7 @@ extern void xdescriptoreventgenerator_register(xdescriptoreventgenerator * o, xd
                     int ret = xdescriptoreventgenerator_epoll_register(generator->f, subscription, xfalse);
                     if(ret == xsuccess)
                     {
-                        xdescriptorevent_dispatch_register(descriptor, xnil, xtrue);
+                        descriptor->on(descriptor, xdescriptoreventmask_register, xnil, xtrue);
                         xdescriptoreventgeneratorsubscriptionlist_push(generator->alive, subscription);
                     }
                     return;
@@ -258,7 +258,8 @@ extern void xdescriptoreventgenerator_unregister(xdescriptoreventgenerator * o, 
     {
         if(descriptor->status & xdescriptorstatus_register)
         {
-            xdescriptoreventgenerator_epoll_unregister(generator->f, descriptor, xtrue);
+            xdescriptoreventgenerator_epoll_unregister(generator->f, subscription, xtrue);
+            descriptor->on(descriptor, xdescriptoreventmask_register, xnil, xfalse);
         }
     }
     xdescriptoreventgeneratorsubscriptionlist_del(subscription);
@@ -282,7 +283,8 @@ extern void xdescriptoreventgenerator_once(xdescriptoreventgenerator * o)
 
                 if(generator->events[i].events & (EPOLLERR | EPOLLPRI | EPOLLRDHUP | EPOLLHUP))
                 {
-                    xdescriptorevent_dispatch_exception(subscription->descriptor, xaddressof(descriptorexceptioncodes[xdescriptorexceptioncode_generator_dispatch_exception]), generator->events[i].events);
+                    // TODO: 정확한 예외 처리를 할 수 있도록 하자.
+                    xdescriptorevent_dispatch_exception(subscription->descriptor, xnil, generator->events[i].events);
                     continue;
                 }
                 if(generator->events[i].events & EPOLLOUT)
@@ -324,11 +326,11 @@ extern void xdescriptoreventgenerator_queue_once(xdescriptoreventgenerator * o)
             if(descriptor->handle.f >= 0 || (descriptor->status & xdescriptorstatus_exception) || (descriptor->status & xdescriptorstatus_close))
             {
                 xassertion(descriptor->status & xdescriptorstatus_register, "");
-                xdescriptorevent_process(xdescriptoreventmask_close, xnil, 0);
+                xdescriptorevent_processor_close(descriptor);
                 xsynclock(generator->queue->sync);
                 continue;
             }
-            xdescriptorevent_process(xdescriptoreventmask_open, xnil, 0);
+            xdescriptorevent_processor_open(descriptor);
             xsynclock(generator->queue->sync);
             continue;
         }

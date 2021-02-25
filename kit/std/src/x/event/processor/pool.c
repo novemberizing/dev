@@ -1,7 +1,12 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
 #include "pool.h"
 
 #include "../engine.h"
 #include "../processor.h"
+#include "../../thread.h"
 
 /**
  * @fn          extern xeventprocessorpool * xeventprocessorpool_new(xeventengine * engine, xuint64 n)
@@ -31,7 +36,7 @@ extern xeventprocessorpool * xeventprocessorpool_new(xeventengine * engine, xuin
 
     o->engine = engine;
 
-    xeventprocessorpoll_add(o, n);
+    xeventprocessorpool_add(o, n);
 
     return o;
 }
@@ -147,7 +152,23 @@ extern xuint64 xeventprocessorpool_size(xeventprocessorpool * pool)
     return pool ? pool->size : 0;
 }
 
-extern void xeventengine_processor_pool_on(xeventprocessorpool * pool)
+extern void xeventprocessorpool_on(xeventprocessorpool * pool)
 {
     // 프로세서는 생성과 동시에 실행이 된다.
+}
+
+/**
+ * 프로세서 풀에는 동기화 객체가 존재하지 않는다.
+ * 
+ * @deprecated
+ */
+extern void xeventprocessorpool_sync(xeventprocessorpool * pool, xint32 on)
+{
+    if(on)
+    {
+        xassertion(pool == xnil, "");
+    }
+    else
+    {
+    }
 }

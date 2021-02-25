@@ -76,5 +76,6 @@ extern xint64 xdescriptorevent_processor_close(xdescriptor * descriptor);
 extern xint64 xdescriptorevent_processor_register(xdescriptor * descriptor);
 extern xint64 xdescriptorevent_processor_unregister(xdescriptor * descriptor);
 extern xint64 xdescriptorevent_processor_rem(xdescriptor * descriptor);
+extern xint64 xdescriptorevent_processor_exception(xdescriptor * descriptor);
 
 #endif // __NOVEMBERIZING_X__DESCRIPTOR__H__

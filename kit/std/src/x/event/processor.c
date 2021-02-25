@@ -1,9 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "processor.h"
 
 #include "engine.h"
 
 #include "processor/pool.h"
 #include "processor/event.h"
+
+#include "../thread.h"
 
 static void xeventprocessor_loop(xeventprocessor * processor);
 static void xeventprocessor_exit(xeventprocessor * processor);
@@ -109,7 +114,7 @@ extern xeventprocessor * xeventprocessor_rem(xeventprocessor * processor)
         pool->size = pool->size - 1;
     }
 
-    return xthreadrem((xthread *) processor);
+    return (xeventprocessor *) xthreadrem((xthread *) processor);
 }
 
 /**
@@ -158,9 +163,9 @@ extern void xeventprocessor_wakeup(xeventengine * engine, xint32 all)
 {
     xassertion(engine == xnil, "");
 
-    xsynclock(engine->queue.sync);
-    xsyncwakeup(engine->queue.sync, all);
-    xsyncunlock(engine->queue.sync);
+    xsynclock(engine->queue->sync);
+    xsyncwakeup(engine->queue->sync, all);
+    xsyncunlock(engine->queue->sync);
 }
 
 /**
@@ -191,7 +196,7 @@ static void xeventprocessor_loop(xeventprocessor * processor)
 {
     xeventprocessorpool * pool = processor->pool;
     xeventengine *      engine = pool->engine;
-    xeventqueue *        queue = xaddressof(engine->queue);
+    xeventqueue *        queue = engine->queue;
     
     while(processor->cancel == xnil)
     {
@@ -237,5 +242,5 @@ static void xeventprocessor_exit(xeventprocessor * processor)
     xeventengine *         engine = pool->engine;
     xeventprocessor_event * event = xeventprocessor_event_new(xeventprocessor_event_handler_rem, processor);
 
-    xeventengine_main_push(event);
+    xeventengine_main_push(engine, (xevent *) event);
 }

@@ -1,7 +1,11 @@
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "descriptor.h"
+#include "thread.h"
 
 #include "event/engine.h"
 
@@ -135,8 +139,32 @@ extern xint64 xdescriptorevent_processor_rem(xdescriptor * descriptor)
 
         xdescriptoreventsubscription * subscription = descriptor->subscription;
         xdescriptoreventgenerator * generator = subscription->generatornode.generator;
-        xdescriptoreventgeneratorsubscriptionlist_push(generator, subscription);
+        xdescriptoreventgeneratorsubscriptionlist_push(generator->queue, subscription);
     }
+    return xsuccess;
+}
+
+extern xint64 xdescriptorevent_processor_exception(xdescriptor * descriptor)
+{
+    xdescriptoreventsubscription * subscription = descriptor->subscription;
+    xdescriptoreventgenerator * generator = subscription->generatornode.generator;
+
+    xint64 n = descriptor->process(descriptor, xdescriptoreventmask_exception, xnil);
+    n = descriptor->on(descriptor, xdescriptoreventmask_exception, xnil, n);
+
+    if(subscription->generatornode.list == generator->alive)
+    {
+        xdescriptoreventgeneratorsubscriptionlist_del(descriptor->subscription);
+    }
+    
+    n = descriptor->process(descriptor, xdescriptoreventmask_close, xnil);
+    n = descriptor->on(descriptor, xdescriptoreventmask_close, xnil, n);
+
+    if(subscription->generatornode.list != generator->queue)
+    {
+        xdescriptoreventgeneratorsubscriptionlist_push(generator->queue, subscription);
+    }
+
     return xsuccess;
 }
 

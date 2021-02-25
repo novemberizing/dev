@@ -24,6 +24,6 @@ extern void xeventprocessorpool_del(xeventprocessorpool * pool, xuint64 n);
 
 extern xint32 xeventprocessorpool_removable(xeventprocessorpool * pool);
 
-extern void xeventengine_processor_pool_on(xeventprocessorpool * pool);
+extern void xeventprocessorpool_on(xeventprocessorpool * pool);
 
 #endif // __NOVEMBERIZING_X__EVENT__PROCESSOR_POOL__H__

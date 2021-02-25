@@ -1,7 +1,12 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "subscription.h"
 
 #include "engine.h"
 #include "target.h"
+
+#include "../thread.h"
 
 extern xeventsubscription * xeventsubscription_new(xeventengine * engine, xeventtarget * target, xuint64 size)
 {
