@@ -1,3 +1,11 @@
+/**
+ * @file        x/stream.h
+ * @brief       스트림 인터페이스를 정의한 소스파입니다.
+ * @details
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 25.
+ */
 #ifndef   __NOVEMBERIZING_X__STREAM__H__
 #define   __NOVEMBERIZING_X__STREAM__H__
 
@@ -7,7 +15,7 @@
 
 #define xstreamtype_default         xstreamtype_buffer      /**!< 디폴트 스트림 타입: 바이트 버퍼 스트림 */
 
-struct xstream;
+struct xstream;                                             /**!< 스트림 인터페이스 구조체입니다. */
 
 typedef struct xstream xstream;                             /**!< 스트림 타입 */
 
@@ -39,6 +47,5 @@ extern xuint64 xstreamsize_set(xstream * o, xuint64 n);
 extern xuint64 xstreamsize_get(xstream * o);
 extern xuint64 xstreampos_set(xstream * o, xuint64 n);
 extern xuint64 xstreampos_get(xstream * o);
-
 
 #endif // __NOVEMBERIZING_X__STREAM__H__

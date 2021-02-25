@@ -1,3 +1,11 @@
+/**
+ * @file        x/stream.c
+ * @brief       스트립 인터페이스의 구현 소스 파일입니다.
+ * @details
+ * 
+ * @version     0.0.1
+ * @date        2021. 02. 25.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 
