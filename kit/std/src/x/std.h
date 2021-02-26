@@ -106,17 +106,17 @@ typedef unsigned char       xbyte;              /**!< 바이트 타입 */
  * @version     0.0.1
  * @date        2021. 02. 22.
  */
-#define xassertion(condition, format, ...) do { \
-    if(condition) {                             \
-        printf("[assertion:%s:%d] %s:%lu => "   \
-               format "\n",                     \
-               __FILE__,                        \
-               __LINE__,                        \
-               __func__,                        \
-               xthreadid(),                     \
-               ##__VA_ARGS__);                  \
-        exit(xinvalid);                         \
-    }                                           \
+#define xassertion(condition, format, ...) do {     \
+    if(condition) {                                 \
+        printf("[assertion:%s:%d] %s:%lu => "       \
+               format "\n",                         \
+               __FILE__,                            \
+               __LINE__,                            \
+               __func__,                            \
+               xthreadid(),                         \
+               ##__VA_ARGS__);                      \
+        exit(xinvalid);                             \
+    }                                               \
 } while(0)
 
 #define xdebugfunctionstart(format, ...) do {       \

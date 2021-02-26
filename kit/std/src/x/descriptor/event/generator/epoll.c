@@ -308,19 +308,16 @@ extern void xdescriptoreventgenerator_once(xdescriptoreventgenerator * o)
 
                 if(generator->events[i].events & (EPOLLERR | EPOLLPRI | EPOLLRDHUP | EPOLLHUP))
                 {
-                    printf("[epoll] exception\n");
-                    // TODO: 정확한 예외 처리를 할 수 있도록 하자.
+                    xassertion(xtrue, "TODO: 정확한 예외 처리를 할 수 있도록 하자.");
                     xdescriptorevent_dispatch_exception(subscription->descriptor, xnil, generator->events[i].events);
                     continue;
                 }
                 if(generator->events[i].events & EPOLLOUT)
                 {
-                    printf("[epoll] out\n");
                     xdescriptorevent_dispatch_out(subscription->descriptor);
                 }
                 if(generator->events[i].events & EPOLLIN)
                 {
-                    printf("[epoll] in\n");
                     xdescriptorevent_dispatch_in(subscription->descriptor);
                 }
             }

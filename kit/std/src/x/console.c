@@ -74,15 +74,7 @@ extern void xconsolesubscriber_set(xconsolesubscriber subscriber)
 
 extern xint64 xconsolesubscriber_default(xconsole * console, xuint64 event, void * parameter, xint64 value)
 {
-    if(event == xdescriptoreventtype_in)
-    {
-        printf("in\n");
-    }
-    else if(event == xdescriptoreventtype_out)
-    {
-        printf("out\n");
-    }
-
+    xassertion(xtrue, "implement this");
     return value;
 }
 
@@ -95,6 +87,8 @@ extern xdescriptor * xconsoledescriptorin_get(void)
         consoledescriptorsingleton_in->event.descriptor = xaddressof(consoledescriptor_in);
         consoledescriptorsingleton_in->status = (xdescriptorstatus_open | xdescriptorstatus_out);
         consoledescriptorsingleton_in->console = xaddressof(console);
+        // TODO: 사용자가 버퍼를 생성할 수 있도록 하자.
+        consoledescriptorsingleton_in->stream = xstreamnew(xstreamtype_default);
         console.in = consoledescriptorsingleton_in;
     }
     
@@ -108,8 +102,10 @@ extern xdescriptor * xconsoledescriptorout_get(void)
         consoledescriptorsingleton_out = xaddressof(consoledescriptor_out);
         consoledescriptorsingleton_out->handle.f = STDOUT_FILENO;
         consoledescriptorsingleton_out->event.descriptor = xaddressof(consoledescriptor_out);
-        consoledescriptorsingleton_out->status = (xdescriptorstatus_open | xdescriptorstatus_out);
+        consoledescriptorsingleton_out->status = (xdescriptorstatus_open | xdescriptorstatus_out | xdescriptorstatus_in);
         consoledescriptorsingleton_out->console = xaddressof(console);
+        // TODO: 사용자가 버퍼를 생성할 수 있도록 하자.
+        consoledescriptorsingleton_in->stream = xstreamnew(xstreamtype_default);
         console.out = consoledescriptorsingleton_out;
     }
 
@@ -147,7 +143,7 @@ static inline xint64 xconsoledescriptorprocessor_input_open(xconsoledescriptor *
 
         if((descriptor->status & xdescriptorstatus_open) == xdescriptorstatus_void)
         {
-            descriptor->status |= xdescriptorstatus_open;
+            descriptor->status = (xdescriptorstatus_open | xdescriptorstatus_out);
         }
 
         return xsuccess;
@@ -172,7 +168,7 @@ static inline xint64 xconsoledescriptorprocessor_output_open(xconsoledescriptor 
 
         if((descriptor->status & xdescriptorstatus_open) == xdescriptorstatus_void)
         {
-            descriptor->status = xdescriptorstatus_open;
+            descriptor->status = (xdescriptorstatus_open | xdescriptorstatus_in | xdescriptorstatus_out);
         }
 
         return xsuccess;
@@ -265,7 +261,7 @@ static xint64 xconsoledescriptorsubscriber_on(xconsoledescriptor * descriptor, x
 {
     xassertion(descriptor == xnil, "");
     xassertion(descriptor->console == xnil, "");
-    xassertion(descriptor->console->on == xnil, "descriptor->console->on => %p", descriptor->console->on);
+    xassertion(descriptor->console->on == xnil, "");
 
     return descriptor->console->on(descriptor->console, event, parameter, val);
 }
@@ -296,9 +292,10 @@ static xint64 xconsoledescriptorprocessor_output(xconsoledescriptor * descriptor
 
 static xint64 xconsoledescriptorsubscriber_output(xconsoledescriptor * descriptor, xuint32 event, void * parameter, xint64 val)
 {
+    
     xassertion(descriptor == xnil, "");
     xassertion(descriptor->console == xnil, "");
-    xassertion(descriptor->console->on == xnil, "descriptor->console->on => %p", descriptor->console->on);
+    xassertion(descriptor->console->on == xnil, "");
 
     return descriptor->console->on(descriptor->console, event, parameter, val);
 }

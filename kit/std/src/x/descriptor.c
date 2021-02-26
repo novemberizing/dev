@@ -75,6 +75,7 @@ extern xint64 xdescriptorevent_processor_in(xdescriptor * descriptor)
     if(xdescriptorcheck_open(descriptor))
     {
         xint64 n = descriptor->process(descriptor, xdescriptoreventtype_in, xnil);
+
         return descriptor->on(descriptor, xdescriptoreventtype_in, xnil, n);
     }
     return xfail;

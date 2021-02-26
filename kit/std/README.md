@@ -1,3 +1,45 @@
+[assertion:console.c:295] xconsoledescriptorprocessor_output:78067520 =>
+[assertion:console.c:297] xconsoledescriptorprocessor_output:78067520 =>
+
+위의 로그는 CONSOLE OUTPUT 의 오픈 상태를 잘못 판단하였기 때문이다.
+콘솔 OUTPUT 의 상태는 IN 역시 항상 오픈되어 있는 것으로 판단하자.
+
+==156065== 
+dsfsdagf
+[epoll] in
+==156065== Invalid read of size 4
+==156065==    at 0x10E129: xstreamadjust (stream.c:313)
+==156065==    by 0x10C580: xconsoledescriptorprocessor_in (console.c:207)
+==156065==    by 0x10C710: xconsoledescriptorprocessor_input (console.c:245)
+==156065==    by 0x10F437: xdescriptorevent_processor_in (descriptor.c:77)
+==156065==    by 0x10FA1D: xdescriptorevent_dispatch_in (descriptor.c:240)
+==156065==    by 0x10B479: xdescriptoreventgenerator_once (epoll.c:324)
+==156065==    by 0x109AC3: xeventengine_generators_once (engine.c:108)
+==156065==    by 0x1096CB: xeventengine_run (engine.c:47)
+==156065==    by 0x10954A: main (console.c:17)
+==156065==  Address 0x0 is not stack'd, malloc'd or (recently) free'd
+==156065== 
+==156065== 
+==156065== Process terminating with default action of signal 11 (SIGSEGV)
+==156065==  Access not within mapped region at address 0x0
+==156065==    at 0x10E129: xstreamadjust (stream.c:313)
+==156065==    by 0x10C580: xconsoledescriptorprocessor_in (console.c:207)
+==156065==    by 0x10C710: xconsoledescriptorprocessor_input (console.c:245)
+==156065==    by 0x10F437: xdescriptorevent_processor_in (descriptor.c:77)
+==156065==    by 0x10FA1D: xdescriptorevent_dispatch_in (descriptor.c:240)
+==156065==    by 0x10B479: xdescriptoreventgenerator_once (epoll.c:324)
+==156065==    by 0x109AC3: xeventengine_generators_once (engine.c:108)
+==156065==    by 0x1096CB: xeventengine_run (engine.c:47)
+==156065==    by 0x10954A: main (console.c:17)
+==156065==  If you believe this happened as a result of a stack
+==156065==  overflow in your program's main thread (unlikely but
+==156065==  possible), you can try to increase the size of the
+==156065==  main thread stack using the --main-stacksize= flag.
+
+
+
+
+
 [assertion:console.c:259] xconsoledescriptorsubscriber_input:78067520 => 
 
 

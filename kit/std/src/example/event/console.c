@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include <x/thread.h>
 #include <x/console.h>
 #include <x/event/engine.h>
 
@@ -19,5 +20,5 @@ int main(int argc, char ** argv)
 
 static xint64 xconsolesubscriber_example(xconsole * console, xuint64 event, void * parameter, xint64 value)
 {
-    
+    return value;
 }
