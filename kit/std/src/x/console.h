@@ -27,4 +27,6 @@ extern void xconsolesubscriber_set(xconsolesubscriber subscriber);
 
 extern xint64 xconsolesubscriber_default(xconsole * console, xuint64 event, void * parameter, xint64 value);
 
+// extern const char * xconsolein(void);
+
 #endif // __NOVEMBERIZING_X__CONSOLE__H__
