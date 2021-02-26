@@ -13,6 +13,7 @@ AC_CONFIG_FILES([
     src/x/Makefile
     src/example/Makefile
     src/example/event/Makefile
+    src/example/console/Makefile
 ])
 
 dnl ----------------------------------------------------------

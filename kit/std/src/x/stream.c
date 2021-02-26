@@ -316,3 +316,12 @@ extern xuint64 xstreamadjust(xstream * o, xint32 force)
     }
     xassertion(xtrue, "");
 }
+
+extern void xstreampush(xstream * o, xbyte * data, xuint64 len)
+{
+    switch(o->type)
+    {
+        case xstreamtype_buffer: return xstreambuffer_push((xstreambuffer *) o, data, len);
+    }
+    xassertion(xtrue, "");
+}

@@ -1,1 +1,1 @@
-SUBDIRS = event
+SUBDIRS = event console

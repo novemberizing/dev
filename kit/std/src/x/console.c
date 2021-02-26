@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "thread.h"
 #include "console.h"
@@ -308,4 +309,31 @@ static xint32 xconsoledescriptorcheck_output(xconsoledescriptor * descriptor, xu
     }
 
     xassertion(xtrue, "");
+}
+
+extern xint64 xconsoleout_string(const char * s)
+{
+    xconsoledescriptor * descriptor = xconsoledescriptorout_get();
+    printf("= 1 =\n");
+    xint64 len = strlen(s);
+
+    xstreampush(descriptor->stream, s, len);
+
+    xint64 n = xdescriptorwrite((xdescriptor *) descriptor, xstreamfront(descriptor->stream), xstreamlen(descriptor->stream));
+
+    if(n > 0)
+    {
+        xassertion(n + len < xstreamlen(descriptor->stream), "");
+
+        xstreampos_set(descriptor->stream, xstreampos_get(descriptor->stream) + n);
+        xstreamadjust(descriptor->stream, xfalse);
+    }
+    else
+    {
+        xassertion(len > 0, "");
+        xassertion(n < 0, "");
+    }
+
+    return n;
+    
 }
