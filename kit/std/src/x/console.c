@@ -338,6 +338,10 @@ extern xint64 xconsoleout_string(const char * s)
     
 }
 
+/**
+ * 현재까지 받을 수 있는 총량만을 출력한다.
+ * 즉, SIZE 는 힌트일 뿐이다.
+ */
 extern xint64 xconsolein_string(char * buffer, xuint64 size)
 {
     xassertion(buffer == xnil || size == 0, "");
@@ -359,12 +363,13 @@ extern xint64 xconsolein_string(char * buffer, xuint64 size)
         if(n > 0)
         {
             xstreamsize_set(descriptor->stream, xstreamsize_get(descriptor->stream) + n);
-            xassertion(xstreamlen(descriptor->stream) < size, "");
         }
-        else
-        {
-            xassertion(n <= 0, "");
-        }
+        xassertion(n < 0, "");
+
+        xassertion(xtrue, "implement this");
+
+        // xint64 len = xstreamlen(descriptor->str
+
         memcpy(buffer, xstreamfront(descriptor->stream), size);
         xstreampos_set(descriptor->stream, xstreampos_get(descriptor->stream) + size);
         xstreamadjust(descriptor->stream, xfalse);
