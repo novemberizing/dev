@@ -317,7 +317,7 @@ extern xuint64 xstreamadjust(xstream * o, xint32 force)
     xassertion(xtrue, "");
 }
 
-extern void xstreampush(xstream * o, xbyte * data, xuint64 len)
+extern xuint64 xstreampush(xstream * o, const xbyte * data, xuint64 len)
 {
     switch(o->type)
     {

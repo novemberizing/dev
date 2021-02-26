@@ -106,7 +106,7 @@ extern xdescriptor * xconsoledescriptorout_get(void)
         consoledescriptorsingleton_out->status = (xdescriptorstatus_open | xdescriptorstatus_out | xdescriptorstatus_in);
         consoledescriptorsingleton_out->console = xaddressof(console);
         // TODO: 사용자가 버퍼를 생성할 수 있도록 하자.
-        consoledescriptorsingleton_in->stream = xstreamnew(xstreamtype_default);
+        consoledescriptorsingleton_out->stream = xstreamnew(xstreamtype_default);
         console.out = consoledescriptorsingleton_out;
     }
 
@@ -313,8 +313,8 @@ static xint32 xconsoledescriptorcheck_output(xconsoledescriptor * descriptor, xu
 
 extern xint64 xconsoleout_string(const char * s)
 {
-    xconsoledescriptor * descriptor = xconsoledescriptorout_get();
-    printf("= 1 =\n");
+    xconsoledescriptor * descriptor = (xconsoledescriptor *) xconsoledescriptorout_get();
+
     xint64 len = strlen(s);
 
     xstreampush(descriptor->stream, s, len);
@@ -336,4 +336,49 @@ extern xint64 xconsoleout_string(const char * s)
 
     return n;
     
+}
+
+extern xint64 xconsolein_string(char * buffer, xuint64 size)
+{
+    xassertion(buffer == xnil || size == 0, "");
+
+    xint64 n = 0;
+
+    xconsoledescriptor * descriptor = (xconsoledescriptor *) xconsoledescriptorin_get();
+
+    if(size <= xstreamlen(descriptor->stream))
+    {
+        memcpy(buffer, xstreamfront(descriptor->stream), size);
+        xstreampos_set(descriptor->stream, xstreampos_get(descriptor->stream) + size);
+        xstreamadjust(descriptor->stream, xfalse);
+        return size;
+    }
+    else if(xstreamlen(descriptor->stream) > 0)
+    {
+        xint64 n = xdescriptorread((xdescriptor *) descriptor, xstreamback(descriptor->stream), size - xstreamlen(descriptor->stream));
+        if(n > 0)
+        {
+            xstreamsize_set(descriptor->stream, xstreamsize_get(descriptor->stream) + n);
+            xassertion(xstreamlen(descriptor->stream) < size, "");
+        }
+        else
+        {
+            xassertion(n <= 0, "");
+        }
+        memcpy(buffer, xstreamfront(descriptor->stream), size);
+        xstreampos_set(descriptor->stream, xstreampos_get(descriptor->stream) + size);
+        xstreamadjust(descriptor->stream, xfalse);
+
+        return size;
+    }
+    else
+    {
+        xint64 n = xdescriptorread((xdescriptor *) descriptor, buffer, size);
+
+        xassertion(n != size, "n => %ld", n);
+
+        return n;
+    }
+
+    return xfail;
 }

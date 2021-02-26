@@ -306,5 +306,16 @@ extern xuint64 xstreambuffer_adjust(xstreambuffer * o, xint32 force)
 extern xuint64 xstreambuffer_push(xstreambuffer * o, const xbyte * data, xuint64 len)
 {
     // TODO: 최적화를 수행하가면서 데이터를 삽입하도록 한다.
-    xassertion(xtrue, "implement this");
+    if(len < o->position + (o->capacity - o->size))
+    {
+        xstreambuffer_adjust(o, xtrue);
+    }
+    else
+    {
+        xstreambuffercapacity_set(o, xstreambuffercapacity_get(o) + len);
+    }
+    memcpy(xaddressof(o->buffer[o->size]), data, len);
+    o->size = o->size + len;
+
+    return (o->size - o->position);
 }
