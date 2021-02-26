@@ -181,7 +181,16 @@ static inline xint32 xdescriptoreventgenerator_epoll_open(xdescriptoreventgenera
             xdescriptoreventsubscription * subscription = generator->alive->head;
             while(subscription)
             {
-                // 
+                
+                if(subscription->descriptor->handle.f >= 0)
+                {
+                    if(xdescriptoreventgenerator_epoll_register(generator->f, subscription, xtrue) == xsuccess)
+                    {
+                        subscription = subscription->generatornode.next;
+                        continue;
+                    }
+                }
+                xassertion(xtrue, "implement this");
             }
             xsyncunlock(generator->alive->sync);
         }
@@ -235,8 +244,9 @@ extern xdescriptoreventgenerator * xdescriptoreventgenerator_rem(xdescriptoreven
 
 extern void xdescriptoreventgenerator_register(xdescriptoreventgenerator * o, xdescriptoreventsubscription * subscription)
 {
-    xdescriptoreventgenerator_epoll * generator = (xdescriptoreventgenerator_epoll *) o;
+    xdebugfunctionstart("xdescriptoreventgenerator * o => %p, xdescriptoreventsubscription * subscription => %p", o, subscription);
 
+    xdescriptoreventgenerator_epoll * generator = (xdescriptoreventgenerator_epoll *) o;
     xdescriptor * descriptor = subscription->descriptor;
 
     if(descriptor->handle.f >= 0)
@@ -259,6 +269,7 @@ extern void xdescriptoreventgenerator_register(xdescriptoreventgenerator * o, xd
             }
         }
     }
+
     xdescriptoreventgeneratorsubscriptionlist_push(generator->queue, subscription);
 }
 
@@ -297,16 +308,19 @@ extern void xdescriptoreventgenerator_once(xdescriptoreventgenerator * o)
 
                 if(generator->events[i].events & (EPOLLERR | EPOLLPRI | EPOLLRDHUP | EPOLLHUP))
                 {
+                    printf("[epoll] exception\n");
                     // TODO: 정확한 예외 처리를 할 수 있도록 하자.
                     xdescriptorevent_dispatch_exception(subscription->descriptor, xnil, generator->events[i].events);
                     continue;
                 }
                 if(generator->events[i].events & EPOLLOUT)
                 {
+                    printf("[epoll] out\n");
                     xdescriptorevent_dispatch_out(subscription->descriptor);
                 }
                 if(generator->events[i].events & EPOLLIN)
                 {
+                    printf("[epoll] in\n");
                     xdescriptorevent_dispatch_in(subscription->descriptor);
                 }
             }

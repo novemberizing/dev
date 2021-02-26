@@ -15,7 +15,7 @@
 typedef xconsoledescriptor * (*xconsoledescriptordestructor)(xconsoledescriptor *);
 typedef xint64 (*xconsoledescriptorprocessor)(xconsoledescriptor *, xuint32, void *);             /**!< 디스크립터 이벤트 프로세서 */
 typedef xint64 (*xconsoledescriptorsubscriber)(xconsoledescriptor *, xuint32, void *, xint64);    /**!< 디스크립터 이벤트 서브스크리라이버 */
-typedef xint32 (*xconsoledescriptorcheck)(xconsoledescriptor *, xuint32);  
+typedef xint32 (*xconsoledescriptorcheck)(xconsoledescriptor *, xuint32);
 
 struct xconsoledescriptor
 {

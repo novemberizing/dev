@@ -147,7 +147,8 @@ am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) object.$(OBJEXT) \
 	event/processor/event.$(OBJEXT) descriptor.$(OBJEXT) \
 	descriptor/event/generator.$(OBJEXT) \
 	descriptor/event/generator/epoll.$(OBJEXT) \
-	descriptor/event/generator/subscription/list.$(OBJEXT)
+	descriptor/event/generator/subscription/list.$(OBJEXT) \
+	console.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -164,9 +165,10 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/descriptor.Po ./$(DEPDIR)/object.Po \
-	./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po ./$(DEPDIR)/sync.Po \
-	./$(DEPDIR)/thread.Po descriptor/event/$(DEPDIR)/generator.Po \
+am__depfiles_remade = ./$(DEPDIR)/console.Po ./$(DEPDIR)/descriptor.Po \
+	./$(DEPDIR)/object.Po ./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po \
+	./$(DEPDIR)/sync.Po ./$(DEPDIR)/thread.Po \
+	descriptor/event/$(DEPDIR)/generator.Po \
 	descriptor/event/generator/$(DEPDIR)/epoll.Po \
 	descriptor/event/generator/subscription/$(DEPDIR)/list.Po \
 	event/$(DEPDIR)/engine.Po event/$(DEPDIR)/processor.Po \
@@ -363,7 +365,8 @@ libnovemberizing_a_SOURCES = std.c                                          \
                              descriptor.c                                   \
                              descriptor/event/generator.c                   \
                              descriptor/event/generator/epoll.c             \
-                             descriptor/event/generator/subscription/list.c
+                             descriptor/event/generator/subscription/list.c \
+                             console.c
 
 all: all-am
 
@@ -524,6 +527,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/console.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
@@ -723,7 +727,8 @@ clean-am: clean-generic clean-libLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/descriptor.Po
+		-rm -f ./$(DEPDIR)/console.Po
+	-rm -f ./$(DEPDIR)/descriptor.Po
 	-rm -f ./$(DEPDIR)/object.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/stream.Po
@@ -786,7 +791,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/descriptor.Po
+		-rm -f ./$(DEPDIR)/console.Po
+	-rm -f ./$(DEPDIR)/descriptor.Po
 	-rm -f ./$(DEPDIR)/object.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/stream.Po

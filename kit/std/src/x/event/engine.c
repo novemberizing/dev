@@ -20,6 +20,8 @@ extern xeventengine * xeventengine_new(void)
     engine->main  = xeventqueue_new();
     engine->queue = xeventqueue_new();
 
+    engine->generators.descriptor = xdescriptoreventgenerator_new(engine);
+
     return engine;
 }
 
@@ -29,7 +31,6 @@ extern xint32 xeventengine_run(xeventengine * engine)
     if(engine->on == xnil)
     {
         engine->on = xeventenginecallback_internal;
-        engine->generators.descriptor = xdescriptoreventgenerator_new(engine);
 
         xeventengine_sync(engine, xeventengine_processor_pool_size(engine));
 
@@ -119,11 +120,10 @@ extern void xeventengine_processors_on(xeventengine * engine)
 
 extern void xeventengine_generators_on(xeventengine * engine)
 {
-    if(engine)
-    {
-        xdescriptoreventgenerator_on(engine->generators.descriptor);
-        // TODO: THE OTHER ...
-    }
+    xassertion(engine == xnil, "");
+    xassertion(engine->generators.descriptor == xnil, "");
+
+    xdescriptoreventgenerator_on(engine->generators.descriptor);
 }
 
 extern void xeventengine_main_process(xeventengine * engine)
@@ -188,11 +188,13 @@ extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engi
 
     xassertion(descriptor->subscription, "");   // 이 로직은 어떻게 처리해야 할까?
 
-    xeventsubscription * subscription = xeventsubscription_new(engine, (xeventtarget *) descriptor, sizeof(xdescriptoreventsubscription));
+    xdescriptoreventsubscription * subscription = (xdescriptoreventsubscription *) xeventsubscription_new(engine, (xeventtarget *) descriptor, sizeof(xdescriptoreventsubscription));
 
-    xdescriptoreventgenerator_register(engine->generators.descriptor, (xdescriptoreventsubscription *) subscription);
+    subscription->generatornode.generator = engine->generators.descriptor;
 
-    return subscription;
+    xdescriptoreventgenerator_register(engine->generators.descriptor, subscription);
+
+    return (xeventsubscription *) subscription;
 }
 
 extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * engine, xdescriptor * descriptor)
@@ -236,16 +238,6 @@ extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * en
     }
 
     return (xeventsubscription *) subscription;
-}
-
-extern xeventsubscription * xeventengine_console_descriptor_register(xeventengine * engine, xconsoledescriptor * descriptor)
-{
-    return xeventengine_descriptor_register(engine, (xdescriptor *) descriptor);
-}
-
-extern xeventsubscription * xeventengine_console_descriptor_unregister(xeventengine * engine, xconsoledescriptor * descriptor)
-{
-    return xeventengine_descriptor_unregister(engine, (xdescriptor *) descriptor);
 }
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event)

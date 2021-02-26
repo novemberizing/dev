@@ -20,6 +20,6 @@ struct xconsoledescriptorevent
     xconsoledescriptor *           descriptor;
 };
 
-#define xconsoledescriptorevent_init(on, descriptor) ((xconsoledescriptorevent) { xnil, xnil, xnil, on, descriptor })
+#define xconsoledescriptorevent_void    ((xconsoledescriptorevent) { xnil, xnil, xnil, xnil, xnil})
 
 #endif // __NOVEMBERIZING_X__CONSOLE__DESCRIPTOR_EVENT__H__

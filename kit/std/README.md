@@ -1,3 +1,105 @@
+[assertion:console.c:259] xconsoledescriptorsubscriber_input:78067520 => 
+
+
+
+==152369== Invalid write of size 8
+==152369==    at 0x10C23C: xconsoledescriptorin_get (console.c:98)
+==152369==    by 0x10C148: xconsolesubscriber_set (console.c:66)
+==152369==    by 0x109507: main (console.c:10)
+==152369==  Address 0x80 is not stack'd, malloc'd or (recently) free'd
+==152369== 
+==152369== 
+==152369== Process terminating with default action of signal 11 (SIGSEGV)
+==152369==  Access not within mapped region at address 0x80
+==152369==    at 0x10C23C: xconsoledescriptorin_get (console.c:98)
+==152369==    by 0x10C148: xconsolesubscriber_set (console.c:66)
+==152369==    by 0x109507: main (console.c:10)
+==152369==  If you believe this happened as a result of a stack
+==152369==  overflow in your program's main thread (unlikely but
+==152369==  possible), you can try to increase the size of the
+==152369==  main thread stack using the --main-stacksize= flag.
+==152369==  The main thread stack size used in this run was 8388608.
+
+
+
+
+
+
+==148181== Jump to the invalid address stated on the next line
+==148181==    at 0x0: ???
+==148181==    by 0x10B29D: xdescriptoreventgenerator_register (epoll.c:259)
+==148181==    by 0x109E96: xeventengine_descriptor_register (engine.c:196)
+==148181==    by 0x10951B: main (console.c:12)
+==148181==  Address 0x0 is not stack'd, malloc'd or (recently) free'd
+==148181== 
+==148181== 
+==148181== Process terminating with default action of signal 11 (SIGSEGV)
+==148181==  Bad permissions for mapped region at address 0x0
+==148181==    at 0x0: ???
+==148181==    by 0x10B29D: xdescriptoreventgenerator_register (epoll.c:259)
+==148181==    by 0x109E96: xeventengine_descriptor_register (engine.c:196)
+==148181==    by 0x10951B: main (console.c:12)
+
+
+
+
+
+==147774== Invalid write of size 4
+==147774==    at 0x10C22E: xconsoledescriptorout_get (console.c:111)
+==147774==    by 0x109509: main (console.c:12)
+==147774==  Address 0x1c is not stack'd, malloc'd or (recently) free'd
+==147774== 
+==147774== 
+==147774== Process terminating with default action of signal 11 (SIGSEGV)
+==147774==  Access not within mapped region at address 0x1C
+==147774==    at 0x10C22E: xconsoledescriptorout_get (console.c:111)
+==147774==    by 0x109509: main (console.c:12)
+==147774==  If you believe this happened as a result of a stack
+==147774==  overflow in your program's main thread (unlikely but
+==147774==  possible), you can try to increase the size of the
+==147774==  main thread stack using the --main-stacksize= flag.
+==147774==  The main thread stack size used in this run was 8388608.
+
+
+
+고민스러운 부분은 CONSOLE 에 등록하느냐? 아니면 SUBSCRIPTION 에 등록하는냐 이다.
+결국은 SUBSCRIPTION 에 등록하는 것이 아니라 콘솔에 등록하는 것이겠구나
+
+등록할 때 서브스크립션을 생성 한 후에 generatornode 에 generator 를 삽입하도록 하였다.
+
+[assertion:descriptor/event/generator/subscription/list.c:41] xdescriptoreventgeneratorsubscriptionlist_push:78067520 =>
+
+
+생성과 동시에 생성하지 않았다. 그래서 생성과 동시에 필요한 자원을 생성하도록 해야 한다.
+
+==135190== Invalid read of size 8
+==135190==    at 0x10B179: xdescriptoreventgenerator_register (epoll.c:263)
+==135190==    by 0x109E4F: xeventengine_descriptor_register (engine.c:194)
+==135190==    by 0x1094FB: main (console.c:8)
+==135190==  Address 0x8 is not stack'd, malloc'd or (recently) free'd
+==135190== 
+==135190== 
+==135190== Process terminating with default action of signal 11 (SIGSEGV)
+==135190==  Access not within mapped region at address 0x8
+==135190==    at 0x10B179: xdescriptoreventgenerator_register (epoll.c:263)
+==135190==    by 0x109E4F: xeventengine_descriptor_register (engine.c:194)
+==135190==    by 0x1094FB: main (console.c:8)
+==135190==  If you believe this happened as a result of a stack
+==135190==  overflow in your program's main thread (unlikely but
+==135190==  possible), you can try to increase the size of the
+==135190==  main thread stack using the --main-stacksize= flag.
+==135190==  The main thread stack size used in this run was 8388608.
+ 
+ 
+ 디스크립터 이벤트 제네레이터가 널이다.
+
+```
+==134690== Invalid read of size 8
+==134690==    at 0x10B104: xdescriptoreventgenerator_register (epoll.c:263)
+==134690==    by 0x109DC2: xeventengine_descriptor_register (engine.c:193)
+==134690==    by 0x1094FB: main (console.c:8)
+==134690==  Address 0x8 is not stack'd, malloc'd or (recently) free'd
+```
 
 nobase_include_HEADERS
 

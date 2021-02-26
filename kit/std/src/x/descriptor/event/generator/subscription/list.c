@@ -38,7 +38,8 @@ extern xdescriptoreventgeneratorsubscriptionlist * xdescriptoreventgeneratorsubs
 
 extern void xdescriptoreventgeneratorsubscriptionlist_push(xdescriptoreventgeneratorsubscriptionlist * list, xdescriptoreventsubscription * subscription)
 {
-    xassertion(list == xnil || subscription == xnil || subscription->generatornode.generator == xnil, "");
+    xassertion(list == xnil || subscription == xnil, "list => %p, subscription => %p", list, subscription);
+    xassertion(subscription->generatornode.generator == xnil, "subscription->generatornode.generator => %p", subscription->generatornode.generator);
     xassertion(subscription->generatornode.list || subscription->generatornode.prev || subscription->generatornode.next, "");
 
     subscription->generatornode.prev = list->tail;
@@ -52,6 +53,7 @@ extern void xdescriptoreventgeneratorsubscriptionlist_push(xdescriptoreventgener
     }
     list->tail = subscription;
     list->size = list->size + 1;
+
 }
 
 extern xdescriptoreventsubscription * xdescriptoreventgeneratorsubscriptionlist_del(xdescriptoreventsubscription * subscription)

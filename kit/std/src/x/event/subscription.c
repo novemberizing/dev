@@ -19,6 +19,7 @@ extern xeventsubscription * xeventsubscription_new(xeventengine * engine, xevent
     xsynclock(engine->subscriptions.sync);
     subscription->target = target;
     subscription->target->subscription = subscription;
+    
 
     subscription->enginenode.engine = engine;
     subscription->enginenode.prev = engine->subscriptions.tail;

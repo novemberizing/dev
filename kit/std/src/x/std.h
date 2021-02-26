@@ -119,6 +119,28 @@ typedef unsigned char       xbyte;              /**!< 바이트 타입 */
     }                                           \
 } while(0)
 
+#define xdebugfunctionstart(format, ...) do {       \
+    if(xfalse) {                                    \
+        printf("[function:start:%s:%d] %s:%lu => "  \
+               format "\n",                         \
+               __FILE__,                            \
+               __LINE__,                            \
+               __func__,                            \
+               xthreadid(),                         \
+               ##__VA_ARGS__);                      \
+    }                                               \
+} while(0)
+
+#define xdebugverbose(format, ...) do {             \
+    printf("[verbose:%s:%d] %s:%lu => "             \
+           format "\n",                             \
+           __FILE__,                                \
+           __LINE__,                                \
+           __func__,                                \
+           xthreadid(),                             \
+           ##__VA_ARGS__);                          \
+} while(0)
+
 extern xint32 xerrorret(xint32 number);
 
 /**
