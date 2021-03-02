@@ -12,11 +12,10 @@ static xint64 xsessionsocketsubscriber_tcp(xsessionsocket * descriptor, xuint32 
 static xint64 xsessionsocketprocessor_tcp(xsessionsocket * descriptor, xuint32 event, void * data);
 static xint32 xsessionsocketcheck_tcp(xsessionsocket * descriptor, xuint32 event);
 
-extern xsessionsocket * xsessionsocket_new(xsession * session, xint32 domain, xint32 type, xint32 protocol)
+extern xsessionsocket * xsessionsocket_new(xint32 domain, xint32 type, xint32 protocol)
 {
     xsessionsocket * descriptor = (xsessionsocket * ) calloc(sizeof(xsessionsocket), 1);
 
-    descriptor->session = session;
     descriptor->rem = xsessionsocket_rem;
     descriptor->handle.f = xinvalid;
     descriptor->event.descriptor = descriptor;

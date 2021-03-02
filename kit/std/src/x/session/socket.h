@@ -38,7 +38,7 @@ struct xsessionsocket
     xsession * session;
 };
 
-extern xsessionsocket * xsessionsocket_new(xsession * session, xint32 domain, xint32 type, xint32 protocol);
+extern xsessionsocket * xsessionsocket_new(xint32 domain, xint32 type, xint32 protocol);
 extern xsessionsocket * xsessionsocket_rem(xsessionsocket * descriptor);
 
 #endif // __NOVEMBERIZING_X__SESSION__SOCKET__H__

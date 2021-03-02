@@ -1,0 +1,13 @@
+#ifndef   __NOVEMBERIZING_X__SERVER__SOCKET_EVENT_SUBSCRIPTION__H__
+#define   __NOVEMBERIZING_X__SERVER__SOCKET_EVENT_SUBSCRIPTION__H__
+
+struct xserversocketeventsubscription;
+
+typedef struct xserversocketeventsubscription xserversocketeventsubscription;
+
+struct xserversocketeventsubscription
+{
+
+};
+
+#endif // __NOVEMBERIZING_X__SERVER__SOCKET_EVENT_SUBSCRIPTION__H__

@@ -4,12 +4,16 @@
 
 #include "engine.h"
 
-#include "thread.h"
-#include "descriptor.h"
-#include "console/descriptor.h"
-#include "descriptor/event/generator.h"
+#include "../thread.h"
+#include "../descriptor.h"
+#include "../console/descriptor.h"
+#include "../descriptor/event/generator.h"
+#include "../server.h"
+#include "../server/socket.h"
+
 #include "processor/pool.h"
 #include "descriptor/event/subscription.h"
+
 
 static void xeventenginecallback_internal(xeventengine * engine, xuint32 status);
 
@@ -110,6 +114,21 @@ extern void xeventengine_sync(xeventengine * engine, xint32 on)
     }
 
     xsyncunlock(engine->sync);
+}
+
+extern xeventsubscription * xeventengine_server_register(xeventengine * engine, xserver * server)
+{
+    xassertion(engine == xnil || server == xnil || server->descriptor == xnil, "");
+    xassertion(server->descriptor->subscription, "");
+
+    xserversocketeventsubscription * subscription = (xserversocketeventsubscription *) xeventsubscription_new(engine, (xeventtarget *) server->descriptor, sizeof(xserversocketeventsubscription));
+
+    xassertion(xtrue, "implement this");
+
+    // xdescriptoreventsubscription * subscription = (xdescriptoreventsubscription *) 
+    // xeventsubscription_new(engine, (xeventtarget *) descriptor, sizeof(xdescriptoreventsubscription));
+
+    return (xeventsubscription *) subscription;
 }
 
 extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engine, xdescriptor * descriptor)
