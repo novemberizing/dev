@@ -16,7 +16,7 @@ typedef struct xclientsocket xclientsocket;
 typedef xclientsocket * (*xclientsocketdestructor)(xclientsocket *);
 typedef xint64 (*xclientsocketprocessor)(xclientsocket *, xuint32, void *);
 typedef xint64 (*xclientsocketsubscriber)(xclientsocket *, xuint32, void *, xint64);
-typedef xint32 (*xclientsocketstatuscheck)(xclientsocket *, xuint32);
+typedef xint32 (*xclientsocketcheck)(xclientsocket *, xuint32);
 
 struct xclientsocket
 {
@@ -29,7 +29,7 @@ struct xclientsocket
     /** DESCRIPTOR EVENT HANDLE */
     xdescriptorhandle                handle;        /**!< descriptor handle */
     xclientsocketprocessor           process;       /**!< descriptor process function */
-    xclientsocketstatuscheck         check;         /**!< descriptor status checker  */
+    xclientsocketcheck               check;         /**!< descriptor status checker  */
     xclientsocketsubscriber          on;            /**!< descriptor event subscriber */
     xclientsocketevent               event;         /**!< descriptor default event */
     xexception                       exception;     /**!< descriptor exception */

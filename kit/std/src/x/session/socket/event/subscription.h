@@ -1,0 +1,13 @@
+#ifndef   __NOVEMBERIZING_X__SESSION__SOCKET_EVENT_SUBSCRIPTION__H__
+#define   __NOVEMBERIZING_X__SESSION__SOCKET_EVENT_SUBSCRIPTION__H__
+
+struct xsessionsocketeventsubscription;
+
+typedef struct xsessionsocketeventsubscription xsessionsocketeventsubscription;
+
+struct xsessionsocketeventsubscription
+{
+
+};
+
+#endif // __NOVEMBERIZING_X__SESSION__SOCKET_EVENT_SUBSCRIPTION__H__
