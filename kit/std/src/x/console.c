@@ -380,7 +380,20 @@ extern xint64 xconsolein_string(char * buffer, xuint64 size)
     {
         xint64 n = xdescriptorread((xdescriptor *) descriptor, buffer, size);
 
-        xassertion(n != size, "n => %ld", n);
+        if(n > 0)
+        {
+            return n;
+        }
+        else if(n == 0)
+        {
+            xassertion(n < 0, "");
+            return n;
+        }
+        else
+        {
+            xassertion(n < 0, "");
+            return xfail;
+        }
 
         return n;
     }

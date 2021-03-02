@@ -24,8 +24,7 @@ struct xeventprocessorpool_event
 extern void xeventprocessorpool_event_handler_add(xeventprocessorpool_event * event);
 extern void xeventprocessorpool_event_handler_del(xeventprocessorpool_event * event);
 
-
-
 extern xeventprocessorpool_event * xeventprocessorpool_event_new(xeventprocessorpool_event_handler handler, xeventprocessorpool * pool, xuint64 n);
+
 
 #endif // __NOVEMBERIZING_X__EVENT__PROCESSOR_POOL_EVENT__H__

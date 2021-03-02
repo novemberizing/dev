@@ -28,30 +28,38 @@ extern xeventengine * xeventengine_new(void)
 extern xint32 xeventengine_run(xeventengine * engine)
 {
     xassertion(engine == xnil, "");
+
     if(engine->on == xnil)
     {
         engine->on = xeventenginecallback_internal;
 
-        xeventengine_sync(engine, xeventengine_processor_pool_size(engine));
+        
+
+        xeventengine_sync(engine, xeventprocessorpool_size(engine->processors));
 
         xsynclock(engine->sync);
-        xeventengine_generators_on(engine);
-        xeventengine_processors_on(engine);
+        // xeventengine_generators_on(engine);
+        xeventgeneratorset_on(xaddressof(engine->generators));
+        xeventprocessorpool_on(engine->processors);
         while(engine->cancel == xnil)
         {
             // 어느 시점에 ENGINE SYNC 의 UNLOCK/LOCK 을 수행해야 하는지 확인할 필요가 있다.
             xsyncunlock(engine->sync);
 
-            xeventengine_main_consume(engine);
-            xeventengine_queue_consume(engine);
-            xeventengine_generators_once(engine);
-            xeventengine_main_process(engine);
+            xeventqueue_once(engine->main);
+
+            xeventgeneratorset_once(xaddressof(engine->generators));
+
+            if(xeventprocessorpool_size(engine->processors) == 0)
+            {
+                xeventqueue_once(engine->queue);
+            }
 
             xsynclock(engine->sync);
         }
-        xeventengine_generators_off(engine);
-        xeventengine_queue_clear(engine);
-        xeventengine_main_clear(engine);
+        xeventgeneratorset_off(xaddressof(engine->generators));
+        xeventqueue_clear(engine->queue);
+        xeventqueue_clear(engine->main);
         engine->on(engine, xeventenginestatus_off);
         engine->on = xnil;
         xsyncunlock(engine->sync);
@@ -59,84 +67,6 @@ extern xint32 xeventengine_run(xeventengine * engine)
     }
 
     return xsuccess;
-}
-
-extern void xeventengine_main_consume(xeventengine * engine)
-{
-    xassertion(engine == xnil, "");
-
-    xsynclock(engine->main->sync);
-    xuint64 total = engine->main->size;
-    for(xuint64 i = 0; i < total; i++)
-    {
-        xevent * event = xeventqueue_pop(engine->main);
-        if(event)
-        {
-            xsyncunlock(engine->main->sync);
-            event->on(event);
-            xsynclock(engine->main->sync);
-        }
-        break;
-    }
-    xsyncunlock(engine->main->sync);
-}
-
-extern void xeventengine_queue_consume(xeventengine * engine)
-{
-    xassertion(engine == xnil, "");
-
-    xsynclock(engine->queue->sync);
-    xuint64 total = engine->queue->size;
-    for(xuint64 i = 0; i < total; i++)
-    {
-        xevent * event = xeventqueue_pop(engine->queue);
-        if(event)
-        {
-            xsyncunlock(engine->queue->sync);
-            event->on(event);
-            xsynclock(engine->queue->sync);
-        }
-        break;
-    }
-    xsyncunlock(engine->queue->sync);
-}
-
-extern void xeventengine_generators_once(xeventengine * engine)
-{
-    xassertion(engine == xnil, "");
-
-    xdescriptoreventgenerator_once(engine->generators.descriptor);
-
-    // TODO: THE OTHER GENERATOR ONCE ...
-}
-
-extern void xeventengine_processors_on(xeventengine * engine)
-{
-    if(engine)
-    {
-        xeventprocessorpool_on(engine->processors);
-    }
-}
-
-extern void xeventengine_generators_on(xeventengine * engine)
-{
-    xassertion(engine == xnil, "");
-    xassertion(engine->generators.descriptor == xnil, "");
-
-    xdescriptoreventgenerator_on(engine->generators.descriptor);
-}
-
-extern void xeventengine_main_process(xeventengine * engine)
-{
-    // TODO:
-    if(engine)
-    {
-    }
-}
-
-extern xuint64 xeventengine_processor_pool_size(xeventengine * engine)
-{
-    return engine && engine->processors ? engine->processors->size : 0;
 }
 
 extern void xeventengine_sync(xeventengine * engine, xint32 on)
@@ -249,17 +179,6 @@ extern void xeventengine_main_push(xeventengine * engine, xevent * event)
     xsyncunlock(engine->main->sync);
 }
 
-extern xevent * xeventengine_main_pop(xeventengine * engine)
-{
-    xassertion(engine == xnil || engine->main == xnil, "");
-
-    xsynclock(engine->main->sync);
-    xevent * event = xeventqueue_pop(engine->main);
-    xsyncunlock(engine->main->sync);
-
-    return event;
-}
-
 extern void xeventengine_queue_push(xeventengine * engine, xevent * event)
 {
     xassertion(engine == xnil || engine->queue == xnil || event == xnil, "");
@@ -275,65 +194,15 @@ extern void xeventengine_queue_push(xeventengine * engine, xevent * event)
     xsyncunlock(engine->queue->sync);
 }
 
-extern xevent * xeventengine_queue_pop(xeventengine * engine)
-{
-    xassertion(engine == xnil || engine->queue == xnil, "");
-    /**
-     * WAIT 을 수행하지 않는 이유는 이 코드는 이벤트 프로세서에 정의되어 있고,
-     * 이 함수가 호출되는 곳은 엔진의 메인 이벤트 루프에서 호출되기 때문이다.
-     */
-    xsynclock(engine->queue->sync);
-    xevent * event = xeventqueue_pop(engine->queue);
-    xsyncunlock(engine->queue->sync);
-
-    return event;
-}
-
 static void xeventenginecallback_internal(xeventengine * engine, xuint32 status)
 {
     // TODO: 
 }
 
-extern void xeventengine_main_clear(xeventengine * engine)
-{
-    xsynclock(engine->main->sync);
-    while(engine->main->size > 0)
-    {
-        xevent * event = xeventqueue_pop(engine->main);
-        xsyncunlock(engine->main->sync);
-        if(event)
-        {
-            event->on(event);
-        }
-        xsynclock(engine->main->sync);
-    }
-    xsyncunlock(engine->main->sync);
-}
-
-extern void xeventengine_queue_clear(xeventengine * engine)
-{
-    xsynclock(engine->queue->sync);
-    while(engine->queue->size > 0)
-    {
-        xevent * event = xeventqueue_pop(engine->queue);
-        xsyncunlock(engine->queue->sync);
-        if(event)
-        {
-            event->on(event);
-        }
-        xsynclock(engine->queue->sync);
-    }
-    xsyncunlock(engine->queue->sync);
-}
-
-extern void xeventengine_generators_off(xeventengine * engine)
-{
-    xassertion(engine == xnil, "");
-
-    xdescriptoreventgenerator_off(engine->generators.descriptor);
-}
-
-extern xint32 xengineengine_descriptor_dispatch(xdescriptor * descriptor)
+/**
+ * 
+ */
+extern xint32 xeventengine_descriptor_dispatch(xdescriptor * descriptor)
 {
     xassertion(descriptor == xnil, "");
 

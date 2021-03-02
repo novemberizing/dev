@@ -18,6 +18,7 @@ libnovemberizing_a_SOURCES = std.c                                          \
                              event/engine.c                                 \
                              event/processor/pool.c                         \
                              event/processor/event.c                        \
+                             event/generator/set.c                          \
                              descriptor.c                                   \
                              descriptor/event/generator.c                   \
                              descriptor/event/generator/epoll.c             \

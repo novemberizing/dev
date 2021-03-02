@@ -189,7 +189,7 @@ extern xint64 xdescriptorevent_dispatch_on(xdescriptor * descriptor)
 
     if(subscription)
     {
-        if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+        if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
         {
             return xdescriptorevent_process_on(descriptor);
         }
@@ -211,7 +211,7 @@ extern xint64 xdescriptorevent_dispatch_open(xdescriptor * descriptor)
         {
             if(subscription)
             {
-                if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+                if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
                 {
                     return xdescriptorevent_processor_open(descriptor);
                 }
@@ -236,7 +236,7 @@ extern xint64 xdescriptorevent_dispatch_in(xdescriptor * descriptor)
     {
         if(subscription)
         {
-            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
                 return xdescriptorevent_processor_in(descriptor);
             }
@@ -257,7 +257,7 @@ extern xint64 xdescriptorevent_dispatch_out(xdescriptor * descriptor)
     {
         if(subscription)
         {
-            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
                 return xdescriptorevent_processor_out(descriptor);
             }
@@ -280,7 +280,7 @@ extern xint64 xdescriptorevent_dispatch_close(xdescriptor * descriptor)
         descriptor->status |= xdescriptorstatus_close;
         if(subscription)
         {
-            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
                 return xdescriptorevent_processor_close(descriptor);
             }
@@ -308,7 +308,7 @@ extern xint64 xdescriptorevent_dispatch_rem(xdescriptor * descriptor)
         descriptor->status |= xdescriptorstatus_rem;
         if(subscription)
         {
-            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
                 xdescriptorevent_processor_unregister(descriptor);
                 xdescriptorevent_processor_close(descriptor);
@@ -338,7 +338,7 @@ extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor, void
         descriptor->exception.number = number;
         if(subscription)
         {
-            if(xengineengine_descriptor_dispatch(descriptor) != xsuccess)
+            if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
                 return xdescriptorevent_processor_exception(descriptor);
             }

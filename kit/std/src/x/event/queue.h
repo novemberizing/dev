@@ -24,4 +24,7 @@ extern xeventqueue * xeventqueue_rem(xeventqueue * queue);
 extern void xeventqueue_push(xeventqueue * queue, xevent * event);
 extern xevent * xeventqueue_pop(xeventqueue * queue);
 
+extern void xeventqueue_once(xeventqueue * queue);
+extern void xeventqueue_clear(xeventqueue * queue);
+
 #endif // __NOVEMBERIZING_X__EVENT__QUEUE__H__

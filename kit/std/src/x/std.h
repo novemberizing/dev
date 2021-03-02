@@ -119,6 +119,9 @@ typedef unsigned char       xbyte;              /**!< 바이트 타입 */
     }                                               \
 } while(0)
 
+/**
+ * 로그 서브 시스템을 만들자.
+ */
 #define xdebugfunctionstart(format, ...) do {       \
     if(xfalse) {                                    \
         printf("[function:start:%s:%d] %s:%lu => "  \

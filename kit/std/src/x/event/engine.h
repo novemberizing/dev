@@ -19,12 +19,13 @@
 
 #include <x/descriptor.h>
 #include <x/console.h>
-
+#include <x/event/subscription/list.h>
+#include <x/event/generator/set.h>
 #include <x/descriptor/event/generator.h>
 
 #define xeventenginestatus_off      1
 
-typedef void (*xeventenginecb)(xeventengine *, xuint32);
+typedef void (*xeventenginesubscriber)(xeventengine *, xuint32);
 typedef void (*xeventenginefunc)(xeventengine *);       /**!< 이벤트 엔진의 기본 가상 함수입니다. */
 
 /**
@@ -34,16 +35,13 @@ typedef void (*xeventenginefunc)(xeventengine *);       /**!< 이벤트 엔진�
  */
 struct xeventengine
 {
-    xeventenginecb                                     on;
+    xeventenginesubscriber                             on;
     xeventenginefunc                                   cancel;
     xeventqueue *                                      queue;
     xeventqueue *                                      main;
     xsync *                                            sync;
-    struct { xeventsubscription * head;
-             xeventsubscription * tail;
-             xsync * sync;
-             xuint64 size;                           } subscriptions;
-    struct { xdescriptoreventgenerator * descriptor; } generators;
+    xeventsubscriptionlist                             subscriptions;
+    xeventgeneratorset                                 generators;
     xeventprocessorpool *                              processors;
 };
 
@@ -53,29 +51,13 @@ extern void xeventengine_cancel(xeventengine * engine, xeventenginefunc callback
 
 extern void xeventengine_sync(xeventengine * engine, xint32 on);
 
-extern xuint64 xeventengine_processor_pool_size(xeventengine * engine);
-
-extern void xeventengine_generators_on(xeventengine * engine);
-extern void xeventengine_processors_on(xeventengine * engine);
-extern void xeventengine_main_consume(xeventengine * engine);
-extern void xeventengine_queue_consume(xeventengine * engine);
-extern void xeventengine_main_clear(xeventengine * engine);
-extern void xeventengine_queue_clear(xeventengine * engine);
-extern void xeventengine_generators_once(xeventengine * engine);
-extern void xeventengine_main_process(xeventengine * engine);
-extern void xeventengine_generators_off(xeventengine * engine);
-
-extern xint32 xengineengine_descriptor_dispatch(xdescriptor * descriptor);
+extern xint32 xeventengine_descriptor_dispatch(xdescriptor * descriptor);
+extern xint32 xeventengine_event_dispatch(xeventengine * engine, xevent * event);
 
 extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engine, xdescriptor * descriptor);
 extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * engine, xdescriptor * descriptor);
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event);
-extern xevent * xeventengine_main_pop(xeventengine * engine);
-
 extern void xeventengine_queue_push(xeventengine * engine, xevent * event);
-extern xevent * xeventengine_queue_pop(xeventengine * engine);
-
-
 
 #endif // __NOVEMBERIZING_X__EVENT__ENGINE__H__
