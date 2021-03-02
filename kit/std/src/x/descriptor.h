@@ -36,18 +36,18 @@ typedef xint32 (*xdescriptorcheck)(xdescriptor *, xuint32);                   /*
 struct xdescriptor
 {
     /** INHERITED EVENT TARGET */
-    xdescriptordestructor                   rem;            /**!< destructor */
-    xdescriptoreventsubscription *          subscription;   /**!< subscription */
-    xsync *                                 sync;           /**!< synchronization */
-    xuint32                                 mask;           /**!< mask */
-    xuint32                                 status;         /**!< status */
+    xdescriptordestructor          rem;            /**!< destructor */
+    xdescriptoreventsubscription * subscription;   /**!< subscription */
+    xsync *                        sync;           /**!< synchronization */
+    xuint32                        mask;           /**!< mask */
+    xuint32                        status;         /**!< status */
     /** DESCRIPTOR EVENT HANDLE */
-    xdescriptorhandle                       handle;         /**!< descriptor handle */
-    xdescriptorprocessor                    process;        /**!< descriptor process function */
-    xdescriptorcheck                        check;          /**!< descriptor status checker  */
-    xdescriptorsubscriber                   on;             /**!< descriptor event subscriber */
-    xdescriptorevent                        event;          /**!< descriptor default event */
-    xexception                              exception;      /**!< descriptor exception */
+    xdescriptorhandle              handle;         /**!< descriptor handle */
+    xdescriptorprocessor           process;        /**!< descriptor process function */
+    xdescriptorcheck               check;          /**!< descriptor status checker  */
+    xdescriptorsubscriber          on;             /**!< descriptor event subscriber */
+    xdescriptorevent               event;          /**!< descriptor default event */
+    xexception                     exception;      /**!< descriptor exception */
 };
 
 extern xint64 xdescriptorclose(xdescriptor * descriptor);
@@ -66,7 +66,7 @@ extern xint64 xdescriptorevent_dispatch_in(xdescriptor * descriptor);
 extern xint64 xdescriptorevent_dispatch_out(xdescriptor * descriptor);
 extern xint64 xdescriptorevent_dispatch_close(xdescriptor * descriptor);
 extern xint64 xdescriptorevent_dispatch_rem(xdescriptor * descriptor);
-extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor, void * code, xint64 number);
+extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor);
 
 extern xint64 xdescriptorevent_processor_on(xdescriptor * descriptor);
 extern xint64 xdescriptorevent_processor_open(xdescriptor * descriptor);

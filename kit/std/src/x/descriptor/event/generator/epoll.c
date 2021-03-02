@@ -59,7 +59,10 @@ static inline xint32 xdescriptoreventgenerator_epoll_register(int epollfd, xdesc
                 }
                 if(ret != xsuccess)
                 {
-                    xdescriptorevent_dispatch_exception(descriptor, epoll_ctl, errno);
+                    xexceptionset(xaddressof(descriptor->exception), epoll_ctl, errno, xexceptiontype_system, "");
+
+                    // xdescriptorexception_set(descriptor)
+                    xdescriptorevent_dispatch_exception(descriptor);
                     return xfail;
                 }
                 return xsuccess;
@@ -309,7 +312,8 @@ extern void xdescriptoreventgenerator_once(xdescriptoreventgenerator * o)
                 if(generator->events[i].events & (EPOLLERR | EPOLLPRI | EPOLLRDHUP | EPOLLHUP))
                 {
                     xassertion(xtrue, "TODO: 정확한 예외 처리를 할 수 있도록 하자.");
-                    xdescriptorevent_dispatch_exception(subscription->descriptor, xnil, generator->events[i].events);
+                    xexceptionset(xaddressof(subscription->descriptor->exception), epoll_wait, generator->events[i].events, xexceptiontype_descriptor, ""); 
+                    xdescriptorevent_dispatch_exception(subscription->descriptor);
                     continue;
                 }
                 if(generator->events[i].events & EPOLLOUT)

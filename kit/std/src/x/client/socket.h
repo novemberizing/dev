@@ -46,6 +46,9 @@ struct xclientsocket
 
 extern xclientsocket * xclientsocket_new(xclient * client, xint32 domain, xint32 type, xint32 protocol, const void * addr, xuint32 addrlen);
 extern xclientsocket * xclientsocket_rem(xclientsocket * o);
+
+
+
 // struct xclientsocket;
 
 // typedef struct xclientsocket xclientsocket;

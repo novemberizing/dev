@@ -327,15 +327,13 @@ extern xint64 xdescriptorevent_dispatch_rem(xdescriptor * descriptor)
     return xfail;
 }
 
-extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor, void * func, xint64 number)
+extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor)
 {
     xdescriptoreventsubscription * subscription = descriptor->subscription;
 
     if((descriptor->status & xdescriptorstatus_exception) == xdescriptorstatus_void)
     {
         descriptor->status |= xdescriptorstatus_exception;
-        descriptor->exception.func = func;
-        descriptor->exception.number = number;
         if(subscription)
         {
             if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)

@@ -139,8 +139,8 @@ libnovemberizing_a_AR = $(AR) $(ARFLAGS)
 libnovemberizing_a_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) object.$(OBJEXT) \
-	thread.$(OBJEXT) thread/posix.$(OBJEXT) sync.$(OBJEXT) \
-	sync/posix/mutex.$(OBJEXT) stream.$(OBJEXT) \
+	exception.$(OBJEXT) thread.$(OBJEXT) thread/posix.$(OBJEXT) \
+	sync.$(OBJEXT) sync/posix/mutex.$(OBJEXT) stream.$(OBJEXT) \
 	stream/buffer.$(OBJEXT) event/queue.$(OBJEXT) \
 	event/processor.$(OBJEXT) event/subscription.$(OBJEXT) \
 	event/engine.$(OBJEXT) event/processor/pool.$(OBJEXT) \
@@ -166,9 +166,9 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/console.Po ./$(DEPDIR)/descriptor.Po \
-	./$(DEPDIR)/object.Po ./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po \
-	./$(DEPDIR)/sync.Po ./$(DEPDIR)/thread.Po \
-	descriptor/event/$(DEPDIR)/generator.Po \
+	./$(DEPDIR)/exception.Po ./$(DEPDIR)/object.Po \
+	./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po ./$(DEPDIR)/sync.Po \
+	./$(DEPDIR)/thread.Po descriptor/event/$(DEPDIR)/generator.Po \
 	descriptor/event/generator/$(DEPDIR)/epoll.Po \
 	descriptor/event/generator/subscription/$(DEPDIR)/list.Po \
 	event/$(DEPDIR)/engine.Po event/$(DEPDIR)/processor.Po \
@@ -351,6 +351,7 @@ lib_LIBRARIES = libnovemberizing.a
 # TODO: 디스크립터 이벤트 제네레이터를 OS 에 알맞는 소스를 링크하도록 한다.
 libnovemberizing_a_SOURCES = std.c                                          \
                              object.c                                       \
+                             exception.c                                    \
                              thread.c                                       \
                              thread/posix.c                                 \
                              sync.c                                         \
@@ -540,6 +541,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/console.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptor.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@ # am--include-marker
@@ -743,6 +745,7 @@ clean-am: clean-generic clean-libLIBRARIES clean-libtool \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/console.Po
 	-rm -f ./$(DEPDIR)/descriptor.Po
+	-rm -f ./$(DEPDIR)/exception.Po
 	-rm -f ./$(DEPDIR)/object.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/stream.Po
@@ -808,6 +811,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/console.Po
 	-rm -f ./$(DEPDIR)/descriptor.Po
+	-rm -f ./$(DEPDIR)/exception.Po
 	-rm -f ./$(DEPDIR)/object.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/stream.Po
