@@ -15,7 +15,9 @@
 
 #define xserversocketeventtype_open     xdescriptoreventtype_open
 #define xserversocketeventtype_in       xdescriptoreventtype_in
+#define xserversocketeventtype_out      xdescriptoreventtype_out
 #define xserversocketeventtype_close    xdescriptoreventtype_close
+#define xserversocketeventtype_register xdescriptoreventtype_register
 
 #define xserversocketstatus_void        xsocketstatus_void
 #define xserversocketstatus_open        xsocketstatus_open

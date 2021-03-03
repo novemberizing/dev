@@ -21,13 +21,10 @@ extern xint32 xdescriptorcheck_close(xdescriptor * descriptor)
 
 extern xint32 xdescriptorcheck_open(xdescriptor * descriptor)
 {
-    xcheck(xtrue, "0x%08x", descriptor->status);
-    xcheck(xdescriptorcheck_close(descriptor) == xfalse, "xdescriptorcheck_close(descriptor) == xfalse");
-    xcheck((descriptor->status & xdescriptorstatus_open), "");
     return xdescriptorcheck_close(descriptor) == xfalse && (descriptor->status & xdescriptorstatus_open);
 }
 
-extern xint64 xdescriptorevent_process_on(xdescriptor * descriptor)
+extern xint64 xdescriptorevent_processor_on(xdescriptor * descriptor)
 {
     xassertion(descriptor == xnil, "");
 
@@ -129,6 +126,7 @@ extern xint64 xdescriptorevent_processor_register(xdescriptor * descriptor)
         xint64 n = xdescriptoreventgenerator_descriptor_update(generator, descriptor);
         return descriptor->on(descriptor, xdescriptoreventtype_register, xnil, n == xsuccess);
     }
+    printf("= 3 =\n");
     return xfail;
 }
 
@@ -198,13 +196,13 @@ extern xint64 xdescriptorevent_dispatch_on(xdescriptor * descriptor)
     {
         if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
         {
-            return xdescriptorevent_process_on(descriptor);
+            return xdescriptorevent_processor_on(descriptor);
         }
         return xsuccess;
     }
     else
     {
-        return xdescriptorevent_process_on(descriptor);
+        return xdescriptorevent_processor_on(descriptor);
     }
 }
 
@@ -245,7 +243,19 @@ extern xint64 xdescriptorevent_dispatch_in(xdescriptor * descriptor)
         {
             if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
-                return xdescriptorevent_processor_in(descriptor);
+                xint64 n = xdescriptorevent_processor_in(descriptor);
+                if(n > 0)
+                {
+                    xeventengine_queue_push(subscription->enginenode.engine, (xevent *) xaddressof(descriptor->event));
+                }
+                else if(n == 0)
+                {
+                    if((descriptor->status & xdescriptorstatus_in) == xdescriptorstatus_void)
+                    {
+                        xassertion(xtrue, "implement this");
+                    }
+                }
+                return n;
             }
             return xsuccess;
         }
@@ -266,7 +276,19 @@ extern xint64 xdescriptorevent_dispatch_out(xdescriptor * descriptor)
         {
             if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
-                return xdescriptorevent_processor_out(descriptor);
+                xint64 n = xdescriptorevent_processor_out(descriptor);
+                if(n > 0)
+                {
+                    xeventengine_queue_push(subscription->enginenode.engine, (xevent *) xaddressof(descriptor->event));
+                }
+                else if(n == 0)
+                {
+                    if((descriptor->status & xdescriptorstatus_out) == xdescriptorstatus_void)
+                    {
+                        xassertion(xtrue, "implement this");
+                    }
+                }
+                return n;
             }
             return xsuccess;
         }

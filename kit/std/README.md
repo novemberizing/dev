@@ -1,3 +1,12 @@
+[check:descriptor.c:26] xdescriptorcheck_open:140737351628608 => 
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000055555555ade1 in xsessionsocketsubscriber_tcp (descriptor=0x5555555689c0, event=64, data=0x0, result=1) at session/socket.c:85
+85          xserver * server = session->server;
+
+
+
+
 1. OPEN 에서 실패할 경우: 재접속 시도를 수행하지 않는다.
 2. 
 

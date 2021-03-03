@@ -53,6 +53,7 @@ static inline xint32 xdescriptoreventgenerator_epoll_register(int epollfd, xdesc
                     {
                         if(epoll_ctl(epollfd, EPOLL_CTL_MOD, descriptor->handle.f, &event) == xsuccess)
                         {
+                            descriptor->status |= xdescriptorstatus_register;
                             return xsuccess;
                         }
                     }
@@ -65,6 +66,8 @@ static inline xint32 xdescriptoreventgenerator_epoll_register(int epollfd, xdesc
                     xdescriptorevent_dispatch_exception(descriptor);
                     return xfail;
                 }
+
+                descriptor->status |= xdescriptorstatus_register;
                 return xsuccess;
             }
         }
@@ -85,6 +88,8 @@ static inline xint32 xdescriptoreventgenerator_epoll_unregister(int epollfd, xde
             if((descriptor->status & xdescriptorstatus_register) || force)
             {
                 int ret = epoll_ctl(epollfd, EPOLL_CTL_DEL, descriptor->handle.f, xnil);
+
+                descriptor->status &= (~xdescriptorstatus_register);
 
                 xassertion(ret != xsuccess, "");
 
@@ -381,11 +386,12 @@ extern void xdescriptoreventgenerator_queue_once(xdescriptoreventgenerator * o)
                 xsynclock(generator->alive->sync);
                 xdescriptoreventgeneratorsubscriptionlist_push(generator->alive, subscription);
                 xsyncunlock(generator->alive->sync);
-                if(xdescriptorevent_processor_register(descriptor) == xsuccess)
+                if(xdescriptorevent_processor_register(descriptor) >= 0)
                 {
                     xsynclock(generator->queue->sync);
                     continue;
                 }
+                xdescriptoreventgeneratorsubscriptionlist_del(subscription);
             }
             xsynclock(generator->queue->sync);
             xdescriptoreventgeneratorsubscriptionlist_push(generator->queue, subscription);
@@ -486,10 +492,7 @@ extern xint64 xdescriptoreventgenerator_descriptor_update(xdescriptoreventgenera
     xassertion(descriptor->handle.f < 0, "");
     xassertion(generator->alive != subscription->generatornode.list, "");
 
-    if(xdescriptoreventgenerator_epoll_update(generator->f, subscription, xtrue) == xsuccess)
-    {
-        descriptor->on(descriptor, xdescriptoreventtype_register, xnil, xtrue);
-    }
+    return xdescriptoreventgenerator_epoll_update(generator->f, subscription, xtrue);
 }
 
 extern xint64 xdescriptoreventgenerator_descriptor_unregister(xdescriptoreventgenerator * o, xdescriptor * descriptor)

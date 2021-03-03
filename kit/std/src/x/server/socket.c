@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -23,19 +24,20 @@ extern xserversocket * xserversocket_new(xserver * server, xint32 domain, xint32
 {
     xserversocket * descriptor = calloc(sizeof(xserversocket), 1);
 
-    descriptor->rem      = xserversocket_rem;
-    descriptor->handle.f = xinvalid;
-    descriptor->process  = xserversocketprocessor_tcp;
-    descriptor->check    = xserversocketcheck_tcp;
-    descriptor->on       = xserversocketsubscriber_tcp;
-    descriptor->event.on = xserversocketeventhandler_tcp;
-    descriptor->domain   = domain;
-    descriptor->type     = type;
-    descriptor->protocol = protocol;
-    descriptor->addr     = xobjectdup(addr, addrlen);
-    descriptor->addrlen  = addrlen;
-    descriptor->server   = server;
-    descriptor->backlog  = SOMAXCONN;
+    descriptor->rem              = xserversocket_rem;
+    descriptor->handle.f         = xinvalid;
+    descriptor->process          = xserversocketprocessor_tcp;
+    descriptor->check            = xserversocketcheck_tcp;
+    descriptor->on               = xserversocketsubscriber_tcp;
+    descriptor->event.on         = xserversocketeventhandler_tcp;
+    descriptor->event.descriptor = descriptor;
+    descriptor->domain           = domain;
+    descriptor->type             = type;
+    descriptor->protocol         = protocol;
+    descriptor->addr             = xobjectdup(addr, addrlen);
+    descriptor->addrlen          = addrlen;
+    descriptor->server           = server;
+    descriptor->backlog          = SOMAXCONN;
 
     return descriptor;
 }
@@ -101,7 +103,7 @@ extern void xserversocketbacklog_set(xserversocket * descriptor, xint32 backlog)
 
 static void xserversocketeventhandler_tcp(xserversocketevent * server)
 {
-    xassertion(xtrue, "implement this");
+    xdescriptorevent_processor_on((xdescriptor *) server->descriptor);
 }
 
 static xint64 xserversocketprocessor_tcp(xserversocket * descriptor, xuint32 event, void * data)
@@ -110,9 +112,10 @@ static xint64 xserversocketprocessor_tcp(xserversocket * descriptor, xuint32 eve
     {
         case xserversocketeventtype_open:   return xserversocketprocessor_tcp_open(descriptor, data);
         case xserversocketeventtype_in:     return xserversocketprocessor_tcp_in(descriptor, data);
+        case xserversocketeventtype_out:    return xsuccess;
         case xserversocketeventtype_close:  return xserversocketprocessor_tcp_close(descriptor, data);
     }
-    xassertion(xtrue, "implement this - check event");
+    xassertion(xtrue, "implement this - check event 0x%08x", event);
 }
 
 static xint64 xserversocketprocessor_tcp_open(xserversocket * descriptor, void * data)
@@ -176,6 +179,7 @@ static xint64 xserversocketprocessor_tcp_in(xserversocket * descriptor, void * d
 
             xsessionsocket * sessionsocket = session->descriptor;
 
+            sessionsocket->session = session;
             sessionsocket->handle.f = f;
             sessionsocket->status = (xsessionsocketstatus_open | xsessionsocketstatus_bind | xsessionsocketstatus_out);
             if(xeventengine_session_register(engine, session) == xnil)
@@ -184,15 +188,29 @@ static xint64 xserversocketprocessor_tcp_in(xserversocket * descriptor, void * d
                 return xfail;
             }
             xassertion((sessionsocket->status & xsessionsocketstatus_register) == xsessionsocketstatus_void, "");
-            return xsuccess;
+            sessionsocket->on(sessionsocket, xsessionsocketstatus_open, xnil, xsuccess);
         }
-        xassertion(session == xnil, "");
+        else
+        {
+            xcheck(xtrue, "shutdown apply");
+            if(close(f) != xsuccess)
+            {
+                xassertion(xtrue, "");
+            }
+            xassertion(session == xnil, "");
+        }
+        return 1;
     }
     else
     {
-        xassertion(xtrue, "implement this");
+        if(errno != EAGAIN)
+        {
+            xcheck(xtrue, "accept fail %d", errno);
+            xassertion(xtrue, "implement this");
+        }
+        return 0;
         // 서버를 체크하도록 하자.
-        xcheck(xtrue, "accept fail %d", errno);
+        
     }
 
     return xfail;
@@ -211,6 +229,7 @@ static xint64 xserversocketsubscriber_tcp(xserversocket * descriptor, xuint32 ev
         xcheck(xtrue, "exception errno => %d", descriptor->exception.number);
     }
     xcheck(xtrue, "event => 0x%08x, result => %ld", event, result);
+    
     return server->on(server, event, data, result);
 }
 
