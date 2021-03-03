@@ -10,6 +10,8 @@
 #include "../descriptor/event/generator.h"
 #include "../server.h"
 #include "../server/socket.h"
+#include "../session.h"
+#include "../session/socket.h"
 
 #include "processor/pool.h"
 #include "descriptor/event/subscription.h"
@@ -112,6 +114,25 @@ extern void xeventengine_sync(xeventengine * engine, xint32 on)
     }
 
     xsyncunlock(engine->sync);
+}
+
+extern xeventsubscription * xeventengine_session_register(xeventengine * engine, xsession * session)
+{
+    xassertion(engine == xnil || session == xnil || session->descriptor == xnil, "");
+    xassertion(session->descriptor->subscription, "");   // 이 로직을 어떻게 처리해야할까?
+
+    xsessionsocketeventsubscription * subscription = (xsessionsocketeventsubscription *) xeventsubscription_new(engine, (xeventtarget *) session->descriptor, sizeof(xsessionsocketeventsubscription));
+
+    subscription->generatornode.generator = engine->generators.descriptor;
+
+    xdescriptoreventgenerator_register(engine->generators.descriptor, (xdescriptoreventsubscription *) subscription);
+
+    return (xeventsubscription *) subscription;
+}
+
+extern xeventsubscription * xeventengine_session_unregister(xeventengine * engine, xsession * session)
+{
+    return (xeventsubscription *) xeventengine_descriptor_unregister(engine, (xdescriptor *) session->descriptor);
 }
 
 extern xeventsubscription * xeventengine_server_register(xeventengine * engine, xserver * server)

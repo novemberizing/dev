@@ -408,7 +408,7 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
     return xfail;
 }
 
-extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 len)
+extern xint64 xdescriptorwrite(xdescriptor * descriptor, const void * data, xuint64 len)
 {
     if(xdescriptorcheck_open(descriptor))
     {
@@ -471,6 +471,7 @@ extern xint32 xdescriptornonblock_set(xdescriptor * descriptor, xint32 on)
         descriptor->exception.func   = fcntl;
         descriptor->exception.number = errno;
         descriptor->status          |= xdescriptorstatus_exception;
+
         return xfail;
     }
     return xsuccess;

@@ -52,7 +52,7 @@ struct xdescriptor
 
 extern xint64 xdescriptorclose(xdescriptor * descriptor);
 extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 size);
-extern xint64 xdescriptorwrite(xdescriptor * descriptor, void * data, xuint64 len);
+extern xint64 xdescriptorwrite(xdescriptor * descriptor, const void * data, xuint64 len);
 
 extern xint32 xdescriptorcheck_rem(xdescriptor * descriptor);
 extern xint32 xdescriptorcheck_close(xdescriptor * descriptor);

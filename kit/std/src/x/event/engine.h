@@ -58,8 +58,10 @@ extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engi
 extern xeventsubscription * xeventengine_descriptor_unregister(xeventengine * engine, xdescriptor * descriptor);
 
 extern xeventsubscription * xeventengine_server_register(xeventengine * engine, xserver * server);
-/** @implement */
 extern xeventsubscription * xeventengine_server_unregister(xeventengine * engine, xserver * server);
+
+extern xeventsubscription * xeventengine_session_register(xeventengine * engine, xsession * session);
+extern xeventsubscription * xeventengine_session_unregister(xeventengine * engine, xsession * session);
 
 extern void xeventengine_main_push(xeventengine * engine, xevent * event);
 extern void xeventengine_queue_push(xeventengine * engine, xevent * event);

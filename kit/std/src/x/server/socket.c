@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #include "../thread.h"
 
+#include "../session/socket.h"
 #include "socket.h"
 
 static void xserversocketeventhandler_tcp(xserversocketevent * server);
@@ -52,6 +54,11 @@ extern xint32 xserversocketcheck_open(xserversocket * descriptor)
     return xtrue;
 }
 
+extern xint32 xserversocketcheck_close(xserversocket * descriptor)
+{
+    return descriptor->status & (xserversocketstatus_exception | xserversocketstatus_close | xserversocketstatus_rem);
+}
+
 extern xint32 xserversocketcheck_rem(xserversocket * descriptor)
 {
     xassertion(descriptor == xnil, "");
@@ -70,6 +77,7 @@ extern xint32 xserversocketcheck_rem(xserversocket * descriptor)
     }
     return xtrue;
 }
+
 
 extern xserversocket * xserversocket_rem(xserversocket * descriptor)
 {
@@ -103,42 +111,100 @@ static xint64 xserversocketprocessor_tcp(xserversocket * descriptor, xuint32 eve
         case xserversocketeventtype_in:     return xserversocketprocessor_tcp_in(descriptor, data);
         case xserversocketeventtype_close:  return xserversocketprocessor_tcp_close(descriptor, data);
     }
-    xassertion(xtrue, "implement this");
+    xassertion(xtrue, "implement this - check event");
 }
 
 static xint64 xserversocketprocessor_tcp_open(xserversocket * descriptor, void * data)
 {
-    if(xserversocketcheck_open(descriptor) == xfalse)
+    if(xserversocketcheck_close(descriptor) == xfalse)
     {
-        if((descriptor->status & xsocketstatus_create) == xsocketstatus_void)
+        if(xserversocketcheck_open(descriptor) == xfalse)
         {
-            
+            if((descriptor->status & xsocketstatus_create) == xsocketstatus_void)
+            {
+                if(xsocketcreate((xsocket *) descriptor) != xsuccess)
+                {
+                    return xfail;
+                }
+            }
+            if((descriptor->status & xsocketstatus_bind) == xsocketstatus_void)
+            {
+                if(xsocketbind((xsocket *) descriptor, descriptor->addr, descriptor->addrlen) != xsuccess)
+                {
+                    return xfail;
+                }
+            }
+            if((descriptor->status & xsocketstatus_listen) == xsocketstatus_void)
+            {
+                if(xsocketlisten((xsocket *) descriptor, descriptor->backlog) != xsuccess)
+                {
+                    return xfail;
+                }
+            }
+            descriptor->status |= (xsocketstatus_open | xsocketstatus_out);
         }
-
-
-    #define xsocketstatus_create        xsocketeventtype_create
-#define xsocketstatus_bind          xsocketeventtype_bind
+        descriptor->status |= (xsocketstatus_out | xsocketstatus_out);
+        return xsuccess;
     }
     return xfail;
 }
 
 static xint64 xserversocketprocessor_tcp_in(xserversocket * descriptor, void * data)
 {
-    xassertion(xtrue, "");
+    xassertion(descriptor == xnil, "");
+    xassertion(descriptor->subscription == xnil, "");
+    xassertion(descriptor->server == xnil, "");
+
+    xserver * server = descriptor->server;
+    xserversocketeventsubscription * subscription = descriptor->subscription;
+    xeventengine * engine = subscription->enginenode.engine;
+
+    xassertion(engine == xnil, "");
+    
+    int f = accept(descriptor->handle.f, xnil, 0);
+
+    if(f >= 0)
+    {
+        xsession * session = server->create(descriptor->domain, descriptor->type, descriptor->protocol);
+        if(session)
+        {
+            xsessionsocket * sessionsocket = session->descriptor;
+
+
+            sessionsocket->handle.f = f;
+            sessionsocket->status = (xsessionsocketstatus_open | xsessionsocketstatus_bind | xsessionsocketstatus_out);
+            if(xeventengine_session_register(engine, session) == xnil)
+            {
+                xassertion(xtrue, "");
+                return xfail;
+            }
+            return xsuccess;
+        }
+        xassertion(session == xnil, "");
+    }
+    else
+    {
+        xassertion(xtrue, "implement this");
+        // 서버를 체크하도록 하자.
+        xcheck(xtrue, "accept fail %d", errno);
+    }
 
     return xfail;
 }
 
 static xint64 xserversocketprocessor_tcp_close(xserversocket * descriptor, void * data)
 {
-    xassertion(xtrue, "");
+    // IMPLEMENT THIS
+    xassertion(xtrue, "implement this");
 
     return xfail;
 }
 
 static xint64 xserversocketsubscriber_tcp(xserversocket * descriptor, xuint32 event, void * data, xint64 result)
 {
-    xassertion(xtrue, "implement this");
+    xserver * server = descriptor->server;
+    xcheck(xtrue, "event => 0x%08x, result => %ld", event, result);
+    return server->on(server, event, data, result);
 }
 
 static xint32 xserversocketcheck_tcp(xserversocket * descriptor, xuint32 event)

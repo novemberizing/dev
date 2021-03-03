@@ -51,6 +51,7 @@ extern void xdescriptoreventgeneratorsubscriptionlist_push(xdescriptoreventgener
     {
         list->head = subscription;
     }
+    subscription->generatornode.list = list;
     list->tail = subscription;
     list->size = list->size + 1;
 
@@ -109,6 +110,7 @@ extern xdescriptoreventsubscription * xdescriptoreventgeneratorsubscriptionlist_
             list->tail = xnil;
         }
         list->size = list->size - 1;
+        subscription->generatornode.list = xnil;
     }
     return subscription;
 }

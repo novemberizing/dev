@@ -1,3 +1,8 @@
+1. OPEN 에서 실패할 경우: 재접속 시도를 수행하지 않는다.
+2. 
+
+----
+
 [assertion:console.c:295] xconsoledescriptorprocessor_output:78067520 =>
 [assertion:console.c:297] xconsoledescriptorprocessor_output:78067520 =>
 

@@ -88,6 +88,9 @@ static xint64 xsessionsocketsubscriber_tcp(xsessionsocket * descriptor, xuint32 
 static xint64 xsessionsocketprocessor_tcp(xsessionsocket * descriptor, xuint32 event, void * data)
 {
     xassertion(xtrue, "implement this");
+    switch(event)
+    {
+    }
 
     return xfail;
 }

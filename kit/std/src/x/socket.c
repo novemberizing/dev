@@ -6,11 +6,11 @@
 
 #include "thread.h"
 #include "socket.h"
+#include "descriptor.h"
 
-extern xint32 xsocketcreate(xsocket * o)
+extern xint64 xsocketcreate(xsocket * o)
 {
     xassertion(o == xnil, "");
-
     if(o->handle.f < 0)
     {
         o->handle.f = socket(o->domain, o->type, o->protocol);
@@ -35,32 +35,36 @@ extern xint32 xsocketcreate(xsocket * o)
     return xsuccess;
 }
 
-extern xint32 xsocketbind(xsocket * o, void * addr, xuint32 addrlen)
+extern xint64 xsocketbind(xsocket * o, void * addr, xuint32 addrlen)
 {
     xassertion(o == xnil, "");
     xassertion(o->handle.f < 0 || (o->status & xsocketstatus_create) == xsocketstatus_void, "");
 
-    if((o->status & xsocketstatus_bind) == xsocketstatus_void)
+    if((o->status & xsocketstatus_exception) == xsocketstatus_void)
     {
-        xint32 ret = bind(o->handle.f, (struct sockaddr *) addr, addrlen);
+        if((o->status & xsocketstatus_bind) == xsocketstatus_void)
+        {
+            xint32 ret = bind(o->handle.f, (struct sockaddr *) addr, addrlen);
 
-        if(ret == xsuccess)
-        {
-            o->status |= xsocketstatus_bind;
-            return xsuccess;
+            if(ret == xsuccess)
+            {
+                o->status |= xsocketstatus_bind;
+                return xsuccess;
+            }
+            else
+            {
+                o->status |= xsocketstatus_exception;
+                xexceptionset(xaddressof(o->exception), bind, errno, 0, "");
+                return xfail;
+            }
         }
-        else
-        {
-            o->status |= xsocketstatus_exception;
-            xexceptionset(xaddressof(o->exception), bind, errno, 0, "");
-            return xfail;
-        }
+
+        return xsuccess;
     }
-
-    return xsuccess;
+    return xfail;
 }
 
-extern xint32 xsocketlisten(xsocket * o, xint32 backlog)
+extern xint64 xsocketlisten(xsocket * o, xint32 backlog)
 {
     xassertion(o == xnil, "");
     xassertion(o->handle.f < 0 || (o->status & xsocketstatus_create) == xsocketstatus_void, "");
@@ -68,23 +72,26 @@ extern xint32 xsocketlisten(xsocket * o, xint32 backlog)
     xassertion((o->status & (xsocketstatus_connect | xsocketstatus_connecting)) != xsocketstatus_void, "");
     xcheck(xtrue, "implement this");    // 클라이언트 소켓과 서버 소켓 세션 소켓을 구분할 수 있도록 마스크를 세팅하자.
 
-    if((o->status & xsocketstatus_listen) == xsocketstatus_void)
+    if((o->status & xsocketstatus_exception) == xsocketstatus_void)
     {
-        int ret = listen(o->handle.f, backlog);
-        if(ret == xsuccess)
+        if((o->status & xsocketstatus_listen) == xsocketstatus_void)
         {
-            o->status |= xsocketstatus_listen;
-            return xsuccess;
+            int ret = listen(o->handle.f, backlog);
+            if(ret == xsuccess)
+            {
+                o->status |= xsocketstatus_listen;
+                return xsuccess;
+            }
+            else
+            {
+                o->status |= xsocketstatus_exception;
+                xexceptionset(xaddressof(o->exception), listen, errno, 0, "");
+                return xfail;
+            }
         }
-        else
-        {
-            o->status |= xsocketstatus_exception;
-            xexceptionset(xaddressof(o->exception), listen, errno, 0, "");
-            return xfail;
-        }
+        return xsuccess;
     }
-
-    return xsuccess;
+    return xfail;
 }
 
 extern xint64 xsocketread(xsocket * o, void * buffer, xuint64 size)
@@ -109,6 +116,17 @@ extern xint64 xsocketshutdown(xsocket * o, xuint32 how)
         if((o->status & xsocketstatus_offin) == xsocketstatus_void)
         {
             int ret = shutdown(o->handle.f, SHUT_RD);
+            if(ret == xsuccess)
+            {
+                o->status |= xsocketstatus_offin;
+                return xsuccess;
+            }
+            else
+            {
+                o->status |= xsocketstatus_exception;
+                xexceptionset(xaddressof(o->exception), shutdown, errno, 0, "");
+                return xfail;
+            }
         }
         return xsuccess;
     }
@@ -117,6 +135,17 @@ extern xint64 xsocketshutdown(xsocket * o, xuint32 how)
         if((o->status & xsocketstatus_offout) == xsocketstatus_void)
         {
             int ret = shutdown(o->handle.f, SHUT_WR);
+            if(ret == xsuccess)
+            {
+                o->status |= xsocketstatus_offin;
+                return xsuccess;
+            }
+            else
+            {
+                o->status |= xsocketstatus_exception;
+                xexceptionset(xaddressof(o->exception), shutdown, errno, 0, "");
+                return xfail;
+            }
         }
         return xsuccess;
     }
@@ -125,6 +154,17 @@ extern xint64 xsocketshutdown(xsocket * o, xuint32 how)
         if((o->status & xsocketstatus_offall) == xsocketstatus_void)
         {
             int ret = shutdown(o->handle.f, SHUT_RDWR);
+            if(ret == xsuccess)
+            {
+                o->status |= xsocketstatus_offin;
+                return xsuccess;
+            }
+            else
+            {
+                o->status |= xsocketstatus_exception;
+                xexceptionset(xaddressof(o->exception), shutdown, errno, 0, "");
+                return xfail;
+            }
         }
         return xsuccess;
     }
@@ -132,4 +172,38 @@ extern xint64 xsocketshutdown(xsocket * o, xuint32 how)
     {
         xassertion(xtrue, "");
     }
+    return xfail;
+}
+
+extern xint64 xsocketconnect(xsocket * o, void * addr, xuint32 addrlen)
+{
+    xassertion(o == xnil, "");
+    xassertion(o->handle.f < 0, "");
+    xassertion((o->status & xsocketstatus_create) == xsocketstatus_void, "");
+
+    if((o->status & xsocketstatus_exception) == xsocketstatus_void)
+    {
+        if((o->status & (xsocketstatus_connect | xsocketstatus_connecting)) == xsocketstatus_void)
+        {
+            int ret = connect(o->handle.f, (struct sockaddr *) addr, addrlen);
+            if(ret == xsuccess)
+            {
+                o->status |= xsocketstatus_connect;
+                return xsuccess;
+            }
+            else
+            {
+                if(errno != EAGAIN && errno != EINPROGRESS)
+                {
+                    o->status |= xsocketstatus_exception;
+                    xexceptionset(xaddressof(o->exception), connect, errno, 0, "");
+                    return xfail;
+                }
+                o->status |= xsocketstatus_connecting;
+                return xsuccess;
+            }
+        }
+        return xsuccess;
+    }
+    return xfail;
 }

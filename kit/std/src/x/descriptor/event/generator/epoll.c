@@ -114,6 +114,15 @@ static inline xint32 xdescriptoreventgenerator_epoll_update(int epollfd, xdescri
             event.data.ptr = subscrption;
             event.events = (EPOLLHUP | EPOLLERR | EPOLLRDHUP | EPOLLPRI | EPOLLET | EPOLLONESHOT);
 
+            if((descriptor->status & xdescriptorstatus_out) == xdescriptorstatus_void)
+            {
+                event.events |= EPOLLOUT;
+            }
+            if((descriptor->status & xdescriptorstatus_in) == xdescriptorstatus_void)
+            {
+                event.events |= EPOLLIN;
+            }
+
             if(descriptor->status & xdescriptorstatus_register)
             {
                 int ret = epoll_ctl(epollfd, EPOLL_CTL_MOD, descriptor->handle.f, &event);
@@ -151,6 +160,7 @@ static inline xint32 xdescriptoreventgenerator_epoll_update(int epollfd, xdescri
                         {
                             if(epoll_ctl(epollfd, EPOLL_CTL_MOD, descriptor->handle.f, &event) == xsuccess)
                             {
+                                descriptor->status |= xdescriptorstatus_register;
                                 return xsuccess;
                             }
                         }
@@ -162,8 +172,10 @@ static inline xint32 xdescriptoreventgenerator_epoll_update(int epollfd, xdescri
                         descriptor->exception.number = errno;
                         return xfail;
                     }
+                    descriptor->status |= xdescriptorstatus_register;
                     return xsuccess;
                 }
+                descriptor->status |= xdescriptorstatus_register;
                 return xsuccess;
             }
         }
@@ -359,8 +371,20 @@ extern void xdescriptoreventgenerator_queue_once(xdescriptoreventgenerator * o)
                 xsynclock(generator->queue->sync);
                 continue;
             }
-            xdescriptorevent_processor_open(descriptor);
+            
+            if(xdescriptorevent_processor_open(descriptor) == xsuccess)
+            {
+                xsynclock(generator->alive->sync);
+                xdescriptoreventgeneratorsubscriptionlist_push(generator->alive, subscription);
+                xsyncunlock(generator->alive->sync);
+                if(xdescriptorevent_processor_register(descriptor) == xsuccess)
+                {
+                    xsynclock(generator->queue->sync);
+                    continue;
+                }
+            }
             xsynclock(generator->queue->sync);
+            xdescriptoreventgeneratorsubscriptionlist_push(generator->queue, subscription);
             continue;
         }
         break;
