@@ -15,6 +15,9 @@ typedef struct xdescriptor xdescriptor;
 struct xclient;
 struct xserver;
 struct xsession;
+struct xclientsocket;
+struct xserversocket;
+struct xsessionsocket;
 struct xsocket;
 
 struct xdescriptorexception;
@@ -30,6 +33,9 @@ typedef struct xdescriptoreventgeneratorsubscriptions xdescriptoreventgenerators
 typedef struct xclient xclient;
 typedef struct xserver xserver;
 typedef struct xsession xsession;
+typedef struct xclientsocket xclientsocket;
+typedef struct xserversocket xserversocket;
+typedef struct xsessionsocket xsessionsocket;
 typedef struct xsocket xsocket;
 
 typedef xsocket * (*xsocketdestructor)(xsocket *);

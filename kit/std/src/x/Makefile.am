@@ -25,5 +25,8 @@ libnovemberizing_a_SOURCES = std.c                                          \
                              descriptor/event/generator/epoll.c             \
                              descriptor/event/generator/subscription/list.c \
                              console.c                                      \
+                             server.c                                       \
+                             server/socket.c                                \
+                             session.c                                      \
                              session/socket.c
 

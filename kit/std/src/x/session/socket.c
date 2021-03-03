@@ -48,3 +48,53 @@ extern xsessionsocket * xsessionsocket_rem(xsessionsocket * descriptor)
     }
     return xnil;
 }
+
+extern xstream * xsessionsocketstreamin_get(xsessionsocket * descriptor)
+{
+    return descriptor->stream.in;
+}
+
+extern void xsessionsocketstreamin_set(xsessionsocket * descriptor, xstream * stream)
+{
+    xassertion(descriptor->stream.in, "");
+
+    descriptor->stream.in = stream;
+}
+
+extern xstream * xsessionsocketstreamout_get(xsessionsocket * descriptor)
+{
+    return descriptor->stream.out;
+}
+
+extern void xsessionsocketstreamout_set(xsessionsocket * descriptor, xstream * stream)
+{
+    xassertion(descriptor->stream.out, "");
+
+    descriptor->stream.out = stream;
+}
+
+static void xsessionsocketeventhandler_tcp(xsessionsocketevent * event)
+{
+    xassertion(xtrue, "implement this");
+}
+
+static xint64 xsessionsocketsubscriber_tcp(xsessionsocket * descriptor, xuint32 event, void * data, xint64 result)
+{
+    xassertion(xtrue, "implement this");
+
+    return xfail;
+}
+
+static xint64 xsessionsocketprocessor_tcp(xsessionsocket * descriptor, xuint32 event, void * data)
+{
+    xassertion(xtrue, "implement this");
+
+    return xfail;
+}
+
+static xint32 xsessionsocketcheck_tcp(xsessionsocket * descriptor, xuint32 event)
+{
+    xassertion(xtrue, "implement this");
+
+    return xfail;
+}

@@ -3,6 +3,7 @@
 
 #include "thread.h"
 #include "server.h"
+#include "server/socket.h"
 #include "session/socket.h"
 
 extern xserver * xservernew(xint32 domain, xint32 type, xint32 protocol, const void * addr, xuint32 addrlen, xsessionsubscriber on, xuint64 size)
@@ -20,6 +21,20 @@ extern xserver * xservernew(xint32 domain, xint32 type, xint32 protocol, const v
     server->release    = xsessionreleaser_default;
 
     return server;
+}
+
+extern xserver * xserverrem(xserver * server)
+{
+    if(server)
+    {
+        xassertion(server->session.alive.size > 0, "");
+        xassertion(xserversocketcheck_rem(server->descriptor), "");
+
+        server->descriptor = xserversocket_rem(server->descriptor);
+
+        free(server);
+    }
+    return xnil;
 }
 
 extern xint64 xserversubscriber_default(xserver * server, xuint64 event, void * data, xint64 result)
@@ -43,5 +58,4 @@ extern void xsessionreleaser_default(xsession * session)
         session->descriptor = session->descriptor->rem(session->descriptor);
         free(session);
     }
-    return xnil;
 }

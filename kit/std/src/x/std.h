@@ -155,7 +155,7 @@ extern xint32 xerrorret(xint32 number);
  * @return      | xobject | 강제적으로 형변환된 객체 |
  */
 #define        xobjectof(o)     ((void *) o)
-extern xobject xobjectdup(const xobject data, xuint64 size);
+extern xobject xobjectdup(const void * data, xuint64 size);
 extern xobject xobjectnew(xuint64 size);
 extern xobject xobjectrem(xobject o);
 

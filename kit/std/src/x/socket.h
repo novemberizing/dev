@@ -11,8 +11,10 @@
 #include <x/socket/event/type.h>
 #include <x/socket/event/subscription.h>
 
+#define xsocketeventtype_open   xdescriptoreventtype_open
 #define xsocketeventtype_in     xdescriptoreventtype_in
 #define xsocketeventtype_out    xdescriptoreventtype_out
+#define xsocketeventtype_close  xdescriptoreventtype_close
 
 typedef xint64 (*xsocketprocessor)(xsocket *, xuint32, void *);
 typedef xint64 (*xsocketsubscriber)(xsocket *, xuint32, void *, xint64);

@@ -148,7 +148,8 @@ am_libnovemberizing_a_OBJECTS = std.$(OBJEXT) object.$(OBJEXT) \
 	descriptor.$(OBJEXT) descriptor/event/generator.$(OBJEXT) \
 	descriptor/event/generator/epoll.$(OBJEXT) \
 	descriptor/event/generator/subscription/list.$(OBJEXT) \
-	console.$(OBJEXT) session/socket.$(OBJEXT)
+	console.$(OBJEXT) server.$(OBJEXT) server/socket.$(OBJEXT) \
+	session.$(OBJEXT) session/socket.$(OBJEXT)
 libnovemberizing_a_OBJECTS = $(am_libnovemberizing_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -167,6 +168,7 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/console.Po ./$(DEPDIR)/descriptor.Po \
 	./$(DEPDIR)/exception.Po ./$(DEPDIR)/object.Po \
+	./$(DEPDIR)/server.Po ./$(DEPDIR)/session.Po \
 	./$(DEPDIR)/std.Po ./$(DEPDIR)/stream.Po ./$(DEPDIR)/sync.Po \
 	./$(DEPDIR)/thread.Po descriptor/event/$(DEPDIR)/generator.Po \
 	descriptor/event/generator/$(DEPDIR)/epoll.Po \
@@ -175,9 +177,9 @@ am__depfiles_remade = ./$(DEPDIR)/console.Po ./$(DEPDIR)/descriptor.Po \
 	event/$(DEPDIR)/queue.Po event/$(DEPDIR)/subscription.Po \
 	event/generator/$(DEPDIR)/set.Po \
 	event/processor/$(DEPDIR)/event.Po \
-	event/processor/$(DEPDIR)/pool.Po session/$(DEPDIR)/socket.Po \
-	stream/$(DEPDIR)/buffer.Po sync/posix/$(DEPDIR)/mutex.Po \
-	thread/$(DEPDIR)/posix.Po
+	event/processor/$(DEPDIR)/pool.Po server/$(DEPDIR)/socket.Po \
+	session/$(DEPDIR)/socket.Po stream/$(DEPDIR)/buffer.Po \
+	sync/posix/$(DEPDIR)/mutex.Po thread/$(DEPDIR)/posix.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -371,6 +373,9 @@ libnovemberizing_a_SOURCES = std.c                                          \
                              descriptor/event/generator/epoll.c             \
                              descriptor/event/generator/subscription/list.c \
                              console.c                                      \
+                             server.c                                       \
+                             server/socket.c                                \
+                             session.c                                      \
                              session/socket.c
 
 all: all-am
@@ -520,6 +525,14 @@ descriptor/event/generator/subscription/$(DEPDIR)/$(am__dirstamp):
 descriptor/event/generator/subscription/list.$(OBJEXT):  \
 	descriptor/event/generator/subscription/$(am__dirstamp) \
 	descriptor/event/generator/subscription/$(DEPDIR)/$(am__dirstamp)
+server/$(am__dirstamp):
+	@$(MKDIR_P) server
+	@: > server/$(am__dirstamp)
+server/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) server/$(DEPDIR)
+	@: > server/$(DEPDIR)/$(am__dirstamp)
+server/socket.$(OBJEXT): server/$(am__dirstamp) \
+	server/$(DEPDIR)/$(am__dirstamp)
 session/$(am__dirstamp):
 	@$(MKDIR_P) session
 	@: > session/$(am__dirstamp)
@@ -542,6 +555,7 @@ mostlyclean-compile:
 	-rm -f event/*.$(OBJEXT)
 	-rm -f event/generator/*.$(OBJEXT)
 	-rm -f event/processor/*.$(OBJEXT)
+	-rm -f server/*.$(OBJEXT)
 	-rm -f session/*.$(OBJEXT)
 	-rm -f stream/*.$(OBJEXT)
 	-rm -f sync/posix/*.$(OBJEXT)
@@ -554,6 +568,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/session.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/std.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sync.Po@am__quote@ # am--include-marker
@@ -568,6 +584,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@event/generator/$(DEPDIR)/set.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@event/processor/$(DEPDIR)/event.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@event/processor/$(DEPDIR)/pool.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@server/$(DEPDIR)/socket.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@session/$(DEPDIR)/socket.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@stream/$(DEPDIR)/buffer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@sync/posix/$(DEPDIR)/mutex.Po@am__quote@ # am--include-marker
@@ -739,6 +756,8 @@ distclean-generic:
 	-rm -f event/generator/$(am__dirstamp)
 	-rm -f event/processor/$(DEPDIR)/$(am__dirstamp)
 	-rm -f event/processor/$(am__dirstamp)
+	-rm -f server/$(DEPDIR)/$(am__dirstamp)
+	-rm -f server/$(am__dirstamp)
 	-rm -f session/$(DEPDIR)/$(am__dirstamp)
 	-rm -f session/$(am__dirstamp)
 	-rm -f stream/$(DEPDIR)/$(am__dirstamp)
@@ -761,6 +780,8 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/descriptor.Po
 	-rm -f ./$(DEPDIR)/exception.Po
 	-rm -f ./$(DEPDIR)/object.Po
+	-rm -f ./$(DEPDIR)/server.Po
+	-rm -f ./$(DEPDIR)/session.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/stream.Po
 	-rm -f ./$(DEPDIR)/sync.Po
@@ -775,6 +796,7 @@ distclean: distclean-am
 	-rm -f event/generator/$(DEPDIR)/set.Po
 	-rm -f event/processor/$(DEPDIR)/event.Po
 	-rm -f event/processor/$(DEPDIR)/pool.Po
+	-rm -f server/$(DEPDIR)/socket.Po
 	-rm -f session/$(DEPDIR)/socket.Po
 	-rm -f stream/$(DEPDIR)/buffer.Po
 	-rm -f sync/posix/$(DEPDIR)/mutex.Po
@@ -828,6 +850,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/descriptor.Po
 	-rm -f ./$(DEPDIR)/exception.Po
 	-rm -f ./$(DEPDIR)/object.Po
+	-rm -f ./$(DEPDIR)/server.Po
+	-rm -f ./$(DEPDIR)/session.Po
 	-rm -f ./$(DEPDIR)/std.Po
 	-rm -f ./$(DEPDIR)/stream.Po
 	-rm -f ./$(DEPDIR)/sync.Po
@@ -842,6 +866,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f event/generator/$(DEPDIR)/set.Po
 	-rm -f event/processor/$(DEPDIR)/event.Po
 	-rm -f event/processor/$(DEPDIR)/pool.Po
+	-rm -f server/$(DEPDIR)/socket.Po
 	-rm -f session/$(DEPDIR)/socket.Po
 	-rm -f stream/$(DEPDIR)/buffer.Po
 	-rm -f sync/posix/$(DEPDIR)/mutex.Po

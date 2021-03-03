@@ -21,13 +21,15 @@ struct xserver
     xserversocket *                   descriptor;
     xserversubscriber                 on;
 
-    struct { xsessionsubscriber on; } session;
+    struct { xsessionlist alive;
+             xsessionsubscriber on; } session;
 
     xsessionfactory                   create;
     xsessionreleaser                  release;
 };
 
 extern xserver * xservernew(xint32 domain, xint32 type, xint32 protocol, const void * addr, xuint32 addrlen, xsessionsubscriber on, xuint64 size);
+extern xserver * xserverrem(xserver * server);
 
 extern xint64 xserversubscriber_default(xserver * server, xuint64 event, void * data, xint64 result);
 extern xsession * xsessionfactory_default(xint32 domain, xint32 type, xint32 protocol);

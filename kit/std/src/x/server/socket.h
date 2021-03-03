@@ -1,6 +1,7 @@
 #ifndef   __NOVEMBERIZING_X__SERVER__SOCKET__H__
 #define   __NOVEMBERIZING_X__SERVER__SOCKET__H__
 
+#include <x/io.h>
 #include <x/server.h>
 #include <x/sync.h>
 #include <x/exception.h>
@@ -45,6 +46,7 @@ struct xserversocket
 extern xserversocket * xserversocket_new(xserver * server, xint32 domain, xint32 type, xint32 protocol, const void * addr, xuint32 addrlen);
 extern xserversocket * xserversocket_rem(xserversocket * descriptor);
 
+extern xint32 xserversocketcheck_rem(xserversocket * descriptor);
 // 
 // extern xclientsocket * xclientsocket_new(xclient * client, xint32 domain, xint32 type, xint32 protocol, const void * addr, xuint32 addrlen);
 // extern xclientsocket * xclientsocket_rem(xclientsocket * o);

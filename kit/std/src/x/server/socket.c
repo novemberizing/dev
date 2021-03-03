@@ -30,6 +30,38 @@ extern xserversocket * xserversocket_new(xserver * server, xint32 domain, xint32
     return descriptor;
 }
 
-extern xserversocket * xserversocket_rem(xserversocket * descriptor);
-extern void xserversocketfactory_set(xserversocket * server, xsessionfactory factory);
-extern void xserversocketreleaser_set(xserversocket * server, xsessionreleaser releaser);
+extern xint32 xserversocketcheck_rem(xserversocket * descriptor)
+{
+    xassertion(descriptor == xnil, "");
+
+    if(descriptor->subscription)
+    {
+        return xfalse;
+    }
+    if(descriptor->handle.f >= 0)
+    {
+        return xfalse;
+    }
+    if(descriptor->event.queue || descriptor->event.next || descriptor->event.prev)
+    {
+        return xfalse;
+    }
+    return xtrue;
+}
+
+extern xserversocket * xserversocket_rem(xserversocket * descriptor)
+{
+    xassertion(xserversocketcheck_rem(descriptor), "");
+
+    descriptor->sync = xsyncrem(descriptor->sync);
+    descriptor->addr = xobjectrem(descriptor->addr);
+
+    free(descriptor);
+    
+    return xnil;
+}
+
+static void xserversocketeventhandler_tcp(xserversocketevent * server)
+{
+    xassertion(xtrue, "implement this");
+}

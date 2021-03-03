@@ -37,8 +37,6 @@ extern xint32 xeventengine_run(xeventengine * engine)
     {
         engine->on = xeventenginecallback_internal;
 
-        
-
         xeventengine_sync(engine, xeventprocessorpool_size(engine->processors));
 
         xsynclock(engine->sync);
@@ -119,17 +117,22 @@ extern void xeventengine_sync(xeventengine * engine, xint32 on)
 extern xeventsubscription * xeventengine_server_register(xeventengine * engine, xserver * server)
 {
     xassertion(engine == xnil || server == xnil || server->descriptor == xnil, "");
-    xassertion(server->descriptor->subscription, "");
+    xassertion(server->descriptor->subscription, "");   // 이 로직을 어떻게 처리해야할까?
 
     xserversocketeventsubscription * subscription = (xserversocketeventsubscription *) xeventsubscription_new(engine, (xeventtarget *) server->descriptor, sizeof(xserversocketeventsubscription));
 
-    xassertion(xtrue, "implement this");
+    subscription->generatornode.generator = engine->generators.descriptor;
 
-    // xdescriptoreventsubscription * subscription = (xdescriptoreventsubscription *) 
-    // xeventsubscription_new(engine, (xeventtarget *) descriptor, sizeof(xdescriptoreventsubscription));
+    xdescriptoreventgenerator_register(engine->generators.descriptor, (xdescriptoreventsubscription *) subscription);
 
     return (xeventsubscription *) subscription;
 }
+
+extern xeventsubscription * xeventengine_server_unregister(xeventengine * engine, xserver * server)
+{
+    return (xeventsubscription *) xeventengine_descriptor_unregister(engine, (xdescriptor *) server->descriptor);
+}
+
 
 extern xeventsubscription * xeventengine_descriptor_register(xeventengine * engine, xdescriptor * descriptor)
 {

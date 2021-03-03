@@ -70,7 +70,7 @@ extern xobject xobjectnew(xuint64 size)
  * @date        2021. 02. 22.
  *                  
  */
-extern xobject xobjectdup(const xobject data, xuint64 size)
+extern xobject xobjectdup(const void * data, xuint64 size)
 {
     xassertion(data == xnil || size == 0, "");
 
