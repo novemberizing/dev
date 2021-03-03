@@ -76,7 +76,7 @@ extern void xsessionsocketstreamout_set(xsessionsocket * descriptor, xstream * s
 
 static void xsessionsocketeventhandler_tcp(xsessionsocketevent * event)
 {
-    xassertion(xtrue, "implement this");
+    xdescriptorevent_processor_on((xdescriptor *) event->descriptor);
 }
 
 static xint64 xsessionsocketsubscriber_tcp(xsessionsocket * descriptor, xuint32 event, void * data, xint64 result)

@@ -101,9 +101,9 @@ extern void xserversocketbacklog_set(xserversocket * descriptor, xint32 backlog)
     descriptor->backlog = backlog;
 }
 
-static void xserversocketeventhandler_tcp(xserversocketevent * server)
+static void xserversocketeventhandler_tcp(xserversocketevent * event)
 {
-    xdescriptorevent_processor_on((xdescriptor *) server->descriptor);
+    xdescriptorevent_processor_on((xdescriptor *) event->descriptor);
 }
 
 static xint64 xserversocketprocessor_tcp(xserversocket * descriptor, xuint32 event, void * data)
@@ -229,7 +229,7 @@ static xint64 xserversocketsubscriber_tcp(xserversocket * descriptor, xuint32 ev
         xcheck(xtrue, "exception errno => %d", descriptor->exception.number);
     }
     xcheck(xtrue, "event => 0x%08x, result => %ld", event, result);
-    
+
     return server->on(server, event, data, result);
 }
 
