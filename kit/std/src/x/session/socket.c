@@ -35,6 +35,7 @@ extern xsessionsocket * xsessionsocket_rem(xsessionsocket * descriptor)
 {
     if(descriptor)
     {
+        // 세션 소켓의 경우 SUBSCRIPTION 이 존재할 수 있다.
         xassertion(descriptor->subscription, "");
         xassertion(descriptor->status != xdescriptorstatus_void && descriptor->status != xdescriptorstatus_rem, "");
         xassertion(descriptor->handle.f >= 0, "");
@@ -57,9 +58,14 @@ extern xstream * xsessionsocketstreamin_get(xsessionsocket * descriptor)
 
 extern void xsessionsocketstreamin_set(xsessionsocket * descriptor, xstream * stream)
 {
-    xassertion(descriptor->stream.in, "");
+    xcheck(descriptor->stream.in, "check memory leak");
 
     descriptor->stream.in = stream;
+}
+
+extern void xsessionsocketstreamin_del(xsessionsocket * descriptor)
+{
+    descriptor->stream.in = xstreamrem(descriptor->stream.in);
 }
 
 extern xstream * xsessionsocketstreamout_get(xsessionsocket * descriptor)
@@ -67,9 +73,14 @@ extern xstream * xsessionsocketstreamout_get(xsessionsocket * descriptor)
     return descriptor->stream.out;
 }
 
+extern void xsessionsocketstreamout_del(xsessionsocket * descriptor)
+{
+    descriptor->stream.out = xstreamrem(descriptor->stream.out);
+}
+
 extern void xsessionsocketstreamout_set(xsessionsocket * descriptor, xstream * stream)
 {
-    xassertion(descriptor->stream.out, "");
+    xcheck(descriptor->stream.out, "check memory leak");
 
     descriptor->stream.out = stream;
 }
@@ -126,19 +137,32 @@ static inline xint64 xsessionsocketprocessor_tcp_out(xsessionsocket * descriptor
 
 static inline xint64 xsessionsocketprocessor_tcp_close(xsessionsocket * descriptor, void * data)
 {
-    xassertion(xtrue, "implement this");
-    return xfail;
+    // xassertion(xtrue, "implement this");
+    // SHUTDOWN ...
+    descriptor->status |= xsessionsocketstatus_rem;
+    xcheck(xtrue, "force shutdown ...");
+    xsocketshutdown((xsocket *) descriptor, xsocketeventtype_offall);
+    return xdescriptorclose((xdescriptor *) descriptor);
+}
+
+static inline xint64 xsessionsocketprocessor_tcp_exception(xsessionsocket * descriptor, void * data)
+{
+    xcheck(xtrue, "force shutdown ...");
+    descriptor->status |= xsessionsocketstatus_rem;
+    xsocketshutdown((xsocket *) descriptor, xsocketeventtype_offall);
+    return xdescriptorclose((xdescriptor *) descriptor);
 }
 
 static xint64 xsessionsocketprocessor_tcp(xsessionsocket * descriptor, xuint32 event, void * data)
 {
     switch(event)
     {
-        case xsessionsocketeventtype_in:    return xsessionsocketprocessor_tcp_in(descriptor, data);
-        case xsessionsocketeventtype_out:   return xsessionsocketprocessor_tcp_out(descriptor, data);
-        case xsessionsocketeventtype_close: return xsessionsocketprocessor_tcp_close(descriptor, data);
+        case xsessionsocketeventtype_in:        return xsessionsocketprocessor_tcp_in(descriptor, data);
+        case xsessionsocketeventtype_out:       return xsessionsocketprocessor_tcp_out(descriptor, data);
+        case xsessionsocketeventtype_close:     return xsessionsocketprocessor_tcp_close(descriptor, data);
+        case xsessionsocketeventtype_exception: return xsessionsocketprocessor_tcp_exception(descriptor, data);
     }
-    xassertion(xtrue, "implement this");
+    xassertion(xtrue, "implement this: 0x%08x", event);
 
     return xfail;
 }

@@ -1,3 +1,10 @@
+[assertion:session/socket.c:141] xsessionsocketprocessor_tcp:140737351628608 => implement this
+
+
+
+[assertion:descriptor/event/generator/epoll.c:331] xdescriptoreventgenerator_once:140737351628608 => TODO: 정확한 예외 처리를 할 수 있도록 하자.
+
+
 [check:descriptor.c:26] xdescriptorcheck_open:140737351628608 => 
 
 Program received signal SIGSEGV, Segmentation fault.

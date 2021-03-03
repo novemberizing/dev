@@ -307,7 +307,10 @@ extern void xdescriptoreventgenerator_unregister(xdescriptoreventgenerator * o, 
             descriptor->on(descriptor, xdescriptoreventtype_register, xnil, xfalse);
         }
     }
-    xdescriptoreventgeneratorsubscriptionlist_del(subscription);
+    if(subscription->generatornode.list)
+    {
+        xdescriptoreventgeneratorsubscriptionlist_del(subscription);
+    }
 }
 
 extern void xdescriptoreventgenerator_once(xdescriptoreventgenerator * o)
@@ -328,7 +331,6 @@ extern void xdescriptoreventgenerator_once(xdescriptoreventgenerator * o)
 
                 if(generator->events[i].events & (EPOLLERR | EPOLLPRI | EPOLLRDHUP | EPOLLHUP))
                 {
-                    xassertion(xtrue, "TODO: 정확한 예외 처리를 할 수 있도록 하자.");
                     xexceptionset(xaddressof(subscription->descriptor->exception), epoll_wait, generator->events[i].events, xexceptiontype_descriptor, ""); 
                     xdescriptorevent_dispatch_exception(subscription->descriptor);
                     continue;
@@ -369,12 +371,18 @@ extern void xdescriptoreventgenerator_queue_once(xdescriptoreventgenerator * o)
             xsyncunlock(generator->queue->sync);
 
             xdescriptor * descriptor = subscription->descriptor;
-            if(descriptor->handle.f >= 0 || (descriptor->status & xdescriptorstatus_exception) || (descriptor->status & xdescriptorstatus_close))
+            if(descriptor->status & (xdescriptorstatus_exception | xdescriptorstatus_close | xdescriptorstatus_rem))
             {
                 xassertion(descriptor->status & xdescriptorstatus_register, "");
-                xdescriptorevent_processor_close(descriptor);
+                if(descriptor->handle.f >= 0)
+                {
+                    xassertion(descriptor->status & xdescriptorstatus_close, "");
+                    xdescriptorevent_processor_close(descriptor);
+                }
+
                 if(descriptor->status & xdescriptorstatus_rem)
                 {
+                    xdescriptorevent_processor_rem(descriptor);
                     xassertion(xtrue, "implement this");
                 }
                 xsynclock(generator->queue->sync);
@@ -391,7 +399,10 @@ extern void xdescriptoreventgenerator_queue_once(xdescriptoreventgenerator * o)
                     xsynclock(generator->queue->sync);
                     continue;
                 }
-                xdescriptoreventgeneratorsubscriptionlist_del(subscription);
+                if(subscription->generatornode.list)
+                {
+                    xdescriptoreventgeneratorsubscriptionlist_del(subscription);
+                }
             }
             xsynclock(generator->queue->sync);
             xdescriptoreventgeneratorsubscriptionlist_push(generator->queue, subscription);

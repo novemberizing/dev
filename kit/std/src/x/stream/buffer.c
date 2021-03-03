@@ -28,9 +28,10 @@ extern xstreambuffer * xstreambuffer_new(void)
 {
     xstreambuffer * o = (xstreambuffer *) calloc(sizeof(xstreambuffer), 1);
 
-    o->type = xstreamtype_buffer;
+    o->type     = xstreamtype_buffer;
+    o->rem      = xstreambuffer_rem;
     o->capacity = xstreambuffer_capacity_page;
-    o->buffer = malloc(o->capacity);
+    o->buffer   = malloc(o->capacity);
     return o;
 }
 
@@ -50,7 +51,7 @@ extern xstreambuffer * xstreambuffer_new(void)
  */
 extern xstreambuffer * xstreambuffer_rem(xstreambuffer * o)
 {
-    xassertion(o->rem != (xstreamdestructor) xstreambuffer_rem, "");
+    xassertion(o->rem != xstreambuffer_rem, "");
 
     if(o->buffer)
     {

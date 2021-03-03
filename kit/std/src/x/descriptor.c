@@ -37,10 +37,15 @@ extern xint64 xdescriptorevent_processor_on(xdescriptor * descriptor)
     {
         xdescriptorevent_processor_open(descriptor);
     }
+    xuint32 status = (descriptor->status & (xdescriptorstatus_in | xdescriptorstatus_out));
 
     xdescriptorevent_processor_out(descriptor);
     xdescriptorevent_processor_in(descriptor);
-    xdescriptorevent_processor_register(descriptor);
+
+    if((descriptor->status & (xdescriptorstatus_in | xdescriptorstatus_out)) != (xdescriptorstatus_in | xdescriptorstatus_out))
+    {
+        xdescriptorevent_processor_register(descriptor);
+    }
 
     if(xdescriptorcheck_close(descriptor))
     {
@@ -126,7 +131,7 @@ extern xint64 xdescriptorevent_processor_register(xdescriptor * descriptor)
         xint64 n = xdescriptoreventgenerator_descriptor_update(generator, descriptor);
         return descriptor->on(descriptor, xdescriptoreventtype_register, xnil, n == xsuccess);
     }
-    printf("= 3 =\n");
+
     return xfail;
 }
 
@@ -148,9 +153,18 @@ extern xint64 xdescriptorevent_processor_rem(xdescriptor * descriptor)
 
         xeventengine_descriptor_unregister(engine, descriptor);
 
+        xcheck(xtrue, "checkout subscription");
+
+        // xassertion(subscription->descriptor, "");
+        xassertion(subscription->enginenode.engine || subscription->enginenode.prev || subscription->enginenode.next, "");
+        xassertion(subscription->generatornode.prev || subscription->generatornode.next || subscription->generatornode.list, "");
+
+        descriptor->subscription = xnil;
         descriptor->on(descriptor, xdescriptoreventtype_rem, xnil, 0);
 
         descriptor = descriptor->rem(descriptor);
+
+        free(subscription);
     }
     else
     {
@@ -311,6 +325,7 @@ extern xint64 xdescriptorevent_dispatch_close(xdescriptor * descriptor)
         {
             if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
+                xdescriptorevent_processor_unregister(descriptor);
                 return xdescriptorevent_processor_close(descriptor);
             }
             return xsuccess;
@@ -367,6 +382,7 @@ extern xint64 xdescriptorevent_dispatch_exception(xdescriptor * descriptor)
         {
             if(xeventengine_descriptor_dispatch(descriptor) != xsuccess)
             {
+                xdescriptorevent_processor_unregister(descriptor);
                 return xdescriptorevent_processor_exception(descriptor);
             }
             return xsuccess;
@@ -420,6 +436,7 @@ extern xint64 xdescriptorread(xdescriptor * descriptor, void * buffer, xuint64 s
                     descriptor->exception.number = errno;
                     return xfail;
                 }
+                descriptor->status &= (~xdescriptorstatus_in);
                 return xsuccess;
             }
         }
@@ -458,6 +475,7 @@ extern xint64 xdescriptorwrite(xdescriptor * descriptor, const void * data, xuin
                     descriptor->exception.number = errno;
                     return xfail;
                 }
+                descriptor->status &= (~xdescriptorstatus_out);
                 return xsuccess;
             }
         }

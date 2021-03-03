@@ -53,7 +53,7 @@ extern xstream * xstreamnew(xuint32 type)
  */
 extern xstream * xstreamrem(xstream * o)
 {
-    return o->rem(o);
+    return o ? o->rem(o) : xnil;
 }
 
 /**
