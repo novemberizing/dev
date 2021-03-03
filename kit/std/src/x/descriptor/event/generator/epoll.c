@@ -368,6 +368,10 @@ extern void xdescriptoreventgenerator_queue_once(xdescriptoreventgenerator * o)
             {
                 xassertion(descriptor->status & xdescriptorstatus_register, "");
                 xdescriptorevent_processor_close(descriptor);
+                if(descriptor->status & xdescriptorstatus_rem)
+                {
+                    xassertion(xtrue, "implement this");
+                }
                 xsynclock(generator->queue->sync);
                 continue;
             }

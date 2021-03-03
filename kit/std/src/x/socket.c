@@ -207,3 +207,22 @@ extern xint64 xsocketconnect(xsocket * o, void * addr, xuint32 addrlen)
     }
     return xfail;
 }
+
+extern xint32 xsocketresuseaddr_set(xsocket * o, xint32 on)
+{
+    xassertion(o == xnil, "");
+    xassertion(o->handle.f < 0 || (o->status & xsocketstatus_create) == xsocketstatus_void, "");
+
+    int ret = setsockopt(o->handle.f, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(xint32));
+
+    if(ret != xsuccess)
+    {
+        o->exception.func = setsockopt;
+        o->exception.number = errno;
+        o->status |= xsocketstatus_exception;
+
+        return xfail;
+    }
+
+    return xsuccess;
+}

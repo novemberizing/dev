@@ -5,6 +5,7 @@
 
 #include "../descriptor/status.h"
 
+#include "../server.h"
 #include "socket.h"
 
 static void xsessionsocketeventhandler_tcp(xsessionsocketevent * event);
@@ -80,17 +81,64 @@ static void xsessionsocketeventhandler_tcp(xsessionsocketevent * event)
 
 static xint64 xsessionsocketsubscriber_tcp(xsessionsocket * descriptor, xuint32 event, void * data, xint64 result)
 {
-    xassertion(xtrue, "implement this");
+    xsession * session = descriptor->session;
+    xserver * server = session->server;
+    
+    return server->session.on(session, event, data, result);
+}
 
+static inline xint64 xsessionsocketprocessor_tcp_in(xsessionsocket * descriptor, void * data)
+{
+    if(xdescriptorcheck_open((xdescriptor *) descriptor))
+    {
+        xstreamadjust(descriptor->stream.in, xfalse);
+        xcheck(xtrue, "8192 change optimized value");
+        xstreamcapacity_set(descriptor->stream.in, xstreamcapacity_get(descriptor->stream.in) + 8192);
+
+        xint64 n = xdescriptorread((xdescriptor *) descriptor, xstreamback(descriptor->stream.in), xstreamremain(descriptor->stream.in));
+        if(n > 0)
+        {
+            xstreamsize_set(descriptor->stream.in, n + xstreamsize_get(descriptor->stream.in));
+            return n;
+        }
+        return n;
+    }
+    return xfail;
+}
+
+static inline xint64 xsessionsocketprocessor_tcp_out(xsessionsocket * descriptor, void * data)
+{
+    if(xdescriptorcheck_open((xdescriptor *) descriptor))
+    {
+        if(xstreamlen(descriptor->stream.out) > 0)
+        {
+            xint64 n = xdescriptorwrite((xdescriptor *) descriptor, xstreamfront(descriptor->stream.out), xstreamlen(descriptor->stream.out));
+            if(n > 0)
+            {
+                xstreampos_set(descriptor->stream.out, xstreampos_get(descriptor->stream.out) + n);
+            }
+            return n;
+        }
+        return xsuccess;
+    }
+    return xfail;
+}
+
+static inline xint64 xsessionsocketprocessor_tcp_close(xsessionsocket * descriptor, void * data)
+{
+    xassertion(xtrue, "implement this");
     return xfail;
 }
 
 static xint64 xsessionsocketprocessor_tcp(xsessionsocket * descriptor, xuint32 event, void * data)
 {
-    xassertion(xtrue, "implement this");
     switch(event)
     {
+        case xsessionsocketeventtype_in:    return xsessionsocketprocessor_tcp_in(descriptor, data);
+        case xsessionsocketeventtype_out:   return xsessionsocketprocessor_tcp_out(descriptor, data);
+        case xsessionsocketeventtype_close: return xsessionsocketprocessor_tcp_close(descriptor, data);
     }
+    xassertion(xtrue, "implement this");
 
     return xfail;
 }

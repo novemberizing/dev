@@ -365,6 +365,7 @@ extern xint64 xdescriptorclose(xdescriptor * descriptor)
         int ret = close(descriptor->handle.f);
         xassertion(ret != xsuccess, "");
         descriptor->handle.f = xinvalid;
+        descriptor->status |= xdescriptorstatus_close;
     }
     return xsuccess;
 }

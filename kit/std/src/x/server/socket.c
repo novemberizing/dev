@@ -6,6 +6,7 @@
 
 #include "../thread.h"
 
+#include "../socket.h"
 #include "../session/socket.h"
 #include "socket.h"
 
@@ -127,6 +128,9 @@ static xint64 xserversocketprocessor_tcp_open(xserversocket * descriptor, void *
                     return xfail;
                 }
             }
+            xdescriptornonblock_set((xdescriptor *) descriptor, xtrue);
+            xsocketresuseaddr_set((xsocket *) descriptor, xtrue);
+
             if((descriptor->status & xsocketstatus_bind) == xsocketstatus_void)
             {
                 if(xsocketbind((xsocket *) descriptor, descriptor->addr, descriptor->addrlen) != xsuccess)
@@ -168,8 +172,9 @@ static xint64 xserversocketprocessor_tcp_in(xserversocket * descriptor, void * d
         xsession * session = server->create(descriptor->domain, descriptor->type, descriptor->protocol);
         if(session)
         {
-            xsessionsocket * sessionsocket = session->descriptor;
+            session->server = server;
 
+            xsessionsocket * sessionsocket = session->descriptor;
 
             sessionsocket->handle.f = f;
             sessionsocket->status = (xsessionsocketstatus_open | xsessionsocketstatus_bind | xsessionsocketstatus_out);
@@ -178,6 +183,7 @@ static xint64 xserversocketprocessor_tcp_in(xserversocket * descriptor, void * d
                 xassertion(xtrue, "");
                 return xfail;
             }
+            xassertion((sessionsocket->status & xsessionsocketstatus_register) == xsessionsocketstatus_void, "");
             return xsuccess;
         }
         xassertion(session == xnil, "");
@@ -194,15 +200,16 @@ static xint64 xserversocketprocessor_tcp_in(xserversocket * descriptor, void * d
 
 static xint64 xserversocketprocessor_tcp_close(xserversocket * descriptor, void * data)
 {
-    // IMPLEMENT THIS
-    xassertion(xtrue, "implement this");
-
-    return xfail;
+    return xdescriptorclose((xdescriptor *) descriptor);
 }
 
 static xint64 xserversocketsubscriber_tcp(xserversocket * descriptor, xuint32 event, void * data, xint64 result)
 {
     xserver * server = descriptor->server;
+    if(descriptor->exception.number)
+    {
+        xcheck(xtrue, "exception errno => %d", descriptor->exception.number);
+    }
     xcheck(xtrue, "event => 0x%08x, result => %ld", event, result);
     return server->on(server, event, data, result);
 }
