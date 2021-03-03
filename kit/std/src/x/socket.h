@@ -11,10 +11,7 @@
 #include <x/socket/event/type.h>
 #include <x/socket/event/subscription.h>
 
-#define xsocketeventtype_open   xdescriptoreventtype_open
-#define xsocketeventtype_in     xdescriptoreventtype_in
-#define xsocketeventtype_out    xdescriptoreventtype_out
-#define xsocketeventtype_close  xdescriptoreventtype_close
+
 
 typedef xint64 (*xsocketprocessor)(xsocket *, xuint32, void *);
 typedef xint64 (*xsocketsubscriber)(xsocket *, xuint32, void *, xint64);
@@ -40,5 +37,13 @@ struct xsocket
     xint32                     type;            /**!< type */
     xint32                     protocol;        /**!< protocol */
 };
+
+extern xint32 xsocketcreate(xsocket * o);
+extern xint32 xsocketbind(xsocket * o, void * addr, xuint32 addrlen);
+extern xint32 xsocketlisten(xsocket * o, xint32 backlog);
+extern xint64 xsocketread(xsocket * o, void * buffer, xuint64 size);
+extern xint64 xsocketwrite(xsocket * o, const void * data, xuint64 len);
+extern xint64 xsocketclose(xsocket * o);
+extern xint64 xsocketshutdown(xsocket * o, xuint32 how);
 
 #endif // __NOVEMBERIZING_X__SOCKET__H__

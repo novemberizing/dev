@@ -21,6 +21,9 @@ extern xint32 xdescriptorcheck_close(xdescriptor * descriptor)
 
 extern xint32 xdescriptorcheck_open(xdescriptor * descriptor)
 {
+    xcheck(xtrue, "0x%08x", descriptor->status);
+    xcheck(xdescriptorcheck_close(descriptor) == xfalse, "xdescriptorcheck_close(descriptor) == xfalse");
+    xcheck((descriptor->status & xdescriptorstatus_open), "");
     return xdescriptorcheck_close(descriptor) == xfalse && (descriptor->status & xdescriptorstatus_open);
 }
 
@@ -52,9 +55,13 @@ extern xint64 xdescriptorevent_process_on(xdescriptor * descriptor)
     return xsuccess;
 }
 
+/**
+ * 이 함수는 
+ */
 extern xint64 xdescriptorevent_processor_open(xdescriptor * descriptor)
 {
-    xassertion(xdescriptorcheck_open(descriptor) == xfalse, "");
+    xassertion(xdescriptorcheck_open(descriptor), "");
+    xassertion(descriptor->process == xnil, "");
 
     xint64 n = descriptor->process(descriptor, xdescriptoreventtype_open, xnil);
     return descriptor->on(descriptor, xdescriptoreventtype_open, xnil, n);
