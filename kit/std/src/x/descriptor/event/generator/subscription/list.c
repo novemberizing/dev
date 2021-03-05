@@ -63,7 +63,7 @@ extern xdescriptoreventsubscription * xdescriptoreventgeneratorsubscriptionlist_
 
     xdescriptoreventgeneratorsubscriptionlist * list = subscription->generatornode.list;
 
-    xsynclock(list->sync);
+    __xsynclock(list->sync);
     xdescriptoreventsubscription *              prev = subscription->generatornode.prev;
     xdescriptoreventsubscription *              next = subscription->generatornode.next;
 
@@ -88,7 +88,7 @@ extern xdescriptoreventsubscription * xdescriptoreventgeneratorsubscriptionlist_
     list->size = list->size - 1;
     subscription->generatornode.list = xnil;
 
-    xsyncunlock(list->sync);
+    __xsyncunlock(list->sync);
 
     return next;
 }

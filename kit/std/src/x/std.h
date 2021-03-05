@@ -144,8 +144,6 @@ typedef unsigned char       xbyte;              /**!< 바이트 타입 */
            ##__VA_ARGS__);                          \
 } while(0)
 
-extern xint32 xerrorret(xint32 number);
-
 /**
  * @def         xobjectof(o)
  * @brief       강제적으로 객체형으로 변환합니다.

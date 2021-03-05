@@ -41,14 +41,14 @@ extern xint32 xeventengine_run(xeventengine * engine)
 
         xeventengine_sync(engine, xeventprocessorpool_size(engine->processors));
 
-        xsynclock(engine->sync);
+        __xsynclock(engine->sync);
         // xeventengine_generators_on(engine);
         xeventgeneratorset_on(xaddressof(engine->generators));
         xeventprocessorpool_on(engine->processors);
         while(engine->cancel == xnil)
         {
             // 어느 시점에 ENGINE SYNC 의 UNLOCK/LOCK 을 수행해야 하는지 확인할 필요가 있다.
-            xsyncunlock(engine->sync);
+            __xsyncunlock(engine->sync);
 
             xeventqueue_once(engine->main);
 
@@ -59,14 +59,14 @@ extern xint32 xeventengine_run(xeventengine * engine)
                 xeventqueue_once(engine->queue);
             }
 
-            xsynclock(engine->sync);
+            __xsynclock(engine->sync);
         }
         xeventgeneratorset_off(xaddressof(engine->generators));
         xeventqueue_clear(engine->queue);
         xeventqueue_clear(engine->main);
         engine->on(engine, xeventenginestatus_off);
         engine->on = xnil;
-        xsyncunlock(engine->sync);
+        __xsyncunlock(engine->sync);
         xeventengine_sync(engine, xfalse);
     }
 
@@ -87,7 +87,7 @@ extern void xeventengine_sync(xeventengine * engine, xint32 on)
         xassertion(xeventprocessorpool_size(engine->processors) > 0, "");
         engine->sync = xsyncrem(engine->sync);
     }
-    xsynclock(engine->sync);
+    __xsynclock(engine->sync);
 
     xeventprocessorpool_sync(engine->processors, on);
     xdescriptoreventgenerator_sync(engine->generators.descriptor, on);
@@ -113,7 +113,7 @@ extern void xeventengine_sync(xeventengine * engine, xint32 on)
         engine->main->sync = xsyncrem(engine->main->sync);
     }
 
-    xsyncunlock(engine->sync);
+    __xsyncunlock(engine->sync);
 }
 
 extern xeventsubscription * xeventengine_session_register(xeventengine * engine, xsession * session)
@@ -217,9 +217,9 @@ extern void xeventengine_main_push(xeventengine * engine, xevent * event)
 {
     xassertion(engine == xnil || engine->main == xnil || event == xnil, "");
 
-    xsynclock(engine->main->sync);
+    __xsynclock(engine->main->sync);
     xeventqueue_push(engine->main, event);
-    xsyncunlock(engine->main->sync);
+    __xsyncunlock(engine->main->sync);
 }
 
 extern void xeventengine_queue_push(xeventengine * engine, xevent * event)
@@ -231,10 +231,10 @@ extern void xeventengine_queue_push(xeventengine * engine, xevent * event)
      * 다만, 이벤트 프로세서의 카운트가 존재할 경우만 WAKEUP 을 수행하도록 하고 싶다.
      * TODO: 고민할 것,... 시그널을 보내는 것도 아깝기는 하다.
      */
-    xsynclock(engine->queue->sync);
+    __xsynclock(engine->queue->sync);
     xeventqueue_push(engine->queue, event);
-    xsyncwakeup(engine->queue->sync, xfalse);
-    xsyncunlock(engine->queue->sync);
+    __xsyncwakeup(engine->queue->sync, xfalse);
+    __xsyncunlock(engine->queue->sync);
 }
 
 static void xeventenginecallback_internal(xeventengine * engine, xuint32 status)

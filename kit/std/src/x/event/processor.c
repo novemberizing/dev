@@ -150,9 +150,9 @@ extern void xeventprocessor_cancel(xeventprocessor * processor)
  * @param       all    | xint32         | in | 단일 혹은 전체 프로세서 시그널 전송 파라미터 |
  * 
  * @see         xeventengine,
- *              xsynclock,
- *              xsyncwakeup,
- *              xsyncunlock
+ *              __xsynclock,
+ *              __xsyncwakeup,
+ *              __xsyncunlock
  * 
  * @version     0.0.1
  * @date        2021. 02. 19.
@@ -163,9 +163,9 @@ extern void xeventprocessor_wakeup(xeventengine * engine, xint32 all)
 {
     xassertion(engine == xnil, "");
 
-    xsynclock(engine->queue->sync);
-    xsyncwakeup(engine->queue->sync, all);
-    xsyncunlock(engine->queue->sync);
+    __xsynclock(engine->queue->sync);
+    __xsyncwakeup(engine->queue->sync, all);
+    __xsyncunlock(engine->queue->sync);
 }
 
 /**
@@ -184,9 +184,9 @@ extern void xeventprocessor_wakeup(xeventengine * engine, xint32 all)
  *          xeventprocessorpool,
  *          xeventengine,
  *          xeventqueue,
- *          xsynclock,
- *          xsyncwait,
- *          xsyncunlock,
+ *          __xsynclock,
+ *          __xsyncwait,
+ *          __xsyncunlock,
  *          xeventqueue_pop,
  *          
  * @version 0.0.1
@@ -200,18 +200,18 @@ static void xeventprocessor_loop(xeventprocessor * processor)
     
     while(processor->cancel == xnil)
     {
-        xsynclock(queue->sync);
+        __xsynclock(queue->sync);
         if(queue->size == 0)
         {
-            xsyncwait(queue->sync, 0, 0);
+            __xsyncwait(queue->sync, 0, 0);
             if(processor->cancel)
             {
-                xsyncunlock(queue->sync);
+                __xsyncunlock(queue->sync);
                 break;
             }
         }
         xevent * event = xeventqueue_pop(queue);
-        xsyncunlock(queue->sync);
+        __xsyncunlock(queue->sync);
         if(event)
         {
             event->on(event);

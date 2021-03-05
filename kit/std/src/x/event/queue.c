@@ -140,35 +140,35 @@ extern void xeventqueue_once(xeventqueue * queue)
 {
     xassertion(queue == xnil, "");
 
-    xsynclock(queue->sync);
+    __xsynclock(queue->sync);
     xuint64 total = queue->size;
     for(xuint64 i = 0; i < total; i++)
     {
         xevent * event = xeventqueue_pop(queue);
         if(event)
         {
-            xsyncunlock(queue->sync);
+            __xsyncunlock(queue->sync);
             event->on(event);
-            xsynclock(queue->sync);
+            __xsynclock(queue->sync);
             continue;
         }
         break;
     }
-    xsyncunlock(queue->sync);
+    __xsyncunlock(queue->sync);
 }
 
 extern void xeventqueue_clear(xeventqueue * queue)
 {
-    xsynclock(queue->sync);
+    __xsynclock(queue->sync);
     while(queue->size > 0)
     {
         xevent * event = xeventqueue_pop(queue);
-        xsyncunlock(queue->sync);
+        __xsyncunlock(queue->sync);
         if(event)
         {
             event->on(event);
         }
-        xsynclock(queue->sync);
+        __xsynclock(queue->sync);
     }
-    xsyncunlock(queue->sync);
+    __xsyncunlock(queue->sync);
 }

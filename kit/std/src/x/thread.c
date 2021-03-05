@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "thread.h"
+#include "sync.h"
 
 #include "thread/posix.h"
 
@@ -166,4 +167,24 @@ extern void xthreadrun(xthread * o)
 extern xuint64 xthreadid(void)
 {
     return xthreadposix_id();
+}
+
+extern xint32 xsynclock(xsync * o)
+{
+    return __xsynclock(o);
+}
+
+extern xint32 xsyncunlock(xsync * o)
+{
+    return __xsyncunlock(o);
+}
+
+extern xint32 xsyncwait(xsync * o, xint64 second, xint64 nanosecond)
+{
+    return __xsyncwait(o, second, nanosecond);
+}
+
+extern xint32 xsyncwakeup(xsync * o, xint32 all)
+{
+    return __xsyncwakeup(o, all);
 }

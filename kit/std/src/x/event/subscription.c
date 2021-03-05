@@ -16,7 +16,7 @@ extern xeventsubscription * xeventsubscription_new(xeventengine * engine, xevent
 
     xassertion(subscription == xnil, "");
 
-    xsynclock(engine->subscriptions.sync);
+    __xsynclock(engine->subscriptions.sync);
     subscription->target = target;
     subscription->target->subscription = subscription;
     
@@ -33,7 +33,7 @@ extern xeventsubscription * xeventsubscription_new(xeventengine * engine, xevent
     }
     engine->subscriptions.tail = subscription;
     engine->subscriptions.size = engine->subscriptions.size + 1;
-    xsyncunlock(engine->subscriptions.sync);
+    __xsyncunlock(engine->subscriptions.sync);
 
     return subscription;
 }
