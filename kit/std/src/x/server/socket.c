@@ -172,7 +172,7 @@ static xint64 xserversocketprocessor_tcp_in(xserversocket * descriptor, void * d
 
     if(f >= 0)
     {
-        xsession * session = server->create(descriptor->domain, descriptor->type, descriptor->protocol);
+        xsession * session = server->session.create(descriptor->domain, descriptor->type, descriptor->protocol);
         if(session)
         {
             session->server = server;

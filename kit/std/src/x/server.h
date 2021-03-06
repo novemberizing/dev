@@ -18,14 +18,13 @@ typedef xint64 (*xserversubscriber)(xserver *, xuint64, void *, xint64);
 
 struct xserver
 {
-    xserversocket *                   descriptor;
-    xserversubscriber                 on;
+    xserversocket *                      descriptor;
+    xserversubscriber                    on;
 
     struct { xsessionlist alive;
-             xsessionsubscriber on; } session;
-
-    xsessionfactory                   create;
-    xsessionreleaser                  release;
+             xsessionsubscriber on;
+             xsessionfactory create;
+             xsessionreleaser release; } session;
 };
 
 extern xserver * xservernew(xint32 domain, xint32 type, xint32 protocol, const void * addr, xuint32 addrlen, xsessionsubscriber on, xuint64 size);

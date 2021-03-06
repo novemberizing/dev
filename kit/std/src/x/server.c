@@ -10,15 +10,15 @@ extern xserver * xservernew(xint32 domain, xint32 type, xint32 protocol, const v
 {
     xassertion(on == xnil || size < sizeof(xserver), "");
 
-    xserver * server = (xserver *) calloc(size, 1);
+    xserver * server        = (xserver *) calloc(size, 1);
 
-    server->descriptor = xserversocket_new(server, domain, type, protocol, addr, addrlen);
-    server->on         = xserversubscriber_default;
+    server->descriptor      = xserversocket_new(server, domain, type, protocol, addr, addrlen);
+    server->on              = xserversubscriber_default;
 
-    server->session.on = on;
+    server->session.on      = on;
 
-    server->create     = xsessionfactory_default;
-    server->release    = xsessionreleaser_default;
+    server->session.create  = xsessionfactory_default;
+    server->session.release = xsessionreleaser_default;
 
     return server;
 }
