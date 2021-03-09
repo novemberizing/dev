@@ -1,0 +1,49 @@
+
+.novemberizing-block {
+    border-bottom: 1px solid var(--light);
+}
+
+.badge.badge-outlined {
+    background-color: transparent
+}
+
+.badge.badge-outlined.badge-primary {
+    border-color: #2196F3;
+    color: #2196F3
+  }
+  
+  .badge.badge-outlined.badge-secondary {
+    border-color: #323a45;
+    color: #323a45
+  }
+  
+  .badge.badge-outlined.badge-success {
+    border-color: #64DD17;
+    color: #64DD17
+  }
+  
+  .badge.badge-outlined.badge-warning {
+    border-color: #FFD600;
+    color: #FFD600
+  }
+  
+  .badge.badge-outlined.badge-info {
+    border-color: #29B6F6;
+    color: #29B6F6
+  }
+  
+  .badge.badge-outlined.badge-danger {
+    border-color: #ef1c1c;
+    color: #ef1c1c
+  }
+
+  .badge.badge-outlined.badge-light {
+      border: solid 1px #212529;
+    border-color: #212529;
+    color: #212529;
+  }
+
+
+  .text-gray {
+    color: var(--bs-gray)
+  }
