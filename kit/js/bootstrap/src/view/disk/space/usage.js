@@ -16,19 +16,6 @@ const x = d3.scaleLinear()
             .domain([0, 1])
             .range([margin.left, width - margin.right]);
 
-// const y = d3.scaleBand()
-//             .d
-
-
-// y = d3.scaleBand()
-//     .domain(d3.range(data.length))
-//     .rangeRound([margin.top, height - margin.bottom])
-//     .padding(0.1)
-
-//             yAxis = g => g
-//     .attr("transform", `translate(${margin.left},0)`)
-//     .call(d3.axisLeft(y).tickFormat(i => data[i].name).tickSizeOuter(0))
-
 export default class DiskSpaceUsageView extends Component {
     static parse(value) {
         return value.split(/\r?\n/)
