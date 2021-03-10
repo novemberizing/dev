@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
+import moment from "moment";
 import { exec, execSync as execute } from "child_process";
+
+const password = "qkrwldb@17";
 
 const app = express();
 app.use(cors());
@@ -14,8 +17,16 @@ app.get("/", (req, res) => {
 app.get("/api/top", (req, res) => {
     const buffer = execute("top -b -n1");
     const result = buffer.toString();
+
     res.json({data: result});
-    // res.send("Hello World!");
+});
+
+app.get("/api/disk/space/usage", (req, res) => {
+    const result = execute(`echo ${password} | sudo -S df -h`);
+    const current = new Date();
+    const millisecond = current.getTime();
+
+    res.json([{value: result.toString(), clock: parseInt(millisecond/1000), nanosecond: (millisecond % 1000) * 1000000}]);
 });
 
 app.listen(port, () => console.log('application running'));
