@@ -48,8 +48,6 @@ export default class DiskScsiView extends Component {
 
         history.value = devices;
 
-        console.log(history);
-
         return history;
     }
     constructor(props) {
@@ -100,7 +98,6 @@ export default class DiskScsiView extends Component {
     }
 
     render() {
-        console.log(this.latest);
         const rows = this.latest && this.latest.value && this.latest.value.length > 0 ? 
         this.latest.value.map((o, index)=> (
             <tr key={index}>

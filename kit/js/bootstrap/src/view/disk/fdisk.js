@@ -126,8 +126,6 @@ export default class FDiskListView extends Component {
                           <td>{"-"}</td>
                       </tr>))
             : (<tr><td colSpan="11">no data</td></tr>);
-
-              console.log(rows);
         return (
             <div className="row">
                 <div className="card">
