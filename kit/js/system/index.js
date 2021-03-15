@@ -38,4 +38,13 @@ app.get("/api/disk/scsi", (req, res) => {
     res.json([{value: result.toString(), clock: parseInt(millisecond/1000), nanosecond: (millisecond % 1000) * 1000000}]);
 });
 
+app.get("/api/disk/fdisk", (req, res) => {
+    const result = execute(`echo ${password} | sudo -S fdisk -l`);
+
+    const current = new Date();
+    const millisecond = current.getTime();
+
+    res.json([{value: result.toString(), clock: parseInt(millisecond/1000), nanosecond: (millisecond % 1000) * 1000}]);
+});
+
 app.listen(port, () => console.log('application running'));
