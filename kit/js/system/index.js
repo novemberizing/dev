@@ -56,4 +56,14 @@ app.get("/api/disk/stat", (req, res) => {
     res.json([{value: result.toString(), clock: parseInt(millisecond/1000), nanosecond: (millisecond % 1000) * 1000}]);
 });
 
+
+app.get("/api/mem/info", (req, res) => {
+    const result = execute(`echo ${password} | sudo -S cat /proc/meminfo`);
+
+    const current = new Date();
+    const millisecond = current.getTime();
+
+    res.json([{value: result.toString(), clock: parseInt(millisecond/1000), nanosecond: (millisecond % 1000) * 1000}]);
+});
+
 app.listen(port, () => console.log('application running'));
