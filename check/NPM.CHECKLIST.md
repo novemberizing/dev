@@ -15,6 +15,8 @@ NPM CHECKLIST
 | Check npmjs.org                                                    | browser | -     | ...         |
 | Check jsdelivr https://cdn.jsdelivr.net/npm/[organization/package] | browser | -     | ...         |
 
+<!-- TODO: .npmignore 작성을 추가하자. -->
+
 ### CREATE FIRST TEST FILE
 
 __./test/index.js__
