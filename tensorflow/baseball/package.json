@@ -1,0 +1,36 @@
+{
+  "name": "baseball",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "client": "webpack && webpack-dev-server",
+    "server": "node ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^4.9.0",
+    "@tensorflow/tfjs-node-gpu": "^4.9.0",
+    "argparse": "^2.0.1",
+    "socket.io": "^4.7.1",
+    "socket.io-client": "^4.7.1"
+  },
+  "devDependencies": {
+    "clang-format": "^1.8.0",
+    "html-loader": "^4.2.0",
+    "mkdirp": "^3.0.1",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "resolutions": {
+    "node-fetch": "2.6.7"
+  },
+  "browser": {
+    "path": false,
+    "stream": false
+  }
+}
